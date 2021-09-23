@@ -171,7 +171,7 @@ if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only g
 	for k,v in LastSessionSettings[5]
 	{
 		v:=StrSplit(v,A_Space ";").1
-		LastSessionSettings[5][k]:= v
+		LastSessionSettings[5][k]:=v
 	}
     	bRestoreLastSession:=true
 	
@@ -325,10 +325,13 @@ lRestoreLastSession:
 			StoredArrays[2]:=LastSessionSettings[4]
 		}
 	}
-	LastActiveFilterMode:=LastSessionSettings[5].1
-	LastTrumping:=LastSessionSettings[5].2
-	LastCheckURLsInBrowsers:=LastSessionSettings[5].3
-	LastIsProgramOn:=LastSessionSettings[5].4
+	if (LastSessionSettings[5].MaxIndex()!="")
+	{
+		LastActiveFilterMode:=LastSessionSettings[5].1
+		LastTrumping:=LastSessionSettings[5].2
+		LastCheckURLsInBrowsers:=LastSessionSettings[5].3
+		LastIsProgramOn:=LastSessionSettings[5].4
+	}
 	gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 	guicontrol,ChooseString,vActiveFilterMode, %LastActiveFilterMode%
 	guicontrol,ChooseString, bTrumping, %LastTrumping%
@@ -1215,8 +1218,8 @@ lGuiCreate_5:
 gui, 5: destroy
 gui, 5: New, -Caption +LastFound +ToolWindow +LabelSSA_ +AlwaysOnTop ; <- this doesn't work
 vGUIWidth5:=vGUIWidth
-
 return
+
 lGUIShow_5:
 {
 	gui, 1: hide
@@ -1260,6 +1263,86 @@ lCheckEnteredPasswordString:
 	
 }
 Return
+
+
+lLoadFileIntoArrays:
+{
+	str:= "*_DLSaveState.ini"
+	str2:= A_ScriptDIr  "\DistractLess_Storage\"
+	FileSelectFile, vSelectedFile,1,%str2%,Select File,%str%
+	LoadedFile:=fReadINI(vSelectedFile)
+	gosub, lLoadFromFile
+}
+return
+
+lLoadFromFile:
+{
+	bRestoringLastSession:=true
+	Count:=0
+	if (LoadedFile[1].MaxIndex()!="")
+		Count:=Count+ LoadedFile[1].MaxIndex()
+	if (LoadedFile[2].MaxIndex()!="")
+		Count:=Count+ LoadedFile[2].MaxIndex()
+	if (LoadedFile[3].MaxIndex()!="")
+		Count:=Count+ LoadedFile[3].MaxIndex()
+	if (LoadedFile[4].MaxIndex()!="")
+		Count:=Count+ LoadedFile[4].MaxIndex()
+	if (LoadedFile[5].MaxIndex()!="")
+		Count:=Count+ LoadedFile[5].MaxIndex()
+	;ttip("Count: " Count)
+	if Count
+	{
+		StoredArrays:=[[],[]]
+		ActiveArrays:=[[],[]]
+		gui, 1: default
+		; gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
+		if (LoadedFile[1].MaxIndex()!="")
+		{
+			gui, listview, SysListView321
+			f_UpdateLV(LoadedFile[1])
+			ActiveArrays[1]:=LoadedFile[1]
+		}
+		if (LoadedFile[2].MaxIndex()!="")
+		{
+			gui, listview, SysListView323
+			f_UpdateLV(LoadedFile[2])
+			ActiveArrays[2]:=LoadedFile[2]
+		}
+		if (LoadedFile[3].MaxIndex()!="")
+		{
+			gui, listview, SysListView322
+			f_UpdateLV(LoadedFile[3])
+			StoredArrays[1]:=LoadedFile[3]
+		}
+		if (LoadedFile[4].MaxIndex()!="")
+		{
+			gui, listview, SysListView324
+			f_UpdateLV(LoadedFile[4])
+			StoredArrays[2]:=LoadedFile[4]
+		}
+	}
+	if (LoadedFile[5].MaxIndex()!="")
+	{
+		LastActiveFilterMode:=LoadedFile[5].1
+		LastTrumping:=LoadedFile[5].2
+		LastCheckURLsInBrowsers:=LoadedFile[5].3
+		LastIsProgramOn:=LoadedFile[5].4
+	}
+	gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
+	; guicontrol,ChooseString,vActiveFilterMode, %LastActiveFilterMode%
+	; guicontrol,ChooseString, bTrumping, %LastTrumping%
+	; guicontrol,ChooseString, bCheckURLsInBrowsers, %LastCheckURLsInBrowsers%
+	vActiveFilterMode:=LastActiveFilterMode
+	bTrumping:=LastTrumping
+	bCheckURLsInBrowsers:=LastCheckURLsInBrowsers
+	bIsProgramOn:=bIsProgramOn + 0
+	; guicontrol,, bIsProgramOn, %LastIsProgramOn% 
+	; gosub, lCallBack_DDL_FilterMode
+	
+	; gosub, lCallBack_EnableProgram
+	; bRestoringLastSession:=false
+}
+return
 
 
 lUpdateStatusOnStatusBar:
@@ -1814,6 +1897,8 @@ lAddSubstringToActiveWhiteList:
 	gui, 1: submit, nohide
 	Sel_Type:=(TypeSelected="Website") ? "w" : "p"
 	sel:=[]
+	if (sCriteria_Substring!="")
+		return
 	if (Sel_Type="w")
 	{
 		if (sCriteria_Substring=".*") && (!URLToCheckAgainst) ; prohibit the user tJILJILJer 
@@ -1837,10 +1922,13 @@ lAddSubstringToActiveBlackList:
 	gui, 1: submit, nohide
 	Sel_Type:=(TypeSelected="Website") ? "w" : "p"
 	sel:=[]
+	if (sCriteria_Substring!="")
+		return
 	if (Sel_Type="w")
 	{
 		if (sCriteria_Substring=".*") && (!URLToCheckAgainst)
 			return
+
 		sel[1]:="||" Sel_Type "||" sCriteria_Substring "||" URLToCheckAgainst  ; this string is not yet finished completely.
 	}
 	Else
@@ -2241,15 +2329,6 @@ cQ_MoveOffset()
 	return answer
 }
 
-lLoadFileIntoArrays:
-
-m(str:= "*_DLSaveState.ini")
-m(str)
-str2:= A_ScriptDIr  "\DistractLess_Storage\"
-m(str2)
-FileSelectFile, vSelectedFile,1,%str2%,Select File,%str%
-FileSelectFile, vSelectedFile,1,%A_ScriptDIr% . "\DistractLess_Storage\",Select File,*.ini
-return
 f_RestartWithSettings(ExitReason,ExitCode)
 {	; restarts the script from a hidden secondary script using a timer
 	/*
