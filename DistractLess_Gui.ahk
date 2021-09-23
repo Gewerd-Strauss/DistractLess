@@ -32,7 +32,7 @@ else
 bEnableAdvancedSettings:=false ; don't edit this. stuff breaks otherwhise
 bIsLocked:=false
 bRestoreLastSession:=false
-global dbFlag:=false
+global dbFlag:=true
 IniSettingsFilePath:=A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.Ini"
 if !FileExist(IniSettingsFilePath)
 {
@@ -168,10 +168,16 @@ else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
 if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==restart with current settings 
 {
 	LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
+	for k,v in LastSessionSettings[5]
+	{
+		v:=StrSplit(v,A_Space ";").1
+		LastSessionSettings[5][k]:= v
+	}
     	bRestoreLastSession:=true
 	
  	; FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
 }
+m(LastSessionSettings[5])
 f_CreateTrayMenu(IniObj)
 gui, font, %FONT_LV1% , %FONT_LV2%
 guicontrol, font, vLV1
@@ -290,6 +296,8 @@ lRestoreLastSession:
 	;ttip("Count: " Count)
 	if Count
 	{
+		StoredArrays:=[[],[]]
+		ActiveArrays:=[[],[]]
 		gui, 1: default
 		; gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 		if (LastSessionSettings[1].MaxIndex()!="")
@@ -363,8 +371,8 @@ lPrepareArrays:
 	aBlackStor:=[]
 	aWhiteAct:=[]
 	aBlackAct:=[]
-	ActiveArrays:=[[],[]]
-	; ActiveArrays:=fCreateActiveArraysFromActiveWindows()
+	; ActiveArrays:=[[],[]]
+	ActiveArrays:=fCreateActiveArraysFromActiveWindows()
 	; ActiveWhiteBackup:=[1]
 	; ActiveBlackBackup:=[1]
 	StoredWhiteBackUp:=0
@@ -395,6 +403,8 @@ return
 lEnforceRules:
 {
 	; m("the notificaiton forlocking doesnt update.")
+	if !bIsProgramOn ; don't continue if program is turned off.
+		return
 	bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=false
 	sCurrentURL:=""
 	WinGetActiveTitle, sCurrTitle
@@ -403,8 +413,6 @@ lEnforceRules:
 	if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
 		sCurrentURL:=fgetUrl(WinActive("A"))
 	{	; prelim exception handling, safety returns
-		if !bIsProgramOn ; don't continue if program is turned off.
-			return
 		if ((IniObj["General Settings"].EnableDiagnosticMode) || dbFlag) || dbFlag ; debug behaviour
 			ttip(A_ThisLabel sCurrTitle,4)
 		
@@ -415,7 +423,7 @@ lEnforceRules:
 			return
 		if HasVal(NoFilterTitles,sCurrTitle)
 			return
-		if (ActiveArrays[1].Count()=0) && (ActiveArrays[2].Count()=0) ; if both arrays are empty, do nothing
+		if ((ActiveArrays[1].Count()=0) && (ActiveArrays[2].Count()=0)) ; if both arrays are empty, do nothing
 			return	
 	}
 	if !WinActive("- Visual Studio Code") && (sCurrTitle!="")
@@ -464,10 +472,12 @@ lEnforceRules:
 				if bWhiteTrumpedThisTitle
 				{
 					; If bWhiteTrumps: behaviour:
-									; iff whiteonly: don't close
+									; iff whiteonly: don't close ← not even needs to be checked
 					; iff white and black: don't close → we only need to check the cases that are able to close anyways.  
 					; → as a result, as soon as white=true, we don't close. Hence, we can check if white contains the current title, and close everything that does not contain an entry in white
 					; iff blackonly: DO close 
+					bWhiteContainsThisTitle:=true
+
 					for k,v in ActiveArrays[2]
 					{
 						RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
@@ -475,6 +485,39 @@ lEnforceRules:
 							bMatchAnyName:=true
 						if Instr(sCurrTitle,sName) || (bMatchAnyName) ; blacklist matches: check if whitelist does NOT match
 						{
+							; current window is matching black now
+							MatchedTitleEntry:=sName
+							bMatchAnyName:=false
+							bWhiteContainsThisTitle:=false
+							for s, w in ActiveArrays[1]
+							{
+								RegExMatch(w, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
+								if Instr(sCurrTitle, tname)
+								{
+									; Window is also matching a white name → don't close IFF the url also matches if website.
+									if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
+									{
+										if (ttype="w") ; website
+										{
+											if Instr(sCurrentURL, tURL) && (sURL!="") ; while the white title matches, check if white url of entry also matches
+												bWhiteContainsThisTitle:=false ; url doesn't match, so the condition isn't assumed to be for this page. hence, don't use it. 
+										}
+										Else
+											break ; we are matching black AND white title in program, so we are not closing
+									}
+									else
+									{
+
+									}
+
+								}
+								Else
+								{
+									; whitelist doesn't match → black contains, white doesn't
+									bWhiteContainsThisTitle:=false
+								}
+							}
+
 							if (stype="w") ; first check if the blacklist match also matches the URL if specified
 								if !Instr(sCurrentURL,sURL) && (sURL!="") 	; if the current url doesn't match the url specified in the black condition, and _A_ url was specified in the black condition
 									Continue								; if no url is specified (→ sURL is empty, no point in checking a url. that condition is assumed to be universally active)
@@ -482,9 +525,12 @@ lEnforceRules:
 							{	; now that the current window matches the blacklist in a title and an url
 								RegExMatch(w, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
 								if !Instr(sCurrTitle,tname) ; if a name of the whitelist matches, the window is NOT closed. If no whitelist-entries match, close the window
-									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
-							}
+								{
+									bWhiteContainsThisTitle:=false
+								}
+							}	
 						}
+									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
 					}
 					; logical reasoning: check black first, only if black matches check white as well. if white then doesn't match, close this window
 					
@@ -612,8 +658,8 @@ lEnforceRules:
 			}
 			case "Black":	;else if (vActiveFilterMode="Black") ; blacklist only
 			{
-;; BLACK ONLY WORKS AS EXPECTED NOW.
-;; finish and fix whiteonly now, and finish the reddit thread on mixed first
+	;; BLACK ONLY WORKS AS EXPECTED NOW.
+	;; finish and fix whiteonly now, and finish the reddit thread on mixed first
 				
 				for k,v in ACtiveArrays[2] ; now check the blacklist
 				{
@@ -724,9 +770,7 @@ lEnforceRules:
 	Else ; current window has not changed title, and the previous one has passed, hence we don't do anything this time
 		Return
 	if ((IniObj["General Settings"].EnableDiagnosticMode) || dbFlag) || dbFlag ; debug behaviour
-	; 	tooltip, % "Last Error:" A_LastError
-		if (IniObj["General Settings"].EnableDiagnosticMode) || dbFlag
-			ttip(A_ThisLabel "`nLastWinClosed:" bLastWindowWasClosed "`nMatched Title Entry:" MatchedTitleEntry "`nBlack contains:" bBlackContainsThisTitle "´nWhite Contains:" bWhiteContainsThisTitle,4)
+		ttip(A_ThisLabel "`nLastWinClosed:" bLastWindowWasClosed "`nMatched Title Entry:" MatchedTitleEntry "`nBlack contains:" bBlackContainsThisTitle "´nWhite Contains:" bWhiteContainsThisTitle,4)
 }
 return
 
@@ -1243,9 +1287,11 @@ lCallBack_EnableProgram:
 		; f_EnableDisableGuiElements(aBlackControls_ToDisable,0,1)
 		; f_EnableDisableGuiElements(aWhiteControls_ToDisable,0,1)
 		f_EnableDisableGuiElements([bIsProgramOn],1,1)
+		SetTimer, lEnforceRules,Off
 	}
 	Else ; enable them again
 	{
+		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
 		gosub, lUpdateStatusOnStatusBar
 		if bIsLocked
 			return
@@ -1601,7 +1647,7 @@ lSaveBlackActiveToStorage:
 	gui, 1: default
 	gui, ListView, SysListView323
 	sel:=f_GetSelectedLVEntries()
-	StoredArrays[2]:=f_CopySelectionIntoArray(sel,StoredArrays[2],"WhiteDef")
+	StoredArrays[2]:=f_CopySelectionIntoArray(sel,StoredArrays[2],"BlackDef")
 	gui, listview, SysListView324
 	StoredBlackBackUp:=StoredArrays[2].clone()
 	f_UpdateLV(StoredArrays[2])
@@ -1767,7 +1813,7 @@ lAddSubstringToActiveWhiteList:
 	sel:=[]
 	if (Sel_Type="w")
 	{
-		if (sCriteria_Substring=".*") && (!URLToCheckAgainst) ; prohibit the user to enter 
+		if (sCriteria_Substring=".*") && (!URLToCheckAgainst) ; prohibit the user tJILJILJer 
 			return
 		sel[1]:="||" Sel_Type "||" sCriteria_Substring "||" URLToCheckAgainst  ; this string is not yet finished completely.
 	}
@@ -1857,6 +1903,8 @@ fCreateStoredArraysFromStorage(Storage)
 	Lines:=StrSplit(sReadBack,"`r`n")
 	WhiteInd:=1
 	BlackInd:=1
+	aWhiteStor:=[]
+	aBlackStor:=[]
 	for k,v in Lines
 	{
 		RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
@@ -1988,7 +2036,7 @@ f_UpdateLV(Array)
 		RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
 		;m(sType,sName,sURL)
 		if (sType="w")
-			LV_Add("-E0x200",sType,sName,sURL)	
+				LV_Add("-E0x200",sType,sName,sURL)	
 		Else
 			LV_Add("-E0x200",sType,sName,"")	
 	}
@@ -2191,13 +2239,17 @@ cQ_MoveOffset()
 }
 
 lLoadFileIntoArrays:
-
 m(str:= "*_DLSaveState.ini")
-m(str)
+; m(str)
 str2:= A_ScriptDIr  "\DistractLess_Storage\"
-m(str2)
+; m(str2)
 FileSelectFile, vSelectedFile,1,%str2%,Select File,%str%
-FileSelectFile, vSelectedFile,1,%A_ScriptDIr% . "\DistractLess_Storage\",Select File,*.ini
+; FileSelectFile, vSelectedFile,1,%A_ScriptDIr% . "\DistractLess_Storage\",Select File,*.ini
+d:=fReadIni(vSelectedFile)
+m(d)
+
+m("now that I have the readback, figure out how to`n1: feed into arrays`nfor that, use f_CopySelectionIntoArray, followed by f_UpdateLV() to update the visual. Then display a warning and enter db-mode so the user has a chance to check the new conditions, so he doesn't risk closing important windows due to a new condition he didn't remember is now active.")
+; FileRead, sReadBack, %vSelectedFile%
 return
 f_RestartWithSettings(ExitReason,ExitCode)
 {	; restarts the script from a hidden secondary script using a timer
@@ -2225,7 +2277,16 @@ f_RestartWithSettings(ExitReason,ExitCode)
 	if !bCheckURLsInBrowsers
 		bCheckURLsInBrowsers:="Yes"
 	
+
+	vActiveFilterMode.=  A_Space "; ActiveFilterMode"
+	bTrumping.=  A_Space "; TrumpingRule"
+	bCheckURLsInBrowsers.=  A_Space "; CheckUrlsInBrowsers"
+	bIsProgramOn.=  A_Space "; bIsProgramOn"
 	CurrentSettings:=[vActiveFilterMode,bTrumping,bCheckURLsInBrowsers,bIsProgramOn]
+	StringTrimRight, vActiveFilterMode, vActiveFilterMode, 19
+	StringTrimRight, bTrumping, bTrumping, 15
+	StringTrimRight, bCheckURLsInBrowsers, bCheckURLsInBrowsers, 22
+	StringTrimRight, bIsProgramOn, bIsProgramOn, 15
 	Arr:=[ActiveArrays[1],ActiveArrays[2],StoredArrays[1],StoredArrays[2],CurrentSettings]
 	IF (IniObj["General Settings"].EnableDiagnosticMode) || dbFlag
 		m("Executing " A_ThisFunc,ExitReason,Arr)
@@ -2825,6 +2886,73 @@ Acc_Children(Acc) {
 		} Else
 			ErrorLevel := "AccessibleChildren DllCall Failed"
 	}
+}
+
+m(x*){
+	static List:={BTN:{OC:1,ARI:2,YNC:3,YN:4,RC:5,CTC:6},ico:{X:16,"?":32,"!":48,I:64}},Msg:=[]
+	static Title
+	List.Title:="AutoHotkey",List.Def:=0,List.Time:=0,Value:=0,TXT:="",Bottom:=0
+	WinGetTitle,Title,A
+	for a,b in x{
+		Obj:=StrSplit(b,":"),(Obj.1="Bottom"?(Bottom:=1):""),(VV:=List[Obj.1,Obj.2])?(Value+=VV):(List[Obj.1]!="")?(List[Obj.1]:=Obj.2):TXT.=(IsObject(b)?Obj2String(b,,Bottom):b) "`n"
+	}
+	Msg:={option:Value+262144+(List.Def?(List.Def-1)*256:0),Title:List.Title,Time:List.Time,TXT:TXT}
+	Sleep,120
+	/*
+		SetTimer,Move,-1
+	*/
+	MsgBox,% Msg.option,% Msg.Title,% Msg.TXT,% Msg.Time
+	/*
+		SetTimer,ActivateAfterm,-150
+	*/
+	for a,b in {OK:Value?"OK":"",Yes:"YES",No:"NO",Cancel:"CANCEL",Retry:"RETRY"}
+		IfMsgBox,%a%
+			return b
+	return % Msg.Txt
+	Move:
+	TT:=List.Title " ahk_class #32770 ahk_exe AutoHotkey.exe"
+	WinGetPos,x,y,w,h,%TT%
+	WinMove,%TT%,,2000,% Round((A_ScreenHeight-h)/2)
+	/*
+		ToolTip,% A_ScriptFullPath
+		USE THIS TO SAVE LAST POSITIONS FOR MSGBOX'S
+	*/
+	return 
+	/*
+		ActivateAfterm:
+		if(InStr(Title,"Omni-Search")||!Title){
+			Loop,20
+			{
+				WinGetActiveTitle,ATitle
+				if(InStr(ATitle,"AHK Studio"))
+					Break
+				Sleep,50
+			}
+		}else{
+			WinActivate,%Title%
+		}
+		return
+	*/
+}
+
+Obj2String(Obj,FullPath:=1,BottomBlank:=0){
+	static String,Blank
+	if(FullPath=1)
+		String:=FullPath:=Blank:=""
+	if(IsObject(Obj)){
+		for a,b in Obj{
+			if(IsObject(b))
+				Obj2String(b,FullPath "." a,BottomBlank)
+			else{
+				if(BottomBlank=0)
+					String.=FullPath "." a " = " b "`n"
+				else if(b!="")
+					String.=FullPath "." a " = " b "`n"
+				else
+					Blank.=FullPath "." a " =`n"
+			}
+	}}
+	return String Blank
 }
 ;}_____________________________________________________________________________________
 ;   !
