@@ -245,9 +245,7 @@ return
 Esc:: 
 ttip("DistractLess_1 Gescape")
 gui, 1: hide
-Settimer, lEnforceRules, Off
 gosub, lClearAdditionFields
-Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
 return
 +1::
 GuiControl, focus, vLV1
@@ -505,8 +503,8 @@ lEnforceRules:
 									{
 										if (ttype="w") ; website
 										{
-											if Instr(sCurrentURL, tURL) && (sURL!="") ; while the white title matches, check if white url of entry also matches
-												bWhiteContainsThisTitle:=false ; url doesn't match, so the condition isn't assumed to be for this page. hence, don't use it. 
+											if Instr(sCurrentURL, tURL) && (tURL!="") ; while the white title matches, check if white url of entry also matches
+												bWhiteContainsThisTitle:=true ; url doesn't match, so the condition isn't assumed to be for this page. hence, don't use it. 
 										}
 										Else
 											break ; we are matching black AND white title in program, so we are not closing
@@ -1406,11 +1404,8 @@ lCallBack_EnableProgram:
 		if (TypeSelected="Website")
 			f_EnableDisableGuiElements(["bFetchBrowserURL","URLToCheckAgainst","TextURLAddition"],1,1)
 		f_EnableDisableGuiElements([bIsProgramOn],1,1)
-		
 	}
 	gosub, lUpdateStatusOnStatusBar
-	; m("problem with closing the same window title multiple times in a row: function closes at most two at the same time, but not more. Not sure if that is a timing thing, or if I am returning somewhere I shouldn't, or what else.")
-	; SetTimer, lUpdateStatusOnStatusBar
 }
 return
 lCallBack_StatusBarMainWindow:
@@ -1450,15 +1445,20 @@ lCallBack_StatusBarMainWindow:
 	{
 		gui, 1: hide
 		gosub, lClearAdditionFields
+		Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 		if IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0) ; settings have changed
 			gosub, lLoadSettingsFromIniFile
+		; Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
+
 	}
 	else if (((A_GuiEvent="R") && (A_EventInfo=2)) && bEnableAdvancedSettings) ; double right click: Edit hidden settings
 	{
 		gui, 1: hide
 		gosub, lClearAdditionFields
+		Settimer, lEnforceRules, off
 		if IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,1)
 			gosub, lLoadSettingsFromIniFile
+		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
 	}
 	else if (((A_GuiEvent="R") && (A_EventInfo=3)) && bEnableAdvancedSettings) ; double right click: Create Settings
 	{ 
@@ -1467,13 +1467,14 @@ lCallBack_StatusBarMainWindow:
 		gui, color
 		gui, font
 		gui, 99: new
-		; m("create settings")
 		lChooseFile:=false
 		FedFile:= IniSettingsFilePath
 		bMainGuiDestroyed:=true
+		Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 		#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
 		WinWaitClose, IniFileCreator 8
 		gosub, lGuiCreate_1
+		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
 	}
 	else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=5))
 	{
@@ -1490,7 +1491,6 @@ lCallBack_EnableAssortmentButtons:
 	{
 		if (TypeSelected="Website") ;and (bFetchBrowserURL!="")
 		{
-			
 			GuiControl, enable, Button_AddSubsttringToActiveWhiteList
 			GuiControl, enable, Button_AddSubsttringToActiveBlackList
 			
@@ -1528,19 +1528,14 @@ lCallBack_EnableAssortmentButtons:
 return
 lCallBack_DDL_FilterMode:
 { ; controls which filter mode is active, and by extend to which LV's the user has access currently.
-	; HideFocusBorder(MainGUI)
 	gui, 1: default
 	gui 1: submit, NoHide
 	HideFocusBorder(MainGUI)
-	; aWhiteControls_ToDisable:=[LV1,LV2,btn1,btn2,btn3,btn4,btn5,btn6]
-	; aBlackControls_ToDisable:=[LV3,LV4,btn7,btn8,btn9,btn10,btn11,btn12]
-	;m(aBlackControls_ToDisable,aWhiteControls_ToDisable)
 	vLastSliderPos_Slider_FilterMode:=vActiveFilterMode
 	if (vActiveFilterMode="White") ; Whitelist only
 	{
 		f_EnableDisableGuiElements(aBlackControls_ToDisable,0,1)
 		f_EnableDisableGuiElements(aWhiteControls_ToDisable,1,1)
-		
 	}
 	else if (vActiveFilterMode="Both") ; Both
 	{
@@ -1593,8 +1588,6 @@ lLockProgram:
 				f_EnableDisableGuiElements(["bFetchBrowserURL","URLToCheckAgainst","TextURLAddition"],0,1)
 			bIsLocked:=true
 		}
-		; gosub,lCallBack_DDL_FilterMode
-		; SB_SetText("Status: Locked", PartNumber, Style])
 	}
 	gosub, lUpdateStatusOnStatusBar
 }
@@ -2633,67 +2626,7 @@ f_DrawPixelOnLastPosition(LastX,LastY)
 {
 	
 }
-fWriteINI(ByRef Array2D, INI_File)  ; write 2D-array to INI-file
-{
-	if !FileExist("INI-Files") ; check for ini-files directory
-	{
-		MsgBox, Creating "INI-Files"-directory at Location`n"%A_ScriptDir%", containing an ini-file named "%INI_File%.ini"
-		FileCreateDir, INI-Files
-	}
-	
-	for SectionName, Entry in Array2D 
-	{
-		Pairs := ""
-		for Key, Value in Entry
-			Pairs .= Key "=" Value "`n"
-		IniWrite, %Pairs%, %INI_File%.ini, %SectionName%
-	}
-	
-	/* Original File from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
-		
-	;-------------------------------------------------------------------------------
-		WriteINI(ByRef Array2D, INI_File) { ; write 2D-array to INI-file
-	;-------------------------------------------------------------------------------
-			for SectionName, Entry in Array2D {
-				Pairs := ""
-				for Key, Value in Entry
-					Pairs .= Key "=" Value "`n"
-				IniWrite, %Pairs%, %INI_File%, %SectionName%
-			}
-		}
-	*/
-}
-fReadINI(INI_File) ; return 2D-array from INI-file
-{
-	
-	Result := []
-	OrigWorkDir:=A_WorkingDir
-	SetWorkingDir, INI-Files
-	IniRead, SectionNames, %INI_File%
-	for each, Section in StrSplit(SectionNames, "`n") {
-		IniRead, OutputVar_Section, %INI_File%, %Section%
-		for each, Haystack in StrSplit(OutputVar_Section, "`n")
-			RegExMatch(Haystack, "(.*?)=(.*)", $)
-         , Result[Section, $1] := $2
-	}
-	if A_WorkingDir!=OrigWorkDir
-		SetWorkingDir, %OrigWorkDir%
-	return Result
-	/* Original File from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
-	;-------------------------------------------------------------------------------
-		ReadINI(INI_File) { ; return 2D-array from INI-file
-	;-------------------------------------------------------------------------------
-			Result := []
-			IniRead, SectionNames, %INI_File%
-			for each, Section in StrSplit(SectionNames, "`n") {
-				IniRead, OutputVar_Section, %INI_File%, %Section%
-				for each, Haystack in StrSplit(OutputVar_Section, "`n")
-					RegExMatch(Haystack, "(.*?)=(.*)", $)
-            , Result[Section, $1] := $2
-			}
-			return Result
-	*/
-}
+
 f_ToggleStartup(bBootSetting)
 {
   	startUpDir:=(A_Startup "\" A_ScriptName " - Shortcut.lnk")
@@ -2805,10 +2738,144 @@ f_ConvertRelativePath(RelativePath)
 	return FullPath
 }
 
+ttip(text:="TTIP: Test",mode:=1,to:=4000,xp:="NaN",yp:="NaN",to2:=1750,currTip:=20)
+{
+	/*
+		Date: 24 Juli 2021 19:40:56: Modes:  
+		1: remove tt after "to" seconds 
+		2: remove tt after "to" seconds, but show again after "to2" seconds. Then repeat 
+		3: not sure anymore what the plan was lol - remove 
+		4: shows tooltip slightly offset from current mouse, does not repeat
+		5: keep that tt until the function us called again  
+		----  Function uses tooltip 20 by default, use parameter
+		"currTip" to select a tooltip between 1 and 20. Tooltips are removed and handled
+		separately from each other, hence a removal of ttip20 will not remove tt14 
+	*/
+	
+	;if (text="TTIP: Test")
+		;m(to)
+	if (text="")
+		gosub, lRemovettip
+	static ttip_text
+	static lastcall_tip
+	static CurrTip2
+	tooltip,
+	currTip2:=currTip
+	ttip_text:=text
+	lUnevenTimers:=false 
+	MouseGetPos,xp1,yp1
+	if (mode=4) ; set text offset from cursor
+	{
+		yp:=yp1+15
+	}	
+	else
+	{
+		if (xp="NaN")
+			xp:=xp1
+		if (yp="NaN")
+			yp:=yp1
+	}
+	tooltip, % ttip_text,xp,yp,% currTip
+	if (mode=1) ; remove after given time
+	{
+		SetTimer, lRemovettip, % "-" to
+	}
+	else if (mode=2) ; remove, but repeatedly show every "to"
+	{
+		if (to2>to)
+			SetTimer, lRepeatedshow, %  to2
+		else 
+			SetTimer, lRepeatedshow, %  to
+	}
+	else if (mode=3)
+	{
+		lUnevenTimers:=true
+		SetTimer, lRepeatedshow, %  to
+	}
+	else if (mode=5) ; keep until function called again
+	{
+		
+	}
+	return
+	lRepeatedshow:
+	tooltip, % ttip_text,,,20
+	if lUnevenTimers
+		sleep, % to2
+	Else
+		sleep, % to
+	return
+	lRemovettip:
+	;m("hi there")
+	Tooltip,,,,currTip2
+	return
+}
+
 
 
 ;}_____________________________________________________________________________________
 ;{#[Include Section]
+fWriteINI(ByRef Array2D, INI_File)  ; write 2D-array to INI-file
+{
+	if !FileExist("INI-Files") ; check for ini-files directory
+	{
+		MsgBox, Creating "INI-Files"-directory at Location`n"%A_ScriptDir%", containing an ini-file named "%INI_File%.ini"
+		FileCreateDir, INI-Files
+	}
+	
+	for SectionName, Entry in Array2D 
+	{
+		Pairs := ""
+		for Key, Value in Entry
+			Pairs .= Key "=" Value "`n"
+		IniWrite, %Pairs%, %INI_File%.ini, %SectionName%
+	}
+	
+	/* Original File from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
+		
+	;-------------------------------------------------------------------------------
+		WriteINI(ByRef Array2D, INI_File) { ; write 2D-array to INI-file
+	;-------------------------------------------------------------------------------
+			for SectionName, Entry in Array2D {
+				Pairs := ""
+				for Key, Value in Entry
+					Pairs .= Key "=" Value "`n"
+				IniWrite, %Pairs%, %INI_File%, %SectionName%
+			}
+		}
+	*/
+}
+fReadINI(INI_File) ; return 2D-array from INI-file
+{
+	
+	Result := []
+	OrigWorkDir:=A_WorkingDir
+	SetWorkingDir, INI-Files
+	IniRead, SectionNames, %INI_File%
+	for each, Section in StrSplit(SectionNames, "`n") {
+		IniRead, OutputVar_Section, %INI_File%, %Section%
+		for each, Haystack in StrSplit(OutputVar_Section, "`n")
+			RegExMatch(Haystack, "(.*?)=(.*)", $)
+         , Result[Section, $1] := $2
+	}
+	if A_WorkingDir!=OrigWorkDir
+		SetWorkingDir, %OrigWorkDir%
+	return Result
+	/* Original File from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
+	;-------------------------------------------------------------------------------
+		ReadINI(INI_File) { ; return 2D-array from INI-file
+	;-------------------------------------------------------------------------------
+			Result := []
+			IniRead, SectionNames, %INI_File%
+			for each, Section in StrSplit(SectionNames, "`n") {
+				IniRead, OutputVar_Section, %INI_File%, %Section%
+				for each, Haystack in StrSplit(OutputVar_Section, "`n")
+					RegExMatch(Haystack, "(.*?)=(.*)", $)
+            , Result[Section, $1] := $2
+			}
+			return Result
+	*/
+}
+
 hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen:=false, screencolor:="blue") 
 { 
 	; retrieved 20.09.2021 20:56:58 at https://www.autohotkey.com/boards/viewtopic.php?t=33925
@@ -2896,7 +2963,8 @@ hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen
 }
 
 HideFocusBorder(wParam, lParam := "", uMsg := "", hWnd := "") 
-{ ;  fetched from https://www.autohotkey.com/boards/viewtopic.php?t=9684
+{ 
+	;  fetched from https://www.autohotkey.com/boards/viewtopic.php?t=9684
 	; ==================================================================================================================================
 	; Hides the focus border for the given GUI control or GUI and all of its children.
 	; Call the function passing only the HWND of the control / GUI in wParam as only parameter.
@@ -2934,8 +3002,6 @@ getAddressBar(accObj)
 		if IsObject(accObj := %A_ThisFunc%(accChild))
 			return accObj
 }
-
-
 
 Acc_Init()
 {
@@ -3032,5 +3098,6 @@ Obj2String(Obj,FullPath:=1,BottomBlank:=0){
 	}}
 	return String Blank
 }
+
 ;}_____________________________________________________________________________________
 ;   !
