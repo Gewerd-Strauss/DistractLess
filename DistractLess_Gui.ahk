@@ -1,4 +1,4 @@
-﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #SingleInstance,Force
 ;#Persistent
 ;#Warn All  ; Enable warnings to assist with detecting common errors.
@@ -348,7 +348,7 @@ lLoadSettingsFromIniFile: ; load all settings for the behaviour of this program.
 {
 	
 	global IniObj:=fReadIni(A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.ini")
-	global dbFlag:=IniObj["General Settings"].EnableDiagnosticMode
+	global dbflag:=IniObj["General Settings"].EnableDiagnosticMode
 	f_ToggleStartup(IniOBj["General Settings"].bStartup)
 	BrowserClasses:=StrSplit(IniObj["General Settings"].BrowserClasses, ",")
 	BrowserExes:=StrSplit(IniObj["General Settings"].BrowserExes, ",")
@@ -408,17 +408,15 @@ lEnforceRules:
 		return
 	bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=false
 	sCurrentURL:=""
+	; m(sCurrentURL)
 	WinGetActiveTitle, sCurrTitle
 	WinGetClass, sCurrClass, A
 	WinGet, sCurrExe, ProcessName,A
-	bIsBrowser:=false
 	if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
-	{
-		bIsBrowser:=true
+		; m(sCurrentURL)
 		sCurrentURL:=fgetUrl(WinActive("A"))
-	}
 	{	; prelim exception handling, safety returns
-		if  dbFlag ; debug behaviour
+		if dbFlag ; debug behaviour
 			ttip(A_ThisLabel sCurrTitle,4)
 		
 		; NoFilterTitles NoFilterExes NoFilterClasses ← make sure these are never closed, as a precaution.
@@ -442,27 +440,19 @@ lEnforceRules:
 				for k,v in ACtiveArrays[1]
 				{
 					RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-					if bIsBrowser
+					if (stype="w") ; website
 					{
-						if (stype="w") ; website
-						{
-							if dbFlag ; debug behaviour
-								ttip(A_thisLabel sCurrClass "`n" sCurrExe)
-						}
-						Else
-							return ; if we are in a browser, don't process program matches
+						if dbFlag ; debug behaviour
+							ttip(A_thisLabel sCurrClass "`n" sCurrExe)
 					}
-					if (sName==".*") 
-						bMatchAnyName:=true
-					Else
-						bMatchAnyName:=false
-					if Instr(sCurrTitle,sName) || bMatchAnyName
+					if Instr(sCurrTitle,sName)
 					{
 						MatchedTitleEntry:=sName
 						bWhiteContainsThisTitle:=true ; we have verified the window → do not close it, exit the forloop and wait till window changes || next call
-						if bIsBrowser and (stype="w")
-							if !Instr(sCurrentURL,sURL) ; while the title matches, the url specified doesn't → still not a whitelisted page → close
-								bWhiteContainsThisTitle:=false
+						if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
+							if (stype="w") ; website
+								if !Instr(sCurrentURL,sURL) ; while the title matches, the url specified doesn't → still not a whitelisted page → close
+									bWhiteContainsThisTitle:=false
 						break
 					}
 					Else
@@ -489,6 +479,7 @@ lEnforceRules:
 					; iff white and black: don't close → we only need to check the cases that are able to close anyways.  
 					; → as a result, as soon as white=true, we don't close. Hence, we can check if white contains the current title, and close everything that does not contain an entry in white
 					; iff blackonly: DO close 
+					bWhiteContainsThisTitle:=true
 
 					for k,v in ActiveArrays[2]
 					{
@@ -497,7 +488,6 @@ lEnforceRules:
 							bMatchAnyName:=true
 						if Instr(sCurrTitle,sName) || (bMatchAnyName) ; blacklist matches: check if whitelist does NOT match
 						{
-							bBlackContainsThisTitle:=true
 							; current window is matching black now
 							MatchedTitleEntry:=sName
 							bMatchAnyName:=false
@@ -512,7 +502,7 @@ lEnforceRules:
 									{
 										if (ttype="w") ; website
 										{
-											if !Instr(sCurrentURL, tURL) && (tURL!="") ; while the white title matches, check if white url of entry also matches
+											if Instr(sCurrentURL, tURL) && (sURL!="") ; while the white title matches, check if white url of entry also matches
 												bWhiteContainsThisTitle:=false ; url doesn't match, so the condition isn't assumed to be for this page. hence, don't use it. 
 										}
 										Else
@@ -671,111 +661,58 @@ lEnforceRules:
 			}
 			case "Black":	;else if (vActiveFilterMode="Black") ; blacklist only
 			{
-				;; BLACK ONLY WORKS AS EXPECTED NOW.
-				;; finish and fix whiteonly now, and finish the reddit thread on mixed first
+	;; BLACK ONLY WORKS AS EXPECTED NOW.
+	;; finish and fix whiteonly now, and finish the reddit thread on mixed first
 				
 				for k,v in ACtiveArrays[2] ; now check the blacklist
 				{
-					if bIsBrowser
-					{
-						str:="list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)"
-						RegExMatch(v,str,s)
-						if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
-							if (stype="w") ; website
-							{
-								if dbFlag ; debug behaviour
-									ttip(A_Thislabel sCurrClass "`n" sCurrExe) ; sURL
-								
-							}
-
-						if (sName==".*") 
-							bMatchAnyName:=true
-						Else
-							bMatchAnyName:=false
-						if Instr(sCurrTitle,sName) || (bMatchAnyName)
+					str:="list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)"
+					RegExMatch(v,str,s)
+					if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
+						if (stype="w") ; website
 						{
-							if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
+ 							if dbFlag ; debug behaviour
+								ttip(A_Thislabel sCurrClass "`n" sCurrExe) ; sURL
+							
+						}
+					if (sName==".*") 
+						bMatchAnyName:=true
+					if Instr(sCurrTitle,sName) || (bMatchAnyName)
+					{
+						if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
+						{
+							if (stype="w") && if (sURL!="") ; we have a url to check for the website - otherwhise, assume all websites need to be matched
 							{
-								if (stype="w") && if (sURL!="") ; we have a url to check for the website - otherwhise, assume all websites need to be matched
+								if Instr(sCurrentURL,sURL) ; the selected black url and the current url match → close this browser tab
 								{
-									if Instr(sCurrentURL,sURL) ; the selected black url and the current url match → close this browser tab
-									{
-										
-										MatchedTitleEntry:=sName
-										bBlackContainsThisTitle:=true
-										bWhiteContainsThisTitle:=-1
-									}
-								}
-								else	; we are not matching a specific website with the current criteria, so all websites with sName are matched.
-								{
+									
 									MatchedTitleEntry:=sName
 									bBlackContainsThisTitle:=true
 									bWhiteContainsThisTitle:=-1
 								}
 							}
-							else	; we are not in a browser → skip website-entries
+							else	; we are not matching a specific website with the current criteria, so all websites with sName are matched.
 							{
-								if (stype="w") ; we are not in a browser, so close the
-									Continue
 								MatchedTitleEntry:=sName
 								bBlackContainsThisTitle:=true
 								bWhiteContainsThisTitle:=-1
 							}
-							; break
 						}
-						Else
+						else	; we are not in a browser → skip website-entries
 						{
-							bBlackContainsThisTitle:=false
-							continue ; we are not matching the title, hence we don't have to continue this iteration
+							if (stype="w") ; we are not in a browser, so close the
+								Continue
+							MatchedTitleEntry:=sName
+							bBlackContainsThisTitle:=true
+							bWhiteContainsThisTitle:=-1
 						}
+						; break
 					}
 					Else
 					{
-						if (sName==".*") 
-							bMatchAnyName:=true
-						Else
-							bMatchAnyName:=false
-						if Instr(sCurrTitle,sName) || (bMatchAnyName)
-						{
-							if (bCheckURLsInBrowsers="Yes") && HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
-							{
-								if (stype="w") && if (sURL!="") ; we have a url to check for the website - otherwhise, assume all websites need to be matched
-								{
-									if Instr(sCurrentURL,sURL) ; the selected black url and the current url match → close this browser tab
-									{
-										
-										MatchedTitleEntry:=sName
-										bBlackContainsThisTitle:=true
-										bWhiteContainsThisTitle:=-1
-									}
-								}
-								else	; we are not matching a specific website with the current criteria, so all websites with sName are matched.
-								{
-									MatchedTitleEntry:=sName
-									bBlackContainsThisTitle:=true
-									bWhiteContainsThisTitle:=-1
-								}
-							}
-							else	; we are not in a browser → skip website-entries
-							{
-								if (stype="w") ; we are not in a browser, so close the
-									Continue
-								MatchedTitleEntry:=sName
-								bBlackContainsThisTitle:=true
-								bWhiteContainsThisTitle:=-1
-							}
-							; break
-						}
-						Else
-						{
-							bBlackContainsThisTitle:=false
-							continue ; we are not matching the title, hence we don't have to continue this iteration
-						}
+						bBlackContainsThisTitle:=false
+						continue ; we are not matching the title, hence we don't have to continue this iteration
 					}
-				
-
-
-					
 					if bBlackContainsThisTitle and (bWhiteContainsThisTitle==-1)
 					{
 						if (MatchedTitleEntry=".*") ; we are matching everything, so we _must_ match the url as well
@@ -1003,7 +940,7 @@ lGuiCreate_1:
 	gui, add, button, yp+30 xs+%vPositionCenteredButtonLeft% w150 h20 vButton_AddSubsttringToActiveWhiteList glAddSubstringToActiveWhiteList, Add criteria to &WhiteList
 	gui, add, button, yp xs+%vPositionCenteredButtonRight% w150 h20 vButton_AddSubsttringToActiveBlackList glAddSubstringToActiveBlackList, Add criteria to &BlackList
 	gui, add, button, yp-55 xs+%vPositionCenteredButtonRight% w150 h20  vButton_AddFromExistingWindows glGUIShow_3, Add from &existing windows
-	gui, add, button, yp+27 xs+%vPositionCenteredButtonRight% w60 h21  vButton_SaveSelectedListViews glSaveCurrentLVs, Save LV's
+	gui, add, button, yp+27 xs+%vPositionCenteredButtonRight% w60 h21  vButton_SaveSelectedListViews glGUIShow_5, Save LV's
 	gui, add, button, yp xp+90 w60 h21 vButton_RestoreFromSave glLoadFileIntoArrays, Load File
 	;gui, add, button, yp+50 xs+%vPositionCenteredButtonRight% w150 %gui_control_options% h20 vButton_AddFromExistingWindows glGUIShow_3, Add from existing windows
 	gui, add, text, yp+90 xs  vTextHorizontalLine w%vWidthCentralGroupBox% 0x10  ;Horizontal Line > Etched Gray
@@ -1274,8 +1211,22 @@ GC4Escape()
 }
 return
 
+lGuiCreate_5:
+gui, 5: destroy
+gui, 5: New, -Caption +LastFound +ToolWindow +LabelSSA_ +AlwaysOnTop ; <- this doesn't work
+vGUIWidth5:=vGUIWidth
 
-
+return
+lGUIShow_5:
+{
+	gui, 1: hide
+	gui, 2: hide
+	gui, 3: hide
+	gui, 4: hide
+	gui, 5: show, w%vGUIWidth5% h%vGuiHeight%, DistractLess_5
+		; HideFocusBorder(MainGUI)
+}
+return
 
 lCheckEnteredPasswordString:
 {
@@ -1313,7 +1264,6 @@ Return
 
 lUpdateStatusOnStatusBar:
 {
-	
 	gui, 1: default
 	; strProgramStatusOld:=strProgramStatus
 	strProgramStatus:="Program is " (bIsProgramOn?"active":"disabled" ) " and "(bIsLocked?"locked":"not locked")
@@ -1445,8 +1395,7 @@ lCallBack_StatusBarMainWindow:
 	else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=5))
 	{
 		dbFlag:=!dbFlag
-		ttip("figure out how to fix this mess")
-		 gosub, lUpdateStatusOnStatusBar
+		gosub, lUpdateStatusOnStatusBar
 	}
 }
 return
@@ -1905,16 +1854,7 @@ lAddSubstringToActiveBlackList:
 }
 return
 
-lOpenScriptFolder:
-{
-	run, % A_ScriptDir
-}
-return
-lReload:
-{
-	reload
-}
-return
+
 
 ;_________________ common labels
 GuiEscape:
@@ -2036,22 +1976,11 @@ f_CopySelectionIntoArray(sel,DestinationArray,ListType)
 	str:=""
 	for k,v in sel
 	{
-		if Instr(v, "||")
-		{
-			CurrSet:=StrSplit(v,"||")
-			type:= (CurrSet[2]="w") ? "WhiteDef" : "BlackDef"
-			searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
-			InsArr[Ind]:=searchedstr
-			Ind++
-		}
-		else if Instr(v,"|")
-		{
-			CurrSet:=StrSplit(v,"|")
-			type:= (CurrSet[2]="w") ? "WhiteDef" : "BlackDef"
-			searchedstr:="list:(" ListType ")|" Currset[2] "|" CurrSet[3] "|" CurrSet[4] ""
-			InsArr[Ind]:=searchedstr
-			Ind++
-		}
+		CurrSet:=StrSplit(v,"||")
+		type:= (CurrSet[2]="w") ? "WhiteDef" : "BlackDef"
+		searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
+		InsArr[Ind]:=searchedstr
+		Ind++
 		; if !
 		; list:(WhiteDef)|type:(w)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`n
 	}
@@ -2312,64 +2241,14 @@ cQ_MoveOffset()
 	return answer
 }
 
-
-lSaveCurrentLVs:
-{
-		; assume we are only intersted in saving full sets.
-	str:= "*_DLSaveState.ini"
-	str2:= A_ScriptDIr  "\DistractLess_Storage\"
-	FileSelectFile, sSelectedFilePath,S16,%str2%,Select File,%str%
-	if (sSelectedFilePath!="")
-	{
-		sSelectedFilePath.="_DLSaveState"
-		; CurrentSettings:=[vActiveFilterMode,bTrumping,bCheckURLsInBrowsers,bIsProgramOn] ; do we save and load these settings as well? Probably not, just so we don't fuck up any settings
-		Arr:=[ActiveArrays[1],ActiveArrays[2],StoredArrays[1],StoredArrays[2]] ; ,CurrentSettings] 
-		fWriteINI(Arr,sSelectedFilePath)
-	}
-		; FileSelectFile, vSelectedFile,1,%A_ScriptDIr% . "\DistractLess_Storage\",Select File,*.ini	
-		; HideFocusBorder(MainGUI)
-}
-return
-
 lLoadFileIntoArrays:
-{
-	str:= "*_DLSaveState.ini"
-	str2:= A_ScriptDIr  "\DistractLess_Storage\"
-	FileSelectFile, vSelectedFile,1,%str2%,Select File,%str%
-	; FileSelectFile, vSelectedFile,1,%A_ScriptDIr% . "\DistractLess_Storage\",Select File,*.ini
-	SelectedFileArr:=fReadIni(vSelectedFile)
-	{
-			gui, 1: default
-			m(SelectedFileArr[1].MaxIndex(),SelectedFileArr[2].MaxIndex(),SelectedFileArr[3].MaxIndex(),SelectedFileArr[4].MaxIndex())
-			if (SelectedFileArr[1].MaxIndex()!="")
-			{
-				gui, ListView, SysListView321
-				ActiveArrays[1]:=f_CopySelectionIntoArray(SelectedFileArr[1],ActiveArrays[1],"WhiteDef")
-				f_UpdateLV(ActiveArrays[1])
-			}
-			if (SelectedFileArr[2].MaxIndex()!="")
-			{
-				gui, ListView, SysListView323
-				ActiveArrays[2]:=f_CopySelectionIntoArray(SelectedFileArr[2],ActiveArrays[2],"BlackDef")
-				f_UpdateLV(ActiveArrays[2])
-			}
-			if (SelectedFileArr[3].MaxIndex()!="")
-			{
-				gui, ListView, SysListView322
-				StoredArrays[1]:=f_CopySelectionIntoArray(SelectedFileArr[3],StoredArrays[1],"WhiteDef")
-				f_UpdateLV(StoredArrays[1])
-			}
-			if (SelectedFileArr[4].MaxIndex()!="")
-			{
-				gui, ListView, SysListView324
-				StoredArrays[2]:=f_CopySelectionIntoArray(SelectedFileArr[4],StoredArrays[2],"BlackDef")
-				f_UpdateLV(StoredArrays[2])
-			}
-			
-		m("now that I have the readback, figure out how to`n1: feed into arrays`nfor that, use f_CopySelectionIntoArray, followed by f_UpdateLV() to update the visual. Then display a warning and enter db-mode so the user has a chance to check the new conditions, so he doesn't risk closing important windows due to a new condition he didn't remember is now active.")
-	}
-}
-; FileRead, sReadBack, %vSelectedFile%
+
+m(str:= "*_DLSaveState.ini")
+m(str)
+str2:= A_ScriptDIr  "\DistractLess_Storage\"
+m(str2)
+FileSelectFile, vSelectedFile,1,%str2%,Select File,%str%
+FileSelectFile, vSelectedFile,1,%A_ScriptDIr% . "\DistractLess_Storage\",Select File,*.ini
 return
 f_RestartWithSettings(ExitReason,ExitCode)
 {	; restarts the script from a hidden secondary script using a timer
@@ -2671,6 +2550,10 @@ f_CheckFocusChange()
 		return 1
 	SetTimer RemoveToolTip,-3000
 }
+f_DrawPixelOnLastPosition(LastX,LastY)
+{
+	
+}
 fWriteINI(ByRef Array2D, INI_File)  ; write 2D-array to INI-file
 {
 	if !FileExist("INI-Files") ; check for ini-files directory
@@ -2823,7 +2706,12 @@ f_CreateTrayMenu(IniObj)
 	
 	return
 }
-
+lOpenScriptFolder:
+run, % A_ScriptDir
+return
+lReload:
+reload
+return
 f_ConvertRelativePath(RelativePath)
 {
 	VNI=1.0.0.4
