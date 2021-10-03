@@ -12,8 +12,8 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VN=1.4.2.4                                                                    
-	LE=03 Oktober 2021 19:48:09                                                       
+	VN=1.2.2.4                                                                    
+	LE=19 September 2021 21:22:52                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
@@ -46,13 +46,15 @@
 ;General Settings General Settings for DistractLess
 RefreshTime=200
 ;RefreshTime Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
-;RefreshTime Type: Text 
+;RefreshTime Type: Integer 
 ;RefreshTime Default: 200
 bAllowLocking=1
-;bAllowLocking Allows the gui to be locked. This is required for LockingBehaviour to take effect.
+;bAllowLocking Allows the gui to be locked from further access until the time specified in vLockedTime has run out, or the password is entered  correctly.
+;bAllowLocking Note: vLockedTime is not existant yet, the same goes for the logic behind the locking.
 ;bAllowLocking Type: Checkbox 
 ;bAllowLocking Default: 1
-;bAllowLocking CheckboxName: Do you want to allow the gui to be locked?
+;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
+;bAllowLocking Hidden:
 LockingBehaviour=Time-protected
 ;LockingBehaviour set wether or not to lock until
 ;LockingBehaviour - time has passed
@@ -63,46 +65,47 @@ LockingDefaultOffsetHours=3
 ;LockingDefaultOffsetHours Set the number of hours used when calculating the default unlocking time when locking the program for a set time.
 ;LockingDefaultOffsetHours Value in hours.
 ;LockingDefaultOffsetHours Type: Integer 
-;LockingDefaultOffsetHours Default: 3	
-bAlwaysAskPW=1
+;LockingDefaultOffsetHours Default: 3
+bAlwaysAskPW=0
 ;bAlwaysAskPW When checked, the gui is always locked (equivalent to left-clicking the padlock-icon on the main GUI window), and a password is checked.
 ;bAlwaysAskPW Type: Checkbox 
-;bAlwaysAskPW Default: 1
-;bAlwaysAskPW CheckboxName: Do you want to always ask for a password when opening the GUI?
+;bAlwaysAskPW Default: 0
+;bAlwaysAskPW CheckboxName: Do you want to always lock the GUI?
 OnExitBehaviour=Restart with specific bundle
-;OnExitBehaviour Decide what to do when the program is manually closed by any means, except for shutting down, logging off or restarting the PC.
+;OnExitBehaviour Decide what to do when the script is manually closed by any means, except for shutting down, logging off or restarting the PC.
 ;OnExitBehaviour Restart with current bundle:
-;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when program is closed. This prevents the program from being closed by hand.
+;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when script is closed. This prevents the script from being closed by hand.
 ;OnExitBehaviour Empty Restart:
 ;OnExitBehaviour Program is restarted without reloading the current session.
 ;OnExitBehaviour Nothing:
-;OnExitBehaviour program exits normally, without restarting at all.
+;OnExitBehaviour Script exits normally, without restarting at all.
 ;OnExitBehaviour Restart with specific bundle:
 ;OnExitBehaviour Restart with a specific bundle by default. Bundle must be specified under "sDefaultBundle",
-;OnExitBehaviour Type: DropDown Restart with current bundle|Empty Restart|Nothing|Time-protected|Restart with specific bundle||
+;OnExitBehaviour Type: DropDown Nothing||Restart with current settings|Empty Restart|Restart with specific bundle
 ;OnExitBehaviour Default: Restart with specific bundle
+;OnExitBehaviour CheckboxName: Do you want to enable diagnostics mode?
 sDefaultBundle=
 ;sDefaultBundle Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program.
-;sDefaultBundle Type: Text 
-EnableDiagnosticMode=1
+;sDefaultBundle Type: File 
+EnableDiagnosticMode=0
 ;EnableDiagnosticMode Enable Diagnostics-mode for the Closing-function. This results in: CLOSING WINDOWS: more information about matching criteria being displayed, instead of closing the window/tab outright.
 ;EnableDiagnosticMode DoubleClick the fifth part of the statusbar of the main gui to enable and disable diagnostic mode quickly.
 ;EnableDiagnosticMode Type: Checkbox 
-;EnableDiagnosticMode Default: 1
-;EnableDiagnosticMode CheckboxName: Do you want to start the program in Diagnostics mode?
-bAllowWhiteOnly=1
-;bAllowWhiteOnly Allows the program to run only allowing white-listed windows.
+;EnableDiagnosticMode Default: 0
+;EnableDiagnosticMode CheckboxName: Do you want to enable diagnostics mode?
+bAllowWhiteOnly=0
+;bAllowWhiteOnly Allows the script to run only allowing white-listed windows.
 ;bAllowWhiteOnly Note that this is _very_ restrictive, and if not done with great care, will close just about everything you have.
 ;bAllowWhiteOnly Make sure you prepare and test your whitelist in this mode using by enabling the diagnostics mode before employing it.
 ;bAllowWhiteOnly Type: Checkbox 
-;bAllowWhiteOnly Default: 1
-;bAllowWhiteOnly CheckboxName: Do you want to allow white-only mode?
-bEnableBlockingBanner=1
+;bAllowWhiteOnly Default: 0
+;bAllowWhiteOnly CheckboxName: Do you want to allow white-list-only mode?
+bEnableBlockingBanner=0
 ;bEnableBlockingBanner If checked, the closing function will briefly flash a notification when temporarily disabling all keyboard and mouse input. Another message is sent when keyboard and mouse inputs are restored.
-;bEnableBlockingBanner If not checked, the kb/m will be silently blocked and unblocked.
+;bEnableBlockingBanner If not checked, the kbm will be silently blocked and unblocked.
 ;bEnableBlockingBanner Type: Checkbox 
-;bEnableBlockingBanner Default: 1
-;bEnableBlockingBanner CheckboxName: Do you want to enable the Blocking-keyboard-banner
+;bEnableBlockingBanner Default: 0
+;bEnableBlockingBanner CheckboxName: Do you want to enable the banner informing you that the keyboard/mouse is locked?
 BrowserClasses=MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
 ;BrowserClasses Comma-separated list of ahk_classes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
 ;BrowserClasses The ahk_exe of the browser needs to be added to BrowserExes as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
@@ -115,27 +118,29 @@ BrowserExes=firefox.exe,chrome.exe,iexplore.exe,opera.exe
 ;BrowserExes (Looking at you, Spotify)
 ;BrowserExes Type: Text 
 ;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe
-BrowserNewTabs=Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer
+BrowserNewTabs=-1
 ;BrowserNewTabs Comma-separated list of new-tab names for each browser you are using
 ;BrowserNewTabs Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user.
 ;BrowserNewTabs To do so, please replace the "-1" by the names of the new tab in your respective browser(s).
 ;BrowserNewTabs Type: Text 
-bLVDelete_RequireConfirmation=1
-;bLVDelete_RequireConfirmation If  checked, any action removing items from a listview (aka all blacklists and whitelists) requires specific confirmation.
+bLVDelete_RequireConfirmation=0
+;bLVDelete_RequireConfirmation If  checked, any action removing items from a listview requires specific confirmation.
 ;bLVDelete_RequireConfirmation If unchecked, this double-check is skipped. Items can still be restored as usual.
 ;bLVDelete_RequireConfirmation Type: Checkbox 
-;bLVDelete_RequireConfirmation Default: 1
-;bLVDelete_RequireConfirmation CheckboxName: Do you want to always ask for confirmation when removing conditions from a blacklist/whitelist?
+;bLVDelete_RequireConfirmation Default: 0
+;bLVDelete_RequireConfirmation CheckboxName: Do you want an extra dialogue to confirm when removing items from listviews?
 bStartup=1
 ;bStartup Create shortcut (lnk) in the startup folder for DistractLess to start automatically
 ;bStartup 0=No
 ;bStartup 1=Yes
 ;bStartup Type: Checkbox 
-;bStartup CheckboxName: Do you want to start the program at startup?
-sLocationUserBackup=1
+;bStartup Default: 1
+;bStartup CheckboxName: Do you want to add this script to start at system bootup?
+sLocationUserBackup=DistractLess_Storage\UserBackups
+;sLocationUserBackup Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
 ;sLocationUserBackup Choose the folder to store custom lists in via the "Save LV's"-button.
-;sLocationUserBackup Type: Float 
-;sLocationUserBackup Default: 1
+;sLocationUserBackup Type: Folder 
+;sLocationUserBackup Default: DistractLess_Storage\UserBackups
 sFontSize_Text=7
 ;sFontSize_Text Set font-size for the following controls:
 ;sFontSize_Text * Text
@@ -161,7 +166,7 @@ bShowOnProgramStart=1
 ;bShowOnProgramStart Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour)
 ;bShowOnProgramStart Type: Checkbox 
 ;bShowOnProgramStart Default: 1
-;bShowOnProgramStart CheckboxName: Do you want to show the program at startup?
+;bShowOnProgramStart CheckboxName: Do you want to show the GUI after the program has finished its start-routine?
 [Invisible Settings]
 ;Invisible Settings set wether or not to lock until
 ;Invisible Settings - time has passed
@@ -191,6 +196,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 )
 	if !FileExist(IniSettingsFilePath)
 	{
+		; m("figure out how to write a continuation section to file successfully")
 		f_ThrowError("Main Code Body","Settings file does not exist, initiating from default settings. ", A_ScriptNameNoExt . "_"0, Exception("",-1).Line)
 		FileAppend, %DefSettings%, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings.ini
 	}
@@ -228,30 +234,32 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
 		
 	}
-	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
+	if (IniObj["General Settings"].OnExitBehaviour="Restart with current settings")
 		OnExit("f_RestartWithSettings")
 	else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
 		OnExit("f_RestartEmpty")
 	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
-		OnExit("f_RestartWithSpecificBundle")
-	if (A_ComputerName="DESKTOP-FH4RU5C")
 	{
-		OnError("LogError")
-		cause := error
-	}		
 
+		OnExit("f_RestartWithSpecificBundle")
+	}
+
+	; OnError("LogError")
+	; cause := error
 
 ; if (!Count)
 ; 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
 
-	if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle 
+	if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==restart with current settings 
 	{
 		LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
 		for k,v in LastSessionSettings[5]
 			LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
 		bRestoreLastSession:=true
+		m("Rstored LastSessionSettings")
 		; FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
 	}
+	m(LastSessionSettings[5])
 	f_CreateTrayMenu(IniObj)
 	gui, font, %FONT_LV1% , %FONT_LV2%
 	guicontrol, font, vLV1
@@ -521,9 +529,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			Count:=Count+ LastSessionSettings[3].MaxIndex()
 		if (LastSessionSettings[4].MaxIndex()!="")
 			Count:=Count+ LastSessionSettings[4].MaxIndex()
-		if (A_ComputerName="DESKTOP-FH4RU5C")
-			m("Count after checking all data arrays: " Count)
-
+		m("Count after checking all data arrays: " Count)
 		if (!Count)
 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
 		if (LastSessionSettings[5].MaxIndex()!="")
@@ -533,8 +539,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		ActiveArrays:=[[],[]]
 		StoredArrays:=[[],[]]
-		if (A_ComputerName="DESKTOP-FH4RU5C")
-			m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
+		m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
 		if (LastSessionSettings[1].MaxIndex()!="")
 		{
 			gui, listview, SysListView321
@@ -594,6 +599,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		; 	Else
 		; 		ttip("Finished initialising")
 		; }
+			; m("see if already set up")
 		bRestoringLastSession:=false
 	}
 	return
@@ -656,6 +662,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 
 	lEnforceRules:
 	{
+		; m("the notificaiton forlocking doesnt update.")
 		if !bIsProgramOn ; don't continue if program is turned off.
 			return
 		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=false ; reset flags for each call. 
@@ -1199,6 +1206,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 							
 						
 						
+						; m("mode for botH: not planned totally, this might be super buggy cuz I need ")
 						; if (vActiveFilterMode="Both") ; both
 						; {
 						; 	if bWhiteTrumpedThisTitle ; white trumped, 
@@ -1457,6 +1465,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		; Calculate positions of Right side LV's, relative to the anchors at xp/yp
 		xMax_TabWidth:= 16 + vGUITabWidth
 		; Positioning:=[vGUIWidth,vGUIHeight,vGUITabWidth,vGUITabHeight,vGroupBoxWidth,vGroupBoxHeight,vLV_Width,vLV_Heigth]
+		; m(Positioning)
 		OffsetFromRightEdge:=vGroupBoxWidth+10
 		vGroupBoxHeight2:=vGroupBoxHeight-1
 		
@@ -1845,6 +1854,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	GC4Submit()
 	{
 		gui, 4: submit, NoHide
+		; m(sEnteredPassword)
 	}
 	GC4Escape()
 	{
@@ -1874,6 +1884,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, add, text,xm ym, Set unlocking time:
 		Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%%TimeInSetNumberOfHours%00, HH:mm:ss ; HH = hours with leading zero; 24-hour format (00– 23)
 		Gui, Font, s7 cWhite, Verdana
+		; m("figure out how to add the timestamp correctly:`nif TimeInSetNumberOfHours is calculated to reach/overreach 25, we need to wrap around on day, month and possibly year")
 		; Gui +LastFound
 	}
 	return
@@ -1922,6 +1933,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; HideFocusBorder(MainGUI)
 			; If !INstr(SavedFilePath,"_DLUserBackup.ini")
 			; 	SavedFilePath .= "_DLUserBackup.ini"
+		; m(Arr)
 		; if 
 		if !testFlag
 			fWriteINI(Arr,SavedFilePath)
@@ -1975,6 +1987,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
 		{	; folder and file doesn't exist -> create
 			; create file
+			; m("folder does not exist")
 			FileCreateDir,% IniObj["General Settings"].sLocationUserBackup
 			f_ThrowError("Main Code Body","The Folder specified under 'sLocationUserBackup' in settings does not exist in and no backups could be found therefore. The folder is now created. Please save a set of lists/settings via the 'Load LV's'-button into this folder first before trying to read load them.",A_ScriptNameNoExt . "_"4,Exception("",-1).Line)
 			; SetWorkingDir, UserBackups
@@ -2392,8 +2405,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					gosub, lGuiCreate_5
 					gosub, lGUIShow_5
 					WinWaitClose, DistractLess_5
-					if (A_ComputerName="DESKTOP-FH4RU5C")
-						m(DefaultTime)
+					m(DefaultTime)
 					gui, 1: hide
 				}
 			}
@@ -2435,6 +2447,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			StoredArrays:=TestSimStorage[2]
 			TestSimStorage:=[]
 		}
+		; m(ActiveArrays,StoredArrays)
 	}
 	return
 
@@ -2516,6 +2529,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	lLV_BlackStorage_EditSelected:
 	{
 		gui, 1: default
+		; m("rework this and LV_BlackStorage_EditSelected according to the example in 'lLV_WhiteStorage_EditSelected'")
 		gui, listview, SysListView324
 		StoredBlackBackUp:=StoredArrays[2].clone()
 		sEditedString:=f_EditArrayElement(StoredArrays[2][A_EventInfo])
@@ -2627,6 +2641,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		sel:=f_GetSelectedLVEntries()
 		ActiveWhiteBackup:=ActiveArrays[1].clone()
 		ActiveArrays[1]:=f_CopySelectionIntoArray(sel,ActiveArrays[1],"WhiteDef")
+		m(ActiveArrays[1])
 		gui, listview, SysListView321
 		f_UpdateLV(ActiveArrays[1])
 	}
@@ -2659,6 +2674,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			StoredActiveWhiteArrays:=f_RemoveSelectionFromArray(sel,ActiveArrays[1],"WhiteDef") ; rebuild the active array by removing selected entries
 			ActiveArrays[1]:=StoredActiveWhiteArrays[1]
 			ActiveWhiteBackup:=StoredActiveWhiteArrays[2]
+			; m(ActiveArrays[1],ActiveWhiteBackup)
 			gui, ListView, SysListView321
 			f_UpdateLV(ActiveArrays[1])
 		}
@@ -3292,22 +3308,22 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
 
 		}
-
-		tmparr:=fReadINI((A_ScriptDir "\" INI_File ".ini"))
-		Splitpath, A_ScriptFullPath,,ScriptPath
+			; loop, 5
+			; {
+			; 	d:=SubStr(INI_File,-3)
+			; 	if (SubStr(INI_File,-3)==".ini")
+			; 		INI_File:=SubStr(INI_File,1, (StrLen(INI_File)-4))
+			; }
+			tmparr:=fReadINI((A_ScriptDir "\" INI_File ".ini"))
+			Splitpath, A_ScriptFullPath,,ScriptPath
 		; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
-		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
-		if (SubStr(INI_File,-4,4)==".ini")
-			INI_File:=SubStr(INI_File,1, (StrLen(INI_File)-4))
-		if !testFlag
-			fWriteIni(tmparr,INI_File)
-		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
-			run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
-		}
-		Else
-		{
-			if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
-				run, %A_ScriptDir%\includes\DistractLess_RestartEmpty.ahk
+			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
+			if (SubStr(INI_File,-4,4)==".ini")
+				INI_File:=SubStr(INI_File,1, (StrLen(INI_File)-4))
+			if !testFlag
+				fWriteIni(tmparr,INI_File)
+			; if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+			; 	run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
 		}
 	}
 	return
@@ -3402,6 +3418,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				; {
 					; if dbFlag
 					; 	ttip(A_ThisFunc "6")
+					; m(sCurrURL,sURL)
 					if (!Instr(sCurrURL,sURL) and (vActiveFilterMode!="white")) && (sURL!=".*")
 					{
 						; if dbFlag
@@ -3452,6 +3469,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				; {
 					if dbFlag
 						ttip(A_ThisFunc "6")
+					; m(sCurrURL,sURL)
 					
 					
 					;; I HAVE NO IDEA WHAT THIS SECTION IS FOR... that's what you comment your code for.
@@ -3555,7 +3573,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		menu, tray, Add, Show  Gui, Gui1_ShowLogic
 		menu, tray, add,
 		Menu, Misc, add, Open Script-folder, lOpenScriptFolder
-		Menu, Misc, add, Open Settings, lOpenSettings
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
 		if (A_ComputerName="DESKTOP-FH4RU5C") and lDevelopmentFlag ; toggle to add development buttons easier. 
@@ -3632,9 +3649,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			
 		*/
 	}
-	lOpenSettings:
-	IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
-	return
+
 	lOpenScriptFolder:
 	run, % A_ScriptDir
 	return
@@ -3657,6 +3672,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		*/
 		
 		;if (text="TTIP: Test")
+			;m(to)
 		if (text="")
 			gosub, lRemovettip
 		static ttip_text
@@ -3715,6 +3731,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			sleep, % to
 		return
 		lRemovettip:
+		;m("hi there")
 		Tooltip,,,,currTip2
 		return
 	}
@@ -4026,6 +4043,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			;for k,v in % vNumCount
 			;{
 				;SysGet, vMonC, Monitor, %v%
+				;m(vMonCLeft,vMonCTop,vMonCRight,vMonCBottom)
 				;vWidthC:=vMonCRight-vMonCLeft
 				;vHeightC:=vMonCTop-vMonCBottom
 				v:="Screen"
