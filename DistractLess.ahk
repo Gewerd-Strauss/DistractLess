@@ -46,15 +46,13 @@
 ;General Settings General Settings for DistractLess
 RefreshTime=200
 ;RefreshTime Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
-;RefreshTime Type: Integer 
+;RefreshTime Type: Text 
 ;RefreshTime Default: 200
 bAllowLocking=1
-;bAllowLocking Allows the gui to be locked from further access until the time specified in vLockedTime has run out, or the password is entered  correctly.
-;bAllowLocking Note: vLockedTime is not existant yet, the same goes for the logic behind the locking.
+;bAllowLocking Allows the gui to be locked. This is required for LockingBehaviour to take effect.
 ;bAllowLocking Type: Checkbox 
 ;bAllowLocking Default: 1
-;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
-;bAllowLocking Hidden:
+;bAllowLocking CheckboxName: Do you want to allow the gui to be locked?
 LockingBehaviour=Time-protected
 ;LockingBehaviour set wether or not to lock until
 ;LockingBehaviour - time has passed
@@ -65,47 +63,46 @@ LockingDefaultOffsetHours=3
 ;LockingDefaultOffsetHours Set the number of hours used when calculating the default unlocking time when locking the program for a set time.
 ;LockingDefaultOffsetHours Value in hours.
 ;LockingDefaultOffsetHours Type: Integer 
-;LockingDefaultOffsetHours Default: 3
-bAlwaysAskPW=0
+;LockingDefaultOffsetHours Default: 3	
+bAlwaysAskPW=1
 ;bAlwaysAskPW When checked, the gui is always locked (equivalent to left-clicking the padlock-icon on the main GUI window), and a password is checked.
 ;bAlwaysAskPW Type: Checkbox 
-;bAlwaysAskPW Default: 0
-;bAlwaysAskPW CheckboxName: Do you want to always lock the GUI?
+;bAlwaysAskPW Default: 1
+;bAlwaysAskPW CheckboxName: Do you want to always ask for a password when opening the GUI?
 OnExitBehaviour=Restart with specific bundle
-;OnExitBehaviour Decide what to do when the script is manually closed by any means, except for shutting down, logging off or restarting the PC.
+;OnExitBehaviour Decide what to do when the program is manually closed by any means, except for shutting down, logging off or restarting the PC.
 ;OnExitBehaviour Restart with current bundle:
-;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when script is closed. This prevents the script from being closed by hand.
+;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when program is closed. This prevents the program from being closed by hand.
 ;OnExitBehaviour Empty Restart:
 ;OnExitBehaviour Program is restarted without reloading the current session.
 ;OnExitBehaviour Nothing:
-;OnExitBehaviour Script exits normally, without restarting at all.
+;OnExitBehaviour program exits normally, without restarting at all.
 ;OnExitBehaviour Restart with specific bundle:
 ;OnExitBehaviour Restart with a specific bundle by default. Bundle must be specified under "sDefaultBundle",
-;OnExitBehaviour Type: DropDown Nothing||Restart with current settings|Empty Restart|Restart with specific bundle
+;OnExitBehaviour Type: DropDown Restart with current bundle|Empty Restart|Nothing|Time-protected|Restart with specific bundle||
 ;OnExitBehaviour Default: Restart with specific bundle
-;OnExitBehaviour CheckboxName: Do you want to enable diagnostics mode?
 sDefaultBundle=
 ;sDefaultBundle Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program.
-;sDefaultBundle Type: File 
-EnableDiagnosticMode=0
+;sDefaultBundle Type: Text 
+EnableDiagnosticMode=1
 ;EnableDiagnosticMode Enable Diagnostics-mode for the Closing-function. This results in: CLOSING WINDOWS: more information about matching criteria being displayed, instead of closing the window/tab outright.
 ;EnableDiagnosticMode DoubleClick the fifth part of the statusbar of the main gui to enable and disable diagnostic mode quickly.
 ;EnableDiagnosticMode Type: Checkbox 
-;EnableDiagnosticMode Default: 0
-;EnableDiagnosticMode CheckboxName: Do you want to enable diagnostics mode?
-bAllowWhiteOnly=0
-;bAllowWhiteOnly Allows the script to run only allowing white-listed windows.
+;EnableDiagnosticMode Default: 1
+;EnableDiagnosticMode CheckboxName: Do you want to start the program in Diagnostics mode?
+bAllowWhiteOnly=1
+;bAllowWhiteOnly Allows the program to run only allowing white-listed windows.
 ;bAllowWhiteOnly Note that this is _very_ restrictive, and if not done with great care, will close just about everything you have.
 ;bAllowWhiteOnly Make sure you prepare and test your whitelist in this mode using by enabling the diagnostics mode before employing it.
 ;bAllowWhiteOnly Type: Checkbox 
-;bAllowWhiteOnly Default: 0
-;bAllowWhiteOnly CheckboxName: Do you want to allow white-list-only mode?
-bEnableBlockingBanner=0
+;bAllowWhiteOnly Default: 1
+;bAllowWhiteOnly CheckboxName: Do you want to allow white-only mode?
+bEnableBlockingBanner=1
 ;bEnableBlockingBanner If checked, the closing function will briefly flash a notification when temporarily disabling all keyboard and mouse input. Another message is sent when keyboard and mouse inputs are restored.
-;bEnableBlockingBanner If not checked, the kbm will be silently blocked and unblocked.
+;bEnableBlockingBanner If not checked, the kb/m will be silently blocked and unblocked.
 ;bEnableBlockingBanner Type: Checkbox 
-;bEnableBlockingBanner Default: 0
-;bEnableBlockingBanner CheckboxName: Do you want to enable the banner informing you that the keyboard/mouse is locked?
+;bEnableBlockingBanner Default: 1
+;bEnableBlockingBanner CheckboxName: Do you want to enable the Blocking-keyboard-banner
 BrowserClasses=MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
 ;BrowserClasses Comma-separated list of ahk_classes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
 ;BrowserClasses The ahk_exe of the browser needs to be added to BrowserExes as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
@@ -118,29 +115,27 @@ BrowserExes=firefox.exe,chrome.exe,iexplore.exe,opera.exe
 ;BrowserExes (Looking at you, Spotify)
 ;BrowserExes Type: Text 
 ;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe
-BrowserNewTabs=-1
+BrowserNewTabs=Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer
 ;BrowserNewTabs Comma-separated list of new-tab names for each browser you are using
 ;BrowserNewTabs Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user.
 ;BrowserNewTabs To do so, please replace the "-1" by the names of the new tab in your respective browser(s).
 ;BrowserNewTabs Type: Text 
-bLVDelete_RequireConfirmation=0
-;bLVDelete_RequireConfirmation If  checked, any action removing items from a listview requires specific confirmation.
+bLVDelete_RequireConfirmation=1
+;bLVDelete_RequireConfirmation If  checked, any action removing items from a listview (aka all blacklists and whitelists) requires specific confirmation.
 ;bLVDelete_RequireConfirmation If unchecked, this double-check is skipped. Items can still be restored as usual.
 ;bLVDelete_RequireConfirmation Type: Checkbox 
-;bLVDelete_RequireConfirmation Default: 0
-;bLVDelete_RequireConfirmation CheckboxName: Do you want an extra dialogue to confirm when removing items from listviews?
+;bLVDelete_RequireConfirmation Default: 1
+;bLVDelete_RequireConfirmation CheckboxName: Do you want to always ask for confirmation when removing conditions from a blacklist/whitelist?
 bStartup=1
 ;bStartup Create shortcut (lnk) in the startup folder for DistractLess to start automatically
 ;bStartup 0=No
 ;bStartup 1=Yes
 ;bStartup Type: Checkbox 
-;bStartup Default: 1
-;bStartup CheckboxName: Do you want to add this script to start at system bootup?
-sLocationUserBackup=DistractLess_Storage\UserBackups
-;sLocationUserBackup Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
+;bStartup CheckboxName: Do you want to start the program at startup?
+sLocationUserBackup=1
 ;sLocationUserBackup Choose the folder to store custom lists in via the "Save LV's"-button.
-;sLocationUserBackup Type: Folder 
-;sLocationUserBackup Default: DistractLess_Storage\UserBackups
+;sLocationUserBackup Type: Float 
+;sLocationUserBackup Default: 1
 sFontSize_Text=7
 ;sFontSize_Text Set font-size for the following controls:
 ;sFontSize_Text * Text
@@ -166,7 +161,7 @@ bShowOnProgramStart=1
 ;bShowOnProgramStart Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour)
 ;bShowOnProgramStart Type: Checkbox 
 ;bShowOnProgramStart Default: 1
-;bShowOnProgramStart CheckboxName: Do you want to show the GUI after the program has finished its start-routine?
+;bShowOnProgramStart CheckboxName: Do you want to show the program at startup?
 [Invisible Settings]
 ;Invisible Settings set wether or not to lock until
 ;Invisible Settings - time has passed
@@ -233,20 +228,23 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
 		
 	}
-	if (IniObj["General Settings"].OnExitBehaviour="Restart with current settings")
+	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
 		OnExit("f_RestartWithSettings")
 	else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
 		OnExit("f_RestartEmpty")
 	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
 		OnExit("f_RestartWithSpecificBundle")
+	if (A_ComputerName="DESKTOP-FH4RU5C")
+	{
+		OnError("LogError")
+		cause := error
+	}		
 
-	; OnError("LogError")
-	; cause := error
 
 ; if (!Count)
 ; 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
 
-	if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==restart with current settings 
+	if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle 
 	{
 		LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
 		for k,v in LastSessionSettings[5]
