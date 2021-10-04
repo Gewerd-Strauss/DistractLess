@@ -17,7 +17,7 @@ For more information, see [Understanding the filter mechanism]
 
 # 2. The GUI
 
-![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "")
+![Figure 1: The Main Window](DistractLess\Documentation\DL_MainWindow.PNG "")
 
 The main overlay can be broken up into three different sections:
 The left section displays stored and active _whitelisted_ strings. The right third displays _blacklisted_ ones. 
@@ -61,10 +61,10 @@ In case of the following example, you would add `MozillaWindowClass` to `Browser
 
 You can ignore the first and last line of this first field (under "Window Title, Class and Process"), as well as all other info displayed.
 
-![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "")
+![Figure 2: relevant contents of the window spy overlay](DistractLess\Documentation\DL_ContentsWindowSpy.PNG "")
 
 ---
 
 Now that you have added any possible browsers you might be using, let's go over _programs_ (remember, those have distinctly nothing in common with the settings you have just edited.)
 
-A program is only matched according to its window title against any ***p***rogram-condition.
+A program is only matched according to its window title against any ***p***rogram-condition currently visible within the top two listviews visible in figure 1.
