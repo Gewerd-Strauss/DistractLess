@@ -71,6 +71,7 @@ A program is only matched according to its window title against any ***p***rogra
 
 ### 2.1.2 Syntax
 
+
 DistractLess always checks if the current window's title _contains_ the substring. There is no distinction made between upper and lowercase, only the order of symbols must match anywhere within the current window's title.
 
 To have a criteria match any title, set the title string to `.*`.
@@ -90,17 +91,17 @@ When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a help
 ![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "")
 
 After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
-If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#2.1.2-syntax).
+If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
 
 ![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "")
 
 
 Alteratively, you can just create your conditions by hand, but usually that will be more prone to error and take longer :P
 
-Pressing `Save LV's` will open a dialogue to save the current configuration for later access. The default folder can be changed under `sLocationUserBackup` in the settings 3. Accessing and editing the [settings](#3.-accessing-and-editing-the-settings).
+Pressing `Save LV's` will open a dialogue to save the current configuration for later access. The default folder can be changed under `sLocationUserBackup` in the [settings](#3.-accessing-and-editing-the-settings).
 
-### 2.2 The lower middle section
-
+### 2.2 The lower middle section: The filter mechanism
+   #-2.2-the-lower-middle-section:-the-filter-mechanism
 This section is pretty quickly explained, because not a lot is happening here.
 Two Dropdownlists influence the behaviour of the program.
 
@@ -135,18 +136,26 @@ When setting up criteria sets for this mode, please ensure you are running in [d
 
 ### 3. Accessing and editing the settings
 
-In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_. You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (cf Figure 5). 
+In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_ (cf. Figure 5). You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (cf Figure 6). 
 
-Each setting comes with a small description about its usecase, and possible options. The type of the input is displayed, as well as a default value which is restored when pressing "Restore". Settings are saved automatically. In the example of figure 5, we are looking at the `OnExitBehaviour`, and a dropdown-list displays possible options.
+![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpToolBar.PNG "")
 
-![Figure 5: Settings Menu](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_SettingsMenu.PNG "")
+Each setting comes with a small description about its usecase, and possible options. The type of the input is displayed, as well as a default value which is restored when pressing "Restore". Settings are saved automatically. In the example of figure 6, we are looking at the `OnExitBehaviour`, and a dropdown-list displays possible options.
 
-Figure 6 displays a known, but to me not solvable bug. The description displayed can sometimes be muddied by the display of another setting's description. 
+![Figure 6: Settings Menu](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_SettingsMenu.PNG "")
+
+Figure 7 displays a known, but to me not solvable bug. The description displayed can sometimes be muddied by the display of another setting's description. 
 
 These cases can be identified because the "Default:...."- and "Type:...."- information is displayed twice. In these cases, the _lowest_ description is the "correct" one.
 
-![Figure 6: Faulty double description](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_FaultySettingsDescription.PNG "")
+![Figure 7: Faulty double description](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_FaultySettingsDescription.PNG "")
 
 Settings are autosaved upon change or closing of the window. Most settings take effect immediately, but some require a program restart.
 
 ### 4. Entering diagnostics-mode
+
+
+
+### 5. Understanding the filter 
+[syntax](#212-syntax)
+[go to test](#212-syntax)
