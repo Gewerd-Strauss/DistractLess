@@ -2890,6 +2890,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
 		global
+		if (A_ComputerName="DESKTOP-FH4RU5C")
+			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
 		; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
@@ -2912,13 +2914,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			if A_IsCompiled
 			{
 				if (A_ComputerName="DESKTOP-FH4RU5C")
-					ttip("Restarting now")
+					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
 				if (A_ComputerName="DESKTOP-FH4RU5C")
-					ttip("Restarting now")
+					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
 		}
@@ -2927,6 +2929,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	f_RestartWithSpecificBundle(ExitReason,ExitCode)
 	{
 		global
+		if (A_ComputerName="DESKTOP-FH4RU5C")
+			m(A_ThisFunc)
 		if FileExist(IniObj["General Settings"].sDefaultBundle) && (IniObj["General Settings"].sDefaultBundle!="")
 		{
 			INI_File:=IniObj["General Settings"].sDefaultBundle
@@ -2935,29 +2939,18 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				INI_File:=st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
 				if (st_count(INI_File,".ini")>0)  
 					INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
-
 			}
-			; loop, 5
-			; {
-			; 	d:=SubStr(INI_File,-3)
-			; 	if (SubStr(INI_File,-3)==".ini")
-			; 		INI_File:=SubStr(INI_File,1, (StrLen(INI_File)-4))
-			; }
 			tmparr:=fReadINI((A_ScriptDir "\" INI_File ".ini"))
 			Splitpath, A_ScriptFullPath,,ScriptPath
-		; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
 			if (SubStr(INI_File,-4,4)==".ini")
 				INI_File:=SubStr(INI_File,1, (StrLen(INI_File)-4))
 			if !testFlag
 				fWriteIni(tmparr,INI_File)
-			; if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
-			; 	run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
 		}
 		Else
 		{
 			Splitpath, A_ScriptFullPath,,ScriptPath
-			; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
 			
 			Arr:=f_CreateStoredArrays()
@@ -2973,27 +2966,29 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				fWriteIni(Arr,INI_File)
 			else
 				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
-			if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		}
+		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		{
+			if A_IsCompiled
 			{
-				if A_IsCompiled
-				{
-					if (A_ComputerName="DESKTOP-FH4RU5C")
-						ttip("Restarting now")
-					run, %A_ScriptDir%\includes\DistractLess_Restart.exe
-				}
-				Else
-				{
-					if (A_ComputerName="DESKTOP-FH4RU5C")
-						ttip("Restarting now")
-					run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
-				}
+				if (A_ComputerName="DESKTOP-FH4RU5C")
+					m("Restarting now")
+				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
+			}
+			Else
+			{
+				if (A_ComputerName="DESKTOP-FH4RU5C")
+					m("Restarting now")
+				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
 		}
-
 	}
 	return
 	f_RestartEmpty(ExitReason,ExitCode)
 	{	
+		global
+		if (A_ComputerName="DESKTOP-FH4RU5C")
+			m(A_ThisFunc)
 		/*
 			; restarts the script from a hidden secondary script using a timer
 			; Logoff: The user is logging off.
@@ -3013,17 +3008,16 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			if A_IsCompiled
 			{
 				if (A_ComputerName="DESKTOP-FH4RU5C")
-					ttip("Restarting now")
+					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
 				if (A_ComputerName="DESKTOP-FH4RU5C")
-					ttip("Restarting now")
+					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
 		}
-			
 	}
 	return
 	f_ThrowError(Source,Message,ErrorCode:=0,ReferencePlace:="S")
@@ -3055,6 +3049,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	)
 		}
 		MsgBox, % str
+		return
 	}
 	
 	;bCheckURLsInBrowsers sURL sCurrURL
