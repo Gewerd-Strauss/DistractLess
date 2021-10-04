@@ -264,10 +264,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			for k,v in LastSessionSettings[5]
 				LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
 			bRestoreLastSession:=true
-			if (A_ComputerName="DESKTOP-FH4RU5C")
+			if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 				m("Rstored LastSessionSettings")
 			FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
-			if (A_ComputerName="DESKTOP-FH4RU5C")
+			if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 				m(LastSessionSettings[5])
 		}
 	}
@@ -311,7 +311,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	else if !bRestoreLastSession and !vsdb
 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
-	if (A_ComputerName="DESKTOP-FH4RU5C")
+	if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 		m("bRestoreLastSession: " bRestoreLastSession,"vsdb: " vsdb , "I need to embed another setting into LastSessionSettings[5] to figure out in which case to display the startup notification, and in which we don't want to display it.","The logic is the following: because right now the current settings are always stored → there is always gonna be a lastSessionrestored now. " )
 
 	SetWorkingDir, %A_ScriptDir%
@@ -541,7 +541,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		if (LastSessionSettings[4].MaxIndex()!="")
 			Count:=Count+ LastSessionSettings[4].MaxIndex()
 
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 			m("Count after checking all data arrays: " Count)
 		if (!Count)
 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
@@ -552,7 +552,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		ActiveArrays:=[[],[]]
 		StoredArrays:=[[],[]]
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 			m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
 		if (LastSessionSettings[1].MaxIndex()!="")
 		{
@@ -1269,7 +1269,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, tab
 		gui, add, statusbar, -Theme vStatusBarMainWindow BackGround373b41 glCallBack_StatusBarMainWindow
 		; Gui, Font, s9 cWhite, Segoe UI 
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 			SB_SetParts(23,120,100,175,145,70,170)
 		Else
 			SB_SetParts(23,120,100,175,145,70)
@@ -1692,7 +1692,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			SB_SetText(sDiagnosticsOn,5)
 		Else
 			SB_SetText(sDiagnosticsOff,5)
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 		{
 			sTestSimOn:="DoubleClick to exit testsimulation"
 			sTestSimOff:="DoubleClick to enter testsimulation"
@@ -2890,7 +2890,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
 		global
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
 		; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
@@ -2913,13 +2913,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		{
 			if A_IsCompiled
 			{
-				if (A_ComputerName="DESKTOP-FH4RU5C")
+				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (A_ComputerName="DESKTOP-FH4RU5C")
+				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
@@ -2929,7 +2929,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	f_RestartWithSpecificBundle(ExitReason,ExitCode)
 	{
 		global
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 			m(A_ThisFunc)
 		if FileExist(IniObj["General Settings"].sDefaultBundle) && (IniObj["General Settings"].sDefaultBundle!="")
 		{
@@ -2967,17 +2968,17 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			else
 				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
 		}
-		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 		{
 			if A_IsCompiled
 			{
-				if (A_ComputerName="DESKTOP-FH4RU5C")
+				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (A_ComputerName="DESKTOP-FH4RU5C")
+				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
@@ -2987,7 +2988,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	f_RestartEmpty(ExitReason,ExitCode)
 	{	
 		global
-		if (A_ComputerName="DESKTOP-FH4RU5C")
+		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 			m(A_ThisFunc)
 		/*
 			; restarts the script from a hidden secondary script using a timer
@@ -3002,18 +3004,17 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; Reload:	The script is being reloaded via the Reload command or menu item.
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
-		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
-		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 		{
 			if A_IsCompiled
 			{
-				if (A_ComputerName="DESKTOP-FH4RU5C")
+				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (A_ComputerName="DESKTOP-FH4RU5C")
+				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
@@ -3250,7 +3251,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		Menu, Misc, add, Open Settings, lOpenSettings
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
-		if (A_ComputerName="DESKTOP-FH4RU5C") and lDevelopmentFlag ; toggle to add development buttons easier. 
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C"))  and lDevelopmentFlag ; toggle to add development buttons easier. 
 		{
 			menu, Misc, Add, New Settings Dialogue (rename later), lSettingsOverall
 			menu, Misc, Add, Edit Settings File , lEditSettingsOverall
