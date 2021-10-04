@@ -69,7 +69,7 @@ Now that you have added any possible browsers you might be using, let's go over 
 
 A program is only matched according to its window title against any ***p***rogram-condition currently visible within the top two listviews visible in figure 1.
 
-### 2.1.2 
+### 2.1.2 Syntax
 
 
 DistractLess always checks if the current window's title _contains_ the substring. There is no distinction made between upper and lowercase, only the order of symbols must match anywhere within the current window's title.
