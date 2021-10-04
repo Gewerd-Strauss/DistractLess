@@ -90,7 +90,7 @@ When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a help
 ![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "")
 
 After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
-If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#-2.1.2-syntax).
+If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212syntax).
 
 ![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "")
 
