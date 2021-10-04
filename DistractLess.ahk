@@ -12,8 +12,10 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VN=1.2.2.4                                                                    
-	LE=19 September 2021 21:22:52                                                       
+	VN=1.4.7.4                                                                    
+	VNP=VN
+	VN=1.2.1.4
+	LE=03 Oktober 2021 22:00:00                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
@@ -73,6 +75,7 @@ bAlwaysAskPW=0
 ;bAlwaysAskPW CheckboxName: Do you want to always lock the GUI?
 OnExitBehaviour=Restart with specific bundle
 ;OnExitBehaviour Decide what to do when the script is manually closed by any means, except for shutting down, logging off or restarting the PC.
+;OnExitBehaviour Changes in this setting only take effect after restarting the program once.
 ;OnExitBehaviour Restart with current bundle:
 ;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when script is closed. This prevents the script from being closed by hand.
 ;OnExitBehaviour Empty Restart:
@@ -81,9 +84,8 @@ OnExitBehaviour=Restart with specific bundle
 ;OnExitBehaviour Script exits normally, without restarting at all.
 ;OnExitBehaviour Restart with specific bundle:
 ;OnExitBehaviour Restart with a specific bundle by default. Bundle must be specified under "sDefaultBundle",
-;OnExitBehaviour Type: DropDown Nothing||Restart with current settings|Empty Restart|Restart with specific bundle
+;OnExitBehaviour Type: DropDown Nothing||Restart with current bundle|Empty Restart|Restart with specific bundle
 ;OnExitBehaviour Default: Restart with specific bundle
-;OnExitBehaviour CheckboxName: Do you want to enable diagnostics mode?
 sDefaultBundle=
 ;sDefaultBundle Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program.
 ;sDefaultBundle Type: File 
@@ -129,12 +131,12 @@ bLVDelete_RequireConfirmation=0
 ;bLVDelete_RequireConfirmation Type: Checkbox 
 ;bLVDelete_RequireConfirmation Default: 0
 ;bLVDelete_RequireConfirmation CheckboxName: Do you want an extra dialogue to confirm when removing items from listviews?
-bStartup=1
+bStartup=0
 ;bStartup Create shortcut (lnk) in the startup folder for DistractLess to start automatically
 ;bStartup 0=No
 ;bStartup 1=Yes
 ;bStartup Type: Checkbox 
-;bStartup Default: 1
+;bStartup Default: 0
 ;bStartup CheckboxName: Do you want to add this script to start at system bootup?
 sLocationUserBackup=DistractLess_Storage\UserBackups
 ;sLocationUserBackup Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
@@ -202,7 +204,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	else ;; fix faulty lines that can be created when the IniSettingsEditor fucks up the descriptions suddenly. Hotfix that is used at startup to ensure that at least the starting descriptions are correct.
 	{
-		
 		FixedDescriptionFile:=f_FixInfoTextLinesInIniFile(DefSettings,IniSettingsFilePath)
 		str:=""
 		for k,v in FixedDescriptionFile[1]
@@ -227,6 +228,16 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			ExitApp
 		}
 	}
+	if !(IniObj["General Settings"].sLocationUserBackup="")
+	{
+		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
+		{	; folder and file doesn't exist -> create
+			; create file
+			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
+			; SetWorkingDir, UserBackups
+		}
+
+	}
 	if (IniObj["Invisible Settings"].sUnlockPassword=-1)
 	{
 		InputBox, setPWstr  , "Setup DistractLess", "Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards, please check the documentation on GitHub."
@@ -234,32 +245,32 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
 		
 	}
-	if (IniObj["General Settings"].OnExitBehaviour="Restart with current settings")
-		OnExit("f_RestartWithSettings")
+	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
+		OnExit("f_RestartWithLastBundle")
 	else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
 		OnExit("f_RestartEmpty")
 	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
-	{
-
 		OnExit("f_RestartWithSpecificBundle")
-	}
 
-	; OnError("LogError")
-	; cause := error
+	 OnError("LogError")
+	cause := error
 
-; if (!Count)
-; 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
-
-	if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==restart with current settings 
+	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle
+	if (IniObj["General Settings"].OnExitBehaviour!="Nothing") && (IniObj["General Settings"].OnExitBehaviour!="Empty Restart")
 	{
-		LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
-		for k,v in LastSessionSettings[5]
-			LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
-		bRestoreLastSession:=true
-		m("Rstored LastSessionSettings")
-		; FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
+		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle 
+		{
+			LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
+			for k,v in LastSessionSettings[5]
+				LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
+			bRestoreLastSession:=true
+			if (A_ComputerName="DESKTOP-FH4RU5C")
+				m("Rstored LastSessionSettings")
+			FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
+			if (A_ComputerName="DESKTOP-FH4RU5C")
+				m(LastSessionSettings[5])
+		}
 	}
-	m(LastSessionSettings[5])
 	f_CreateTrayMenu(IniObj)
 	gui, font, %FONT_LV1% , %FONT_LV2%
 	guicontrol, font, vLV1
@@ -529,7 +540,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			Count:=Count+ LastSessionSettings[3].MaxIndex()
 		if (LastSessionSettings[4].MaxIndex()!="")
 			Count:=Count+ LastSessionSettings[4].MaxIndex()
-		m("Count after checking all data arrays: " Count)
+
+		if (A_ComputerName="DESKTOP-FH4RU5C")
+			m("Count after checking all data arrays: " Count)
 		if (!Count)
 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
 		if (LastSessionSettings[5].MaxIndex()!="")
@@ -539,7 +552,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		ActiveArrays:=[[],[]]
 		StoredArrays:=[[],[]]
-		m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
+		if (A_ComputerName="DESKTOP-FH4RU5C")
+			m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
 		if (LastSessionSettings[1].MaxIndex()!="")
 		{
 			gui, listview, SysListView321
@@ -599,7 +613,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		; 	Else
 		; 		ttip("Finished initialising")
 		; }
-			; m("see if already set up")
 		bRestoringLastSession:=false
 	}
 	return
@@ -662,7 +675,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 
 	lEnforceRules:
 	{
-		; m("the notificaiton forlocking doesnt update.")
 		if !bIsProgramOn ; don't continue if program is turned off.
 			return
 		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=false ; reset flags for each call. 
@@ -900,110 +912,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 								}
 
 							}
-
-							/*
-								{
-									for s, w in ActiveArrays[1]
-									{
-										bWhiteContainsThisTitle:=true
-										RegExMatch(w, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
-										if Instr(sCurrTitle, tname) 
-										{
-											; Window is also matching a white name → don't close IFF the url also matches if website.
-											; Window is also matching a white name → don't close IFF it is a program and the match is a program → return out of the loops and set 
-											if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
-											{
-
-												;; we are in a browser: skip all entries not set for browser
-												if (ttype!="w")
-													continue ; go on to next entry and see if that is a browser
-												
-												;; now we are in a browser, and the entry we are checking is for a browser
-												;; hence, check the url if set
-												if (tURL!="")										
-												{
-													if Instr(sCurrentURL, tURL)  ; while the white title matches, check if white url of entry also matches
-													{
-														bWhiteContainsThisTitle:=true ; url does match, so the condition is assumed to be true for this page
-														return ; because White is trumping, we can return here because we wouldn't close the website anyways ever
-													}
-												}
-												else ; we are in a browser, the title matches, but we don't care what website this title matches on → it still matches globally, so we don't close
-												{
-													bWhiteContainsThisTitle:=true ; url does match, so the condition is assumed to be true for this page
-													return ; because White is trumping, we can return here because we wouldn't close the website anyways ever
-												}
-											}
-											Else
-											{
-												;; we-are-in-a-program-loop
-											}
-
-
-
-
-
-												if (ttype="w") ; website
-												{
-													if (tURL!="")
-													{
-														if Instr(sCurrentURL, tURL)  ; while the white title matches, check if white url of entry also matches
-														{
-															bWhiteContainsThisTitle:=true ; url does match, so the condition is assumed to be true for this page
-															return ; because White is trumping, we can return here because we wouldn't close the website anyways ever
-														}
-														else
-														{
-															bWhiteContainsThisTitle:=false
-															break
-														} 
-													}
-													Else
-													{
-														bWhiteContainsThisTitle:=true
-														return ; because White is trumping, we can return here because we wouldn't close the website anyways ever
-													}
-												}
-												Else if (ttype="p") ; program, but we are in a browser → go to next set
-													continue ; we are matching black AND white title in program, so we are not closing, because the active window is considered a browser, but the condition we are checking does not belong to browsers (otherwhise the double-HasVal-check one layer before this wouldn't be entered)
-											}
-											else
-											{
-												if (ttype="p") ; program
-												{
-													bWhiteContainsThisTitle:=true
-													return
-												}
-											}	
-										}
-										Else
-										{
-											; whitelist doesn't match → black contains, white doesn't
-											bWhiteContainsThisTitle:=false
-										}
-									}
-									
-									; if (stype="w") ; first check if the blacklist match also matches the URL if specified
-									; 	if !Instr(sCurrentURL,sURL) && (sURL!="") 	; if the current url doesn't match the url specified in the black condition, and _A_ url was specified in the black condition
-									; 		return								; if no url is specified (→ sURL is empty, no point in checking a url. that condition is assumed to be universally active)
-									;for s,w in ActiveArrays[1]
-									;{	; now that the current window matches the blacklist in a title and an url
-										;RegExMatch(w, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
-										;if !Instr(sCurrTitle,tname) ; if a name of the whitelist matches, the window is NOT closed. If no whitelist-entries match, close the window
-										;{
-											;bWhiteContainsThisTitle:=false
-										;}
-									;}
-								}
-
-								if !bWhiteContainsThisTitle 
-									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
-
-
-							*/
 						}
-						; logical reasoning: check black first, only if black matches check white as well. if white then doesn't match, close this window
-						
 					}
 					else if bBlackTrumpedThisTitle
 					{
@@ -1042,194 +951,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 								}
 							}
-
-							/*
-
-
-
-								{
-									;; current window is matching black title
-									MatchedTitleEntry:=sName
-									bMatchAnyName:=false
-									; 1. Check if we need to compare urls
-									if (sType="w") && Instr(sCurrentURL,sURL) && (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ; we want to check a website, and the current window is a browser
-									{
-										;; at this point, we 
-										;; are in a browser
-										;; are matching the current tab's name and url in blacklist
-										;; 
-										for s,w in ActiveArrays[1]
-										{
-											bMatchAnyName:=false
-											;; in this case, check if whitelist has a website entry that matches
-											RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
-											if (tname==".*")
-											{
-												if (ttype="w") and Instr(sCurrentURL,tURL)
-													return ; we are matching any name, on this current website → we can just back out of the label ;bMatchAnyName:=true
-											}
-											if (Instr(sCurrTitle,tname) && (ttype="w")) ;|| (bMatchAnyName && (ttype="w"))
-											{
-												;; state:
-												;; black title: match
-												;; black URL: match
-												;; whitelist is matching a name and type
-												;; or any name and type
-												;; 
-											}
-
-										}
-									}
-									else if (sType="p") and !(HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ; we don't want to check a website, and the current window is not a browser
-									{
-										for s,w in ActiveArrays[1]
-										{
-											bMatchAnyName:=false
-											; in this case, if any match in whitelist occurs, we don't close the program
-											RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
-											if (tname==".*") && (ttype="p") ; we are literally matching any program on whitelist, so no program is ever closed → return out of the loop
-												return
-											if Instr(sCurrTitle,tname) && (ttype="p")
-											{
-												;; state: 
-												;; black title: match
-												;; black type: program, match
-												;; white title: match
-												;; white type: program, match
-												;; 
-											}
-										}
-									}
-
-
-
-
-
-
-
-
-
-									if (stype="w") ; website
-									{
-										if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; make sure we are in a browser when comparing website rules
-										{
-											if !Instr(sCurrentURL,sURL) ; if the url for the trumping black entry doesn't match the current url, that entry is not supposed to be applied to close THIS window. In that case, go on to the next condition to check
-												Continue
-										}
-										Else ; we are checking a browser condition, but we are not in a browser, hence we don't want to apply this condition and risk closing a normal window.
-											Continue
-									}
-									; else if (stype="p") ; program
-									bBlackTrumped_BlackMatched:=true ; assume window matches first.
-									for s, w in ActiveArrays[1]
-									{
-										RegExMatch(w, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
-										if Instr(sCurrTitle, tname) ; white is matching →don't close
-											return 
-									}
-									
-									;; then we checked the white array → and didn't match it
-									;; hence we are now either in case "iff w&b" or "if bo", and hence we close the window.
-									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
-									
-									; }
-								}
-
-							*/
 						}
 					}
-					
-					/*
-						
-						for k,v in ActiveArrays[1] ; first check for match in whitelist
-						{
-						; sList,stype,sname, sURL
-							RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-							if (stype="w") ; website, so check if we have to match url or not.
-							{
-							; WinGetClass, sCurrClass, A
-							; WinGet, sCurrExe, ProcessName,A
-								if dbFlag ; debug behaviour
-									
-								ttip(A_thisLabel sCurrClass "`n" sCurrExe)
-								if (bCheckURLsInBrowsers="Yes") and HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
-								{
-									bCurrentIsBrowser:=true
-									sCurrentURL:=fgetUrl(WinActive("A"))
-								}
-							}
-							if (sName==".*") 
-								bMatchAnyName:=true
-							if Instr(sCurrTitle,sName) || (bMatchAnyName)
-							{
-								MatchedTitleEntry:=sName
-								bWhiteContainsThisTitle:=true
-								break ;  as we are allowing this title to exist, no point in continuing with anything
-							}
-							Else
-							{
-								bWhiteContainsThisTitle:=false
-								continue ; This title doesn't match any one whitelist, so check the next entry
-							}
-						}
-						for k,v in ACtiveArrays[2] ; now check the blacklist
-						{
-							RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-							if (stype="w") ; website
-							{
-							; WinGetClass, sCurrClass, A
-							; WinGet, sCurrExe, ProcessName,A
-								if dbFlag ; debug behaviour
-									ttip(A_Thislabel sCurrClass "`n" sCurrExe)
-								if (bCheckURLsInBrowsers="Yes") and HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
-								{
-									bCurrentIsBrowser:=true
-									sCurrentURL:=fgetUrl(WinActive("A"))
-								}
-							}
-							if (sName==".*") 
-								bMatchAnyName:=true
-							if Instr(sCurrTitle,sName) || (bMatchAnyName)
-							{
-								MatchedTitleEntry:=sName
-								bBlackContainsThisTitle:=true
-								break
-							}
-							Else
-							{
-								bBlackContainsThisTitle:=false
-								continue ; we are not matching the title, hence we don't have to continue this iteration
-							}
-						}
-						
-						;; at this point, any non
-							
-						
-						
-						; m("mode for botH: not planned totally, this might be super buggy cuz I need ")
-						; if (vActiveFilterMode="Both") ; both
-						; {
-						; 	if bWhiteTrumpedThisTitle ; white trumped, 
-						; 	{
-						; 		if bBlackContainsThisTitle and !bWhiteContainsThisTitle ; black contains, and white does not → close this.
-						; 			bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-						; 		else if bBlackContainsThisTitle and bWhiteContainsThisTitle ; both lists contain, but white is trumping → don't close this
-						; 			return
-						; 		else if !bBlackContainsThisTitle and bWhiteContainsThisTitle ; black does not contain it, but white does → don't close this
-						; 			return
-						; 	}
-						; 	else if bBlackTrumpedThisTitle
-						
-						; 	{
-						; 		if bWhiteContainsThisTitle and !bBlackContainsThisTitle ; white contains, and black does not → don't close
-						; 			return ; f_CloseCurrentWindow(Winactive("A"),sCurrClass,sCurrExe,MatchedTitleEntry,WinActive("A"))
-						; 		Else if bWhiteContainsThisTitle and bBlackContainsThisTitle ; both lists contain, but black trumps, so still closed
-						; 			bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-						; 		else if !bWhiteContainsThisTitle and bBlackContainsThisTitle ; only black contains → close this
-						; 			bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-						; 	}
-						; }
-					*/	
 				}
 				case "Black":	;else if (vActiveFilterMode="Black") ; blacklist only
 				{
@@ -1297,49 +1020,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					}
 				}
 			}
-			/*
-				; EVALUATING 
-				if (vActiveFilterMode="White")
-				{
-					if !bWhiteContainsThisTitle
-						bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-				}
-				else if (vActiveFilterMode="Both") ; both
-				{
-					if bWhiteTrumpedThisTitle ; white trumped, 
-					{
-						if bBlackContainsThisTitle and !bWhiteContainsThisTitle ; black contains, and white does not → close this.
-							bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-						else if bBlackContainsThisTitle and bWhiteContainsThisTitle ; both lists contain, but white is trumping → don't close this
-							return
-						else if !bBlackContainsThisTitle and bWhiteContainsThisTitle ; black does not contain it, but white does → don't close this
-							return
-					}
-					else if bBlackTrumpedThisTitle
-					{
-						if bWhiteContainsThisTitle and !bBlackContainsThisTitle ; white contains, and black does not → don't close
-							return ; f_CloseCurrentWindow(Winactive("A"),sCurrClass,sCurrExe,MatchedTitleEntry,WinActive("A"))
-						Else if bWhiteContainsThisTitle and bBlackContainsThisTitle ; both lists contain, but black trumps, so still closed
-							bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-						else if !bWhiteContainsThisTitle and bBlackContainsThisTitle ; only black contains → close this
-							bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-					}
-				}
-				else if (vActiveFilterMode="Black")
-				{
-					if bBlackContainsThisTitle and (bWhiteContainsThisTitle==-1)
-					{
-						if (MatchedTitleEntry=".*") ; we are matching everything, so we _must_ match the url as well
-						{
-							if Instr(sCurrentURL,sURL)
-								bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-							; Else
-						}
-						else
-							bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode)
-					}
-				}
-			*/
 		}
 		Else ; current window has not changed title, and the previous one has passed, hence we don't do anything this time
 			Return
@@ -1352,41 +1032,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	; Main-Gui
 	lGUIShow_1:
 	{
-		; if bIsLocked ; we have locked till time is up, so display time 
-		; 	{
-		; 		if (A_Now>=DefaultTime)
-		; 		{
-		; 			gosub, lLockProgram
-		; 			gosub, lGuiShow_1
-		; 		}
-		; 		else if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
-		; 		{
-		; 			bIsLocked:=TRUE
-		; 			gosub, lLockProgram
-		; 			gosub, lGuiShow_1
-		; 			WinWaitNotActive, DistractLess_1
-		; 			bIsLocked:=TRUE
-		; 		}
-		; 		else
-		; 		{ 
-		; 			DisplayUnlockedTime:=DefaultTime
-		; 			if !vsdb
-		; 				Notify().AddWindow("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),{Title:"",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
-		; 			Else
-		; 				ttip("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),1,1300)
-		; 		}
-		; 		return
-		; 	}
-		; if bGuiHasBeenResized
-		; {
-		; 	bGuiHasBeenResized:=false
-		; 	gosub, lGuiCreate_1
-		; }
-		; if bIsLocked
-		; {
-		; 		if (A_Now<DefaultTime) && (IniOBj["General Settings"].LockingBehaviour="Time-protected")
-		; 			return
-		; }
 		hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
 		if (vGUIWidth="") || (vGuiHeight="")
 			gosub, lGuiCreate_1
@@ -1465,7 +1110,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		; Calculate positions of Right side LV's, relative to the anchors at xp/yp
 		xMax_TabWidth:= 16 + vGUITabWidth
 		; Positioning:=[vGUIWidth,vGUIHeight,vGUITabWidth,vGUITabHeight,vGroupBoxWidth,vGroupBoxHeight,vLV_Width,vLV_Heigth]
-		; m(Positioning)
 		OffsetFromRightEdge:=vGroupBoxWidth+10
 		vGroupBoxHeight2:=vGroupBoxHeight-1
 		
@@ -1536,32 +1180,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, add, text, xp-296 yp+42.5 vText_StoredBlackList, Stored BlackList
 		gui, add, ListView, xp yp+25 +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV4 glLV_BlackStorage_EditSelected, Type|Name|URL
 		f_UpdateLV(StoredArrays[2]) ; SysListView324
-		;}
-		
-		
-		;{ Central Section
-		; calculate end position of whitelist-groupbox
-		; vRightCorner_WhiteListGroupBox:= xMargin_ToLeftEndOfGui + 10 + vGroupgBoxWidth + xMarginRightEndOfGroupBox ;; the 10 is hardcoded into the groupbox for Whitelist:: xm+10
-		; vRightCorner_WhiteListGroupBox:= 16 + 10 + vGroupBoxWidth ; This marks the end of whitelist-groupbox
-		; vLeftCorner_BlackListGroupBox:= vGUIWidth - 24  - vGroupBoxWidth 
-		
-		; vDistanceWhiteListToBlackList:=vLeftCorner_BlackListGroupBox-vRightCorner_WhiteListGroupBox
-		; ; vWidthCentralGroupBox:= vDistanceWhiteListToBlackList - xMarginToWhiteListGroupBox - xMarginToBlackListGroupBox
-		; vWidthCentralGroupBox:=vDistanceWhiteListToBlackList - 2*16 
-		; vWidthCentralGroupBox_Editfields:=vWidthCentralGroupBox-(2*145)
-		
-		; vCentralGroupBoxTLCx:=vRightCorner_WhiteListGroupBox + 16
-		; vYPositionCentralText:=(vWidthCentralGroupBox/2)+145
-		; vMiddleOfCentralGroupBox_EditFields:= 145 + (vWidthCentralGroupBox_Editfields/2)
-		
-		; vCentralGroupBoxButtonWidth:=150
-		; vPositionCenteredButtonLeft:=vMiddleOfCentralGroupBox_EditFields - vCentralGroupBoxButtonWidth-30
-		; vPositionCenteredButtonRight:=vMiddleOfCentralGroupBox_EditFields +30
-		
-		; vCentralGroupSliderWidth:=150
-		; vPositionCenteredSlider:=vMiddleOfCentralGroupBox_EditFields - (vCentralGroupSliderWidth/2)
-		; vPositionCenteredSliderText:=vPositionCenteredSlider+30
-		
+
 		
 		gui, add, GroupBox, x%vCentralGroupBoxTLCx% ym+24 Section  w%vWidthCentralGroupBox% h%vGroupBoxHeight2%
 		gui, add, text, ys+20 xs+145 w190 vTextEnterSubstringCriteriaToAdd,Enter substring &criteria to add
@@ -1606,17 +1225,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, White|Both||Black
 		Else
 			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, Both||Black
-		; gui, add, slider, yp+12 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth% Range1-3 Page1 Line1 TickInterval1 Center glCallBack_DDL_FilterMode vvActiveFilterMode,%vLastSliderPos_Slider_FilterMode%
 		
-		; gui, add, text, yp+40 xp+8, Whitelist
-		; gui, add, text, yp xp+56, Both
-		; gui, add, text, yp xp+34, Blacklist
 		gui, add, text, yp+30 xs+%vPositionCenteredSliderText% vText_SelectTrumpingRule, Select &Trumping Rule
 		gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth% glCallBack_DDL_Trumping vbTrumping, White > Black||Black > White
-		; gui, add, text, yp+30 xs+%vPositionCenteredSliderText% vText_CheckURLsInBrowsers, Check Browser URLs
-		; gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth% glCallBack_DDL_CheckURLInBrowsers vbCheckURLsInBrowsers, Yes||No
-		; gui, add, text, yp+15 xp, BlackList only
-		;} bTrumping
+		
 		
 		GuiControl, disable, Button_AddSubsttringToActiveWhiteList
 		GuiControl, disable, Button_AddSubsttringToActiveBlackList
@@ -1854,7 +1466,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	GC4Submit()
 	{
 		gui, 4: submit, NoHide
-		; m(sEnteredPassword)
 	}
 	GC4Escape()
 	{
@@ -2230,15 +1841,15 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			dbFlag:=!dbFlag
 			gosub, lUpdateStatusOnStatusBar
 		}
-		else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=6))
+		else  if ((A_GuiEvent="DoubleClick") && (A_EventInfo=6)) ; double left Click: Toggle advanced settings availability
+			run, https://github.com/Gewerd-Strauss/DistractLess/issues/new
+		else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=7))
 		{
 			testFlag:=!testFlag
 			bManageTestSimTrue:=True
 			gosub, lUpdateStatusOnStatusBar
 			bManageTestSimTrue:=false
 		}
-		else  if ((A_GuiEvent="DoubleClick") && (A_EventInfo=6)) ; double left Click: Toggle advanced settings availability
-			run, https://github.com/Gewerd-Strauss/DistractLess/issues/new
 	}
 	return
 	lCallBack_EnableAssortmentButtons:
@@ -2570,6 +2181,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, 1: default
 		gui, ListView, SysListView321
 		sel:=f_GetSelectedLVEntries()
+		gosub, lRemoveWhiteActiveFromActive
 		StoredArrays[1]:=f_CopySelectionIntoArray(sel,StoredArrays[1],"WhiteDef")
 		gui, listview, SysListView322
 		StoredWhiteBackUp:=StoredArrays[1].clone()
@@ -2581,6 +2193,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, 1: default
 		gui, ListView, SysListView323
 		sel:=f_GetSelectedLVEntries()
+		gosub, lRemoveBlackActiveFromActive
 		StoredArrays[2]:=f_CopySelectionIntoArray(sel,StoredArrays[2],"BlackDef")
 		gui, listview, SysListView324
 		StoredBlackBackUp:=StoredArrays[2].clone()
@@ -2640,8 +2253,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, listview, SysListView322
 		sel:=f_GetSelectedLVEntries()
 		ActiveWhiteBackup:=ActiveArrays[1].clone()
+		gosub, lRemoveWhiteStorageFromStorage
 		ActiveArrays[1]:=f_CopySelectionIntoArray(sel,ActiveArrays[1],"WhiteDef")
-		m(ActiveArrays[1])
+		; m(ActiveArrays[1])
 		gui, listview, SysListView321
 		f_UpdateLV(ActiveArrays[1])
 	}
@@ -2652,6 +2266,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, listview, SysListView324
 		sel:=f_GetSelectedLVEntries()
 		ActiveBlackBackup:=ActiveArrays[2].clone()
+		gosub, lRemoveBlackStorageFromStorage
 		ActiveArrays[2]:=f_CopySelectionIntoArray(sel,ActiveArrays[2],"BlackDef")
 		gui, ListView, SysListView323
 		f_UpdateLV(ActiveArrays[2])
@@ -2853,6 +2468,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	; setup functions
 	fCreateStoredArraysFromStorage(Storage)
 	{ ; read back stored criteria from file
+		return [[],[]]
 		testing:=false  ; shorts out the logic and removes necessity to have a properly formatted file on hand. Used for reddit questions.
 		if testing 		;; for the reddit version, to make sure they don't need the text file or the directory this script operates upon. The string is hard.coded for now because the function to create these strings doesn't exist yet - hence this is hardcoded by hand, and this will break if anything in this string is changed.
 			sReadBack:="list:(WhiteDef)|type:(w)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(w)|name:(2Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(p)|name:(2 Posteingang - Mozilla Thunderbird)|URL:()`nlist:(WhiteDef)|type:(w)|name:((1) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(w)|name:(Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(p)|name:(Posteingang - Mozilla Thunderbird)|URL:()`n`nlist:(WhiteDef)|type:(p)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(p)|name:(2Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(w)|name:(2 Posteingang - Mozilla Thunderbird)|URL:()`nlist:(WhiteDef)|type:(p)|name:((1) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(p)|name:(Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(w)|name:(Posteingang - Mozilla Thunderbird)|URL:()`n"
@@ -3009,7 +2625,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				LV_Add("-E0x200",sType,sName,"")	
 		}
 		LV_ModifyCol(2,"auto")
-		; gui, 1: Submit, +NoHide
 		return
 	}
 
@@ -3259,7 +2874,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			return Arr:=[ActiveArrays[1],ActiveArrays[2],StoredArrays[1],StoredArrays[2]]
 	}
 
-	f_RestartWithSettings(ExitReason,ExitCode)
+	f_RestartWithLastBundle(ExitReason,ExitCode)
 	{	; restarts the script from a hidden secondary script using a timer
 		/*
 			; restarts the script from a hidden secondary script using a timer
@@ -3293,21 +2908,27 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		else
 			m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
 		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
-			run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
+		{
+			if A_IsCompiled
+				run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.exe
+			Else
+				run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
+		}
 	}
 	return
 	f_RestartWithSpecificBundle(ExitReason,ExitCode)
 	{
-		if FileExist(IniObj["General Settings"].sDefaultBundle)
+		global
+		if FileExist(IniObj["General Settings"].sDefaultBundle) && (IniObj["General Settings"].sDefaultBundle!="")
 		{
 			INI_File:=IniObj["General Settings"].sDefaultBundle
-		if (st_count(INI_File,".ini")>0)
-		{
-			INI_File:=st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
-			if (st_count(INI_File,".ini")>0)  
-				INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
+			if (st_count(INI_File,".ini")>0)
+			{
+				INI_File:=st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
+				if (st_count(INI_File,".ini")>0)  
+					INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
 
-		}
+			}
 			; loop, 5
 			; {
 			; 	d:=SubStr(INI_File,-3)
@@ -3325,6 +2946,34 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 			; 	run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
 		}
+		Else
+		{
+			Splitpath, A_ScriptFullPath,,ScriptPath
+			; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
+			
+			Arr:=f_CreateStoredArrays()
+			Count:=0
+			loop, % Arr.MaxIndex() - 1
+			{
+				if (Arr[A_Index].MaxIndex()!="")
+					Count+=Arr[A_Index].MaxIndex()
+			}
+			IF dbFlag
+				m("Executing " A_ThisFunc,ExitReason,Arr)
+			if !testFlag 
+				fWriteIni(Arr,INI_File)
+			else
+				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
+			if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+			{
+				if A_IsCompiled
+					run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.exe
+				Else
+					run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
+			}
+		}
+
 	}
 	return
 	f_RestartEmpty(ExitReason,ExitCode)
@@ -3344,7 +2993,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		*/
 		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
-			run, %A_ScriptDir%\includes\DistractLess_RestartEmpty.ahk
+		{
+			if A_IsCompiled
+					run, %A_ScriptDir%\includes\DistractLess_RestartEmpty.exe
+				Else
+					run, %A_ScriptDir%\includes\DistractLess_RestartEmpty.ahk
+		}
+			
 	}
 	return
 	f_ThrowError(Source,Message,ErrorCode:=0,ReferencePlace:="S")
@@ -3573,6 +3228,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		menu, tray, Add, Show  Gui, Gui1_ShowLogic
 		menu, tray, add,
 		Menu, Misc, add, Open Script-folder, lOpenScriptFolder
+		Menu, Misc, add, Open Settings, lOpenSettings
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
 		if (A_ComputerName="DESKTOP-FH4RU5C") and lDevelopmentFlag ; toggle to add development buttons easier. 
@@ -3649,7 +3305,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			
 		*/
 	}
-
+	lOpenSettings:
+	IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
+	return
 	lOpenScriptFolder:
 	run, % A_ScriptDir
 	return
@@ -3862,8 +3520,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{ ; writes associative, multilevel settings array to file
 		if !FileExist("INI-Files") ; check for ini-files directory
 		{
-			MsgBox, Creating "INI-Files"-directory at Location`n"%A_ScriptDir%", containing an ini-file named "%INI_File%.ini"
-			FileCreateDir, INI-Files
+			;MsgBox, Creating "INI-Files"-directory at Location`n"%A_ScriptDir%", containing an ini-file named "%INI_File%.ini"
+			; FileCreateDir, INI-Files
 		}
 		if (fWriteINI_st_count(INI_File,".ini")>0)
 		{
