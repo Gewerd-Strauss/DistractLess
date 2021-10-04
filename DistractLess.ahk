@@ -12,10 +12,10 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VN=1.4.7.4                                                                    
-	VNP=VN
-	VN=1.2.1.4
-	LE=03 Oktober 2021 22:00:00                                                       
+	VNpublic=1.3.13.4
+	VN=VNpublic
+	VNdev=1.4.7.4                                                                    
+	LE=04. Oktober 2021 14:56:37                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
@@ -1274,7 +1274,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		Else
 			SB_SetParts(23,120,100,175,145,70)
 		SB_SetIcon("C:\WINDOWS\system32\shell32.dll",48,1)
-		SB_SetText("DistractLess v." VN,2)
+		SB_SetText("DistractLess v." VNpublic,2)
 		SB_SetText(" by " AU,3)
 		SB_SetText("Report a bug",6)
 		
@@ -2910,9 +2910,17 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 		{
 			if A_IsCompiled
-				run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.exe
+			{
+				if (A_ComputerName="DESKTOP-FH4RU5C")
+					ttip("Restarting now")
+				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
+			}
 			Else
-				run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
+			{
+				if (A_ComputerName="DESKTOP-FH4RU5C")
+					ttip("Restarting now")
+				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
+			}
 		}
 	}
 	return
@@ -2968,9 +2976,17 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 			{
 				if A_IsCompiled
-					run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.exe
+				{
+					if (A_ComputerName="DESKTOP-FH4RU5C")
+						ttip("Restarting now")
+					run, %A_ScriptDir%\includes\DistractLess_Restart.exe
+				}
 				Else
-					run, %A_ScriptDir%\includes\DistractLess_RestartWithCurrentSettings.ahk
+				{
+					if (A_ComputerName="DESKTOP-FH4RU5C")
+						ttip("Restarting now")
+					run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
+				}
 			}
 		}
 
@@ -2995,9 +3011,17 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 		{
 			if A_IsCompiled
-					run, %A_ScriptDir%\includes\DistractLess_RestartEmpty.exe
-				Else
-					run, %A_ScriptDir%\includes\DistractLess_RestartEmpty.ahk
+			{
+				if (A_ComputerName="DESKTOP-FH4RU5C")
+					ttip("Restarting now")
+				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
+			}
+			Else
+			{
+				if (A_ComputerName="DESKTOP-FH4RU5C")
+					ttip("Restarting now")
+				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
+			}
 		}
 			
 	}
