@@ -119,7 +119,7 @@ BrowserExes=firefox.exe,chrome.exe,iexplore.exe,opera.exe
 ;BrowserExes The ahk_class of the browser needs to be added to BrowserClasses as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
 ;BrowserExes (Looking at you, Spotify)
 ;BrowserExes Type: Text 
-;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe
+;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe,msedge.exe 
 BrowserNewTabs=-1
 ;BrowserNewTabs Comma-separated list of new-tab names for each browser you are using
 ;BrowserNewTabs Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user.
@@ -218,7 +218,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	if (IniOBj["General Settings"].BrowserNewTabs=-1) ; initialising for first time, notify user to edit this.
 	{
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
-		Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer"
+		Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab"
 		gosub, lLaunchWindowSpy
 		IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
 		gosub, lLoadSettingsFromIniFile
