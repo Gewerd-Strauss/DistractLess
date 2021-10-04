@@ -1,3 +1,5 @@
+**TODO: replace the picture paths in the readme with url's to all pictures on github, similar to "https://github.com/Gewerd-Strauss/GeneralHealthBots.ahk/blob/main/Github%20Help%20Pictures/SHB_Submenu_Overview2.jpeg?raw=true"**
+
 # DistractLess
 
 A small program meant to keep you focused by closing websites and programs matching different set of rules regarding their window/tab name and URL
