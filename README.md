@@ -153,3 +153,4 @@ Settings are autosaved upon change or closing of the window. Most settings take 
 ### 4. Entering diagnostics-mode
 
 [syntax](#212syntax)
+[go to test](#2112-program-matches)
