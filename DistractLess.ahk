@@ -170,7 +170,7 @@ bShowOnProgramStart=1
 ;bShowOnProgramStart Default: 1
 ;bShowOnProgramStart CheckboxName: Do you want to show the GUI after the program has finished its start-routine?
 [Invisible Settings]
-;Invisible Settings set wether or not to lock until
+;Invisible Settings set wether or not to lock until 
 ;Invisible Settings - time has passed
 ;Invisible Settings - or until pw is inputted
 ;Invisible Settings Default: Time-protected
@@ -236,7 +236,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
 			; SetWorkingDir, UserBackups
 		}
-
 	}
 	if (IniObj["Invisible Settings"].sUnlockPassword=-1)
 	{
@@ -255,7 +254,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	 OnError("LogError")
 	cause := error
 
-	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle
+	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle 
 	if (IniObj["General Settings"].OnExitBehaviour!="Nothing") && (IniObj["General Settings"].OnExitBehaviour!="Empty Restart")
 	{
 		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle 
@@ -298,7 +297,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		DefaultTime:=LastSessionSettings[5].5
 		gosub, lLockProgram
 	}
-	; if !vsdb
 	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
 	gosub, lUpdateStatusOnStatusBar
 	if IniObj["General Settings"].bShowOnProgramStart ; && (!bRestoreLastSession)
@@ -321,77 +319,73 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	;{#[Hotkeys Section]
 
 
-	!Sc033:: 
+	!-:: 
 	; ttip()
 	Gui1_ShowLogic:
-	if bMainGuiDestroyed
 	{
-		gosub, lGUICreate_1
-		bMainGuiDestroyed:=false
-	}
-
-	if !Winactive("DistractLess_1")
-	{
-		if (IniObj["General Settings"].LockingBehaviour="Password-protected")
+		if bMainGuiDestroyed
 		{
-			if bIsLocked || IniObj["General Settings"].bAlwaysAskPW
-				gosub, lGUIShow_4 ; if locked, show unlocking screen instead
-			Else
-				gosub, lGUIShow_1
+			gosub, lGUICreate_1
+			bMainGuiDestroyed:=false
 		}
-		else if (IniObj["General Settings"].LockingBehaviour="Time-protected")
+
+		if !Winactive("DistractLess_1")
 		{
-			if bIsLocked ; we have locked till time is up, so display time 
+			if (IniObj["General Settings"].LockingBehaviour="Password-protected")
 			{
-				if (A_Now>=DefaultTime)
+				if bIsLocked || IniObj["General Settings"].bAlwaysAskPW
+					gosub, lGUIShow_4 ; if locked, show unlocking screen instead
+				Else
+					gosub, lGUIShow_1
+			}
+			else if (IniObj["General Settings"].LockingBehaviour="Time-protected")
+			{
+				if bIsLocked ; we have locked till time is up, so display time 
 				{
-					gosub, lLockProgram
-					gosub, lGuiShow_1
+					if (A_Now>=DefaultTime)
+					{
+						gosub, lLockProgram
+						gosub, lGuiShow_1
+					}
+					else if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+					{
+						bIsLocked:=TRUE
+						gosub, lLockProgram
+						gosub, lGuiShow_1
+						WinWaitNotActive, DistractLess_1
+						bIsLocked:=TRUE
+					}
+					else
+					{ 
+						DisplayUnlockedTime:=DefaultTime
+						if !vsdb
+							Notify().AddWindow("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),{Title:"",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
+						Else
+							ttip("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),1,1300)
+					}
+					return
 				}
-				else if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if bIsLocked || IniObj["General Settings"].bAlwaysAskPW
 				{
-					bIsLocked:=TRUE
-					gosub, lLockProgram
-					gosub, lGuiShow_1
+					gosub, lGUIShow_4 ; if locked, show unlocking screen instead
+					WinWaitNotActive, DistractLess_4
+				}
+				Else
+				{
+					gosub, lGUIShow_1
 					WinWaitNotActive, DistractLess_1
-					bIsLocked:=TRUE
 				}
-				else
-				{ 
-					DisplayUnlockedTime:=DefaultTime
-					if !vsdb
-						Notify().AddWindow("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),{Title:"",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
-					Else
-						ttip("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),1,1300)
-				}
-				return
 			}
-			if bIsLocked || IniObj["General Settings"].bAlwaysAskPW
-			{
-				gosub, lGUIShow_4 ; if locked, show unlocking screen instead
-				WinWaitNotActive, DistractLess_4
-			}
-			Else
-			{
-				gosub, lGUIShow_1
-				WinWaitNotActive, DistractLess_1
-			}
-				;; temporary to enable still
-
 		}
+		Else
+		{
+			gui, 1: hide
+			gosub, lClearAdditionFields
+		}
+		hk(0,0)
 	}
-	Else
-	{
-		gui, 1: hide
-		gosub, lClearAdditionFields
-	}
-	hk(0,0)
 	Return
-	;+3:: gosub, lGUIShow_3
-	;#IfWinActive DistractLess
-		;Esc:: 
-		;gui, 1: hide
-		;return
+	
 
 	#IfWinActive DistractLess_1
 	Sc029::
@@ -400,15 +394,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	CurrentState:=!CurrentState
 	GuiControl,,bIsProgramOn, %CurrentState%
 	gosub, lCallBack_EnableProgram
-	; DllCall("SetWinEventHook","UInt",0x8005,"UInt",0x8005,"Ptr",0,"Pr",RegisterCallback("f_CheckFocusChange","F"),"UInt",DllCall("GetCurrentProcessId"),"UInt",0,"UInt",0)
-	;reload
 	return
-	!Sc033::
+	!-::
 	gosub, Gui1_ShowLogic
 	return
-	; ~LButton::
-	; ControlGetFocus, currentFocus,
-	; return
 	Esc:: 
  	gui, 1: hide
 	gosub, lClearAdditionFields
@@ -425,44 +414,21 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	+4::
 	GuiControl, focus, vLV4
 	return
+
 	!t:: guicontrol, focus, bTrumping
 	!f:: guicontrol, focus, vActiveFilterMode
 
-
-	; #If (currentFocus="SysListView321")
-	; Del::
-	; gosub, lRemoveWhiteActiveFromActive
-	; currentFocus:=""
-	; return
-
-	; #If (currentFocus="SysListView322")
-	; Del:: 
-	; gosub, lRemoveWhiteStorageFromStorage
-	; currentFocus:=""
-	; return
-
-	; #If (currentFocus="SysListView323")
-	; Del:: 
-	; gosub, lRemoveBlackActiveFromActive
-	; currentFocus:=""
-	; return
-
-	; #If (currentFocus="SysListView324")
-	; Del:: 
-	; gosub, lRemoveBlackStorageFromStorage
-	; currentFocus:=""
-	; return
-
-	
 	#If (bDistractLess_3IsVisible) || WinActive("DistractLess_3")
 	Escape::
-	Gui, 3: hide
-	SetTimer, UpdateCriteriaPickerURL,off
+	{
+		Gui, 3: hide
+		SetTimer, UpdateCriteriaPickerURL,off
 		global bDistractLess_3IsVisible:=false
 		ttip(,99)
 		ttip("")
 		gosub, lGUIShow_1
-		return
+	}
+	return
 	^LButton::
 	{
 		gui, 3: Submit
@@ -480,11 +446,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			{
 				guicontrol,,URLToCheckAgainst,%CurrentBrowserURL_CriteriaPicker%
 				guicontrol,,URLToCheckAgainst,%CurrentBrowserURL_CriteriaPicker%
-					guicontrol, enable, URLToCheckAgainst
-					guicontrol, enable, TextURLAddition
-					guicontrol, show, URLToCheckAgainst
-					guicontrol, show, TextURLAddition
-					guicontrol, ChooseString, TypeSelected, Website
+				guicontrol, enable, URLToCheckAgainst
+				guicontrol, enable, TextURLAddition
+				guicontrol, show, URLToCheckAgainst
+				guicontrol, show, TextURLAddition
+				guicontrol, ChooseString, TypeSelected, Website
 			}
 			else
 			{
@@ -503,12 +469,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 
 	#IfWinActive DistractLess_3
 	!e::
-	WinGetActiveTitle, CurrAct
 	GC3Escape()
-	; if WinActive("DistractLess_1")
-		; gosub, lGUIShow_3
-	; Else if WinActive("DistractLess_3")
-		gosub, lGUIShow_1
+	gosub, lGUIShow_1
 	return
 
 	#IfWinActive, DistractLess_5
@@ -517,14 +479,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	^Enter::GC5Submit()
 
 	#IfWinActive, Edit Array Element
-	^Enter::
-	eAe_Submit()
-	return
+	^Enter::eAe_Submit()
 
 
-	NotifyTrayClick_203:
-	menu, tray, show
-	return
+	#IF
 	;}______________________________________________________________________________________
 	;{#[Label Section]
 	lRestoreLastSession:
@@ -1000,7 +958,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 								bBlackContainsThisTitle:=true
 								bWhiteContainsThisTitle:=-1
 							}
-							; break
 						}
 						Else
 						{
@@ -1447,7 +1404,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, 4: show,,DistractLess_4
 	}
 	return
-	
 	lGuiCreate_4:
 	{
 		sEnteredPassword:=""
@@ -1462,7 +1418,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		Gui, Font, s7 cWhite, Verdana
 	}
 	return
-
 	GC4Submit()
 	{
 		gui, 4: submit, NoHide
@@ -2164,18 +2119,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 	}
 	return
-	/*
-		
-		ActiveWhiteBackup:=StoredActiveWhiteArrays[2]
-		f_UpdateLV(ActiveArrays[1])
-		ActiveBlackBackup:=StoredActiveBlackArrays[2]
-		f_UpdateLV(ActiveArrays[2])
-		StoredBlacKBackup:=StoredBlackArrays[2]
-		f_UpdateLV(StoredArrays[2])
-		StoredWhiteBackUp:=StoredWhiteArrays[2]
-		f_UpdateLV(StoredArrays[1])		
-	*/
-
 	lSaveWhiteActiveToStorage:
 	{
 		gui, 1: default
@@ -2393,7 +2336,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	return
 
-	; Central GroupBox Labels
 	lAddSubstringToActiveWhiteList:
 	{
 		gui, 1: default
@@ -2454,6 +2396,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	return
 	;_________________ common labels
+	NotifyTrayClick_203:
+	menu, tray, show
+	return
 	GuiEscape:
 	gui, hide
 	return
