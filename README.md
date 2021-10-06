@@ -13,7 +13,7 @@ Manual version 1.0
 DistractLess is a program designed to shut down distracting programs and browser tabs as soon as they gain focus.
 It does so by comparing the current window's title against your sets of whitelisted and blacklisted criteria. Depending on the type of the criteria, a URL can be compared as well. 
 
-For more information, see [Understanding the filter mechanism]
+For more information, see [5. Understanding the filter mechanism](#5-understanding-the-filter-mechanism) 
 
 # 2. The GUI
 
@@ -98,14 +98,14 @@ If you want to generalise a certain criteria, replace title or URL substring wit
 
 Alteratively, you can just create your conditions by hand, but usually that will be more prone to error and take longer :P
 
-Pressing `Save LV's` will open a dialogue to save the current configuration for later access. The default folder can be changed under `sLocationUserBackup` in the [settings](#3.-accessing-and-editing-the-settings).
+Pressing `Save LV's` will open a dialogue to save the current configuration for later access. The default folder can be changed under `sLocationUserBackup` in the [settings](#3-accessing-and-editing-the-settings).
 
 ### 2.2 The lower middle section: The filter mechanism
    #-2.2-the-lower-middle-section:-the-filter-mechanism
 This section is pretty quickly explained, because not a lot is happening here.
 Two Dropdownlists influence the behaviour of the program.
 
-The program has three filter-modes:
+The program has three filter-modes.
 
 #### 2.2.1. Both
 
@@ -131,7 +131,10 @@ As soon as a window matches a criteria, it is closed.
 This option is only available if the setting "bAllowWhiteOnly" is checked in the settings.
 This extra barrier of entry is necessary because this mode is extremely restrictive. Under its ruleset, _any_ window not explicitly matching _any one_ condition of the whitelist is closed.
 
-When setting up criteria sets for this mode, please ensure you are running in [diagnostics mode](#4.-entering-diagnostics-mode) first.
+When setting up criteria sets for this mode, please ensure you are running in [diagnostics mode](#4-entering-and-exiting-diagnostics-mode) first.
+
+
+A detailed flowsheet of each mode can be found in [5. Understanding the filter mechanism](#5-understanding-the-filter-mechanism)
 
 
 ### 3. Accessing and editing the settings
@@ -152,10 +155,45 @@ These cases can be identified because the "Default:...."- and "Type:...."- infor
 
 Settings are autosaved upon change or closing of the window. Most settings take effect immediately, but some require a program restart.
 
-### 4. Entering diagnostics-mode
+### 4. Entering and exiting diagnostics-mode
+
+In order to enter diagnostics mode, doubleclick the fifth section of the toolbar, saying either "Running in normal mode" or "Running in diagnostics mode". Doubleclicking will enter and exit that mode. 
+
+---
+
+In diagnostics mode, windows will not be closed. Instead, information on matches that _would have_ closed the current window/tab will be displayed. I intend to change this mode so that information on why a particular window is _not_ matched will be displayed in those casees as well.
+
+
+![Figure 8: Diagnostics information](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_Diagnostics.PNG "")
+
+Displayed will be
+
+* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#2111-browser-matches) )
+* the current filter mode
+* the current trumping rule (always displayed, but only relevant if Filtermode is "Both")
+* the title of the active window which has been matched to close
+* the corresponding criteria string that was matched
+* the current URL and the matched URL if it is a browser match
 
 
 
 ### 5. Understanding the filter 
+
+At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
+
+![Figure 9: Preliminary Checking routine of the filter](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\Prelim Checks.png "")
+
+Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
+
+![Figure 10: Logic for White-only mode](Documentation\DL_WhiteOnlyLogic.png "")
+
+![Figure 11: Logic for Black-only mode](Documentation\DL_BlackOnlyLogic.png "")
+CONTINUE THE Flowchart in the browser.
+
+![Figure 12: Logic for "Both"-mode, with white trumping black](Documentation\DL_WhiteTrumpsBlackLogic.png "")
+
+![Figure 13: Logic for "Both"-mode, with black trumping white](Documentation\DL_BlackTrumpsWhiteLogic.png "")
+
 [syntax](#212-syntax)
-[go to test](#212-syntax)
+
+

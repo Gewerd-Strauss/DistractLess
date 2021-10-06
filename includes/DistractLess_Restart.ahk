@@ -7,13 +7,13 @@ sleep, 8000
 SplitPath, A_ScriptDir,,ScriptPath
 if A_IsCompiled
 {
-    if (A_ComputerName="DESKTOP-FH4RU5C")
+    if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
         m("executing:" ScriptPath "\DistractLess.exe" )
     run, %ScriptPath%\DistractLess.exe
 }
 Else
 {
-    if (A_ComputerName="DESKTOP-FH4RU5C")
+    if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
         m("executing:" ScriptPath "\DistractLess.ahk" )
     run, %ScriptPath%\DistractLess.ahk
 }

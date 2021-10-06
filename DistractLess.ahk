@@ -12,10 +12,10 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VNpublic=1.3.13.4
+	VNpublic=1.4.8.4
 	VN=VNpublic
-	VNdev=1.4.7.4                                                                    
-	LE=04. Oktober 2021 14:56:37                                                       
+	VNdev=1.4.8.4                                                                    
+	LE=06.10.2021 18:26:35                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
@@ -37,6 +37,7 @@
 	bRestoreLastSession:=false
 	global testFlag:=dbFlag:=false
 	bGuiHasBeenResized:=false
+	bShowDebugPanelINMenuBar:=false
 	IniSettingsFilePath:=A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.Ini"
 	if !Instr(FileExist(A_ScriptDir "\DistractLess_Storage"),"D") ; check if folder structure exists
 		FileCreateDir, % A_ScriptDir "\DistractLess_Storage"
@@ -680,6 +681,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					for k,v in ACtiveArrays[1]
 					{
 						RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
+						bWhiteContainsThisTitle:=true ;; start with the assumption that it is allowed to stay open.
 						if (stype="w") ; website
 						{
 							if dbFlag ; debug behaviour
@@ -692,22 +694,23 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 							else if (stype="p")
 								bMatchAnyName:=true
 						}
+						else 
+							bMatchAnyName:=false
 						if Instr(sCurrTitle,sName) || (bMatchAnyName)
 						{
 							MatchedTitleEntry:=sName
-							bWhiteContainsThisTitle:=true ; we have verified the window → do not close it, exit the forloop and wait till window changes || next call
+							bWhiteContainsThisTitle:=true ; we have verified the window → If program, do not close it, exit the forloop and wait till window changes || if website, check the url still. if that matches, don't close, if it doesn't close.
 							if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
 								if (stype="w") ; website
-									if !Instr(sCurrentURL,sURL) and (sURL!=".*") ; while the title matches, the url specified doesn't → still not a whitelisted page → close
+									if !Instr(sCurrentURL,sURL) and (sURL!=".*") ; while the title matches, the url specified doesn't → still not a whitelisted page → close || if sURL=".*", it matches every url, so it will not be closed in that case, because we have already established that the title matches.
 										bWhiteContainsThisTitle:=false
-
-							break
+							if bWhiteContainsThisTitle
+								return ; we have a match in whitelist -> donÄt close the current window, and no need to continue the search.
 						}
 						Else
 						{
 							MatchedTitleEntry:=sName
-							bWhiteContainsThisTitle:=false
-							continue ; we are not matching the title, hence we don't have to continue to search, and just close it now.
+							bWhiteContainsThisTitle:=false ; we are not matching the title, hence we don't have to continue to search, and just close it now.
 						}
 						if !bWhiteContainsThisTitle
 							bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
@@ -718,7 +721,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					if (bTrumping="White > Black") ; white trumps black
 						bBlackTrumpedThisTitle:=!bWhiteTrumpedThisTitle:=true
 					else if (bTrumping="Black > White") ; black trumps white
-						bWhiteTrumpedThisTitle:=!bBlackTrumpedThisTitle:=true
+						bWhiteTrumpedThisTitle:=!bBlackTrumpedThisTitle:=true	
 					
 					if bWhiteTrumpedThisTitle
 					{
@@ -828,7 +831,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 										}
 										
 
-										;; none of the previous checks set this window to _not_ close, so it is closed now
+										;; none of the previous checks set this website window to _not_ close, so it is closed now
 										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
 									}
 								}
@@ -849,7 +852,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 											if (ttype="p")
 												bMatchAnyName:=true
 										}
-										if (Instr(sCurrTitle,tname) && (ttype="p")) || (bMatchAnyName && (ttype="p"))
+										if (Instr(sCurrTitle,tname) && (ttype="p")) || (bMatchAnyName && (ttype="p")) ;; only check entries related to programs, because we are currently in a program.
 										{
 											;; one of the following is true:
 											;; - a program-name in whitelist matches the program
@@ -884,10 +887,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 							RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
 							if (sName==".*") 
 							{
-								if (stype="w") and Instr(sCurrentURL,sURL)
+								if (stype="w") and Instr(sCurrentURL,sURL) and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) 
 									bMatchAnyName:=true
-								if (stype="w") and !Instr(sCurrentURL,sURL) ;; even though this should never happen, but in case the black any title matches a webside, but we don't have  a url to match, we don't accidentally start closing everything. 
-									return
+								if (stype="w") and !Instr(sCurrentURL,sURL) and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ;; even though this should never happen, but in case the black any title matches a webside, but we don't have  a url to match, we don't accidentally start closing everything. 
+									Continue ;; we must continue here and not return because there might be other conditions that are true which have not yet been checked
 								else if (stype="p")
 									Continue ;; precaution, but it shouldn't ever happen anyways.
 							}
@@ -901,7 +904,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 								;; because black is trumping white here, any match that is considered correct will be closed.
 								if (sType="w") and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ; we want to check a website, and the current window is a browser
 								{
-									if (sURL!="") and Instr(sCurrentURL,sURL)
+									if (sURL!="") and (Instr(sCurrentURL,sURL) || (sURL=".*" && sName!=".*")) ;; allow both normal matches of the url and matching _any url_, but only if we are not also simultaneously matching _any_ name
 										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 								}
 								else if (sType="p") and !(HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ; we don't want to check a website, and the current window is not a browser
@@ -919,6 +922,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					
 					for k,v in ACtiveArrays[2] ; now check the blacklist
 					{
+						bBlackContainsThisTitle:=false
 						str:="list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)"
 						RegExMatch(v,str,s)
 						if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
@@ -959,6 +963,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 								bWhiteContainsThisTitle:=-1
 							}
 						}
+						; else if (Instr(sCurrTitle,))
 						Else
 						{
 							bBlackContainsThisTitle:=false
@@ -1222,11 +1227,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		
 		XPositionTitleString:=vPositionCenteredSliderText+vGroupBoxWidth
 		gui, add, text,x%vPositionCenteredSliderText% ym, DistractLess v.%VN% - by %AU% 
-		; Gui, Color, 1d1f21, 373b41, 
 		gui, tab
 		gui, add, statusbar, -Theme vStatusBarMainWindow BackGround373b41 glCallBack_StatusBarMainWindow
 		; Gui, Font, s9 cWhite, Segoe UI 
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		
+		if ((bShowDebugPanelINMenuBar) && (A_ComputerName="DESKTOP-FH4RU5C")) 
 			SB_SetParts(23,120,100,175,145,70,170)
 		Else
 			SB_SetParts(23,120,100,175,145,70)
@@ -1647,8 +1652,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			SB_SetText(sDiagnosticsOn,5)
 		Else
 			SB_SetText(sDiagnosticsOff,5)
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (A_ComputerName="DESKTOP-FH4RU5C") and bShowDebugPanelINMenuBar
 		{
+
 			sTestSimOn:="DoubleClick to exit testsimulation"
 			sTestSimOff:="DoubleClick to enter testsimulation"
 			if testFlag 
@@ -3123,7 +3129,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			{
 				if dbFlag
 					ttip(A_ThisFunc "12",4)
-				str:="Program  Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]] has been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]`n________Current Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
+				str:="Program  Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]] has been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
 				bActionWasClosed:=true
 			}
 		}
@@ -3277,6 +3283,12 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	run, % A_ScriptDir
 	return
 	lReload:
+	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
+		OnExit("f_RestartWithLastBundle")
+	else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
+		OnExit("f_RestartEmpty")
+	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
+		OnExit("f_RestartWithSpecificBundle")
 	reload
 	return
 
