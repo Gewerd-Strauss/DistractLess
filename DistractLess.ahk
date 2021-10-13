@@ -12,10 +12,10 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VNpublic=1.4.8.4
+	VNpublic=1.4.9.4
 	VN=VNpublic
 	VNdev=1.4.9.4                                                                    
-	LE=13.10.2021 12:13:27                                                       
+	LE=13.10.2021 19:32:41                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
