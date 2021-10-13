@@ -14,8 +14,8 @@
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
 	VNpublic=1.4.8.4
 	VN=VNpublic
-	VNdev=1.4.8.4                                                                    
-	LE=06.10.2021 18:26:35                                                       
+	VNdev=1.4.9.4                                                                    
+	LE=13.10.2021 12:13:27                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
@@ -377,10 +377,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					WinWaitNotActive, DistractLess_1
 				}
 			}
+			Else
+				f_ThrowError("Main Code Body","Setting 'LockingBehaviour', found in the settings under the same name under 'General Settings' contains a non-valid value. Please try and reset the setting via the settings-editor.`nIf that does not work, delete the ini-file located at`n" A_ScriptDir "\DistractLess_Storage\INI-Files\DistractLessSettings.ini`nand restart the program.")
+				
 		}
 		Else
 		{
-			gui, 1: hide
+			gosub, lGuiHide_1
 			gosub, lClearAdditionFields
 		}
 		hk(0,0)
@@ -400,7 +403,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	gosub, Gui1_ShowLogic
 	return
 	Esc:: 
- 	gui, 1: hide
+ 	gosub, lGuiHide_1
 	gosub, lClearAdditionFields
 	return
 	+1::
@@ -990,19 +993,43 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	return
 
+	lGuiHide_1:
+	{
+		gui, 1: hide
+		bGui1IsVisible:=false
+		menu, tray, rename, Hide Gui, Show Gui
+		; sleep, 1300
+		; menu, tray, show
+		; sleep, 1300
+		; menu, tray, rename, Show Gui, HELLO WORLD'
+	}
+	return
 
 	; Main-Gui
 	lGUIShow_1:
 	{
+		vLastCreationScreenHeight:=vGuiHeight
+		vLastCreationScreenWidth:=vGuiWidth
+		
 		hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
-		if (vGUIWidth="") || (vGuiHeight="")
+		if (vGUIWidth="") || (vGuiHeight="") || ((vLastCreationScreenHeight!=A_ScreenHeight) || (vLastCreationScreenWidth!=A_ScreenWidth))
 			gosub, lGuiCreate_1
-		gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
+		if !bGui1IsVisible
+		{
+			gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
+			menu, tray, rename,Show Gui,Hide Gui
+			bGui1IsVisible:=true
+		}
+		else
+		{
+			gosub, lGuiHide_1
+		}
 		gui, 2: hide
 		gui, 3: hide
 		gui, 4: hide
 		gui, 5: hide
 		guicontrol, focus, sCriteria_Substring
+		gosub, lUpdateStatusOnStatusBar
 	}
 	return
 	lGuiCreate_1:
@@ -1035,16 +1062,12 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		; gui, add, text,xm ym, DistractLess v.%VN% - by %AU% 
 		;Gui, add, Edit, %gui_control_options% -VScroll 
 		gui, font, s9 cWhite, Segoe UI
-		
+		vLastCreationScreenHeight:=vGuiHeight
+		vLastCreationScreenWidth:=vGuiWidth
 		if !vGUIWidth and !vGuiHeight
-		{ ; Gui1ResizedHeight Gui1ResizedWidth
+		{ 
 			vGUIWidth:=A_ScreenWidth - 20  ;-910
 			vGUIHeight:=A_ScreenHeight 
-		}
-		else
-		{
-			vGUIWidth:=Gui1ResizedWidth
-			vGUIHeight:=Gui1ResizedHeight
 		}
 		vGuiHeight_Reduction:=60 
 		vGuiHeightControl:=A_ScreenHeight-vGuiHeight_Reduction
@@ -1291,7 +1314,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	; Add from existing windows
 	lGUIShow_3:
 	{
-		gui, 1: hide
+		gosub, lGuiHide_1
 		gosub, lClearAdditionFields
 
 		gui, 2: hide
@@ -1398,7 +1421,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	; Locking GUI
 	lGUIShow_4:
 	{
-		gui, 1: hide
+		gosub, lGuiHide_1
 		gosub, lClearAdditionFields
 		gui, 2: hide
 		gui, 3: hide
@@ -1475,7 +1498,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 
 	lSaveLVs:
 	{
-		gui, 1: hide
+		gosub, lGuiHide_1
 		gui, 2: hide
 		gui, 3: hide
 		gui, 4: hide
@@ -1552,7 +1575,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	lLoadFileIntoArrays:
 	{
 		gui, 1: default
-		gui, 1: hide
+		gosub, lGuiHide_1
 		; str:= "*_DLUserBackup.ini"
 		
 		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
@@ -1764,7 +1787,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		else if (((A_GuiEvent="DoubleClick") && (A_EventInfo=2)) && bEnableAdvancedSettings) ; double left click: Edit normal settings
 		{
-			gui, 1: hide
+			gosub, lGuiHide_1
 			gosub, lClearAdditionFields
 			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 			if IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0) ; settings have changed
@@ -1774,7 +1797,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		else if (((A_GuiEvent="R") && (A_EventInfo=2)) && bEnableAdvancedSettings) ; double right click: Edit hidden settings
 		{
-			gui, 1: hide
+			gosub, lGuiHide_1
 			gosub, lClearAdditionFields
 			Settimer, lEnforceRules, off
 			if IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,1)
@@ -1978,7 +2001,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					gosub, lGUIShow_5
 					WinWaitClose, DistractLess_5
 					m(DefaultTime)
-					gui, 1: hide
+					gosub, lGuiHide_1
 				}
 			}
 		}
@@ -2598,7 +2621,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		{
 			static EditedURL
 			RegExMatch(Element, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-			gui, 1: hide
+			gosub, lGuiHide_1
 			gosub, lClearAdditionFields ;; this gosub clears all arrays before VN=1.2.2.4
 			gui, 2: destroy
 			Gui, 2: New, -Caption +LastFound +ToolWindow +LabeleAE_ +AlwaysOnTop 
@@ -3196,7 +3219,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{ ; facilitates creation of the tray menu
 		; global vAllowedTogglesCount
 		VNI=1.0.0.6
-		menu, tray, Add, Show  Gui, Gui1_ShowLogic
+		menu, tray, Add, Show Gui, Gui1_ShowLogic
 		menu, tray, add,
 		Menu, Misc, add, Open Script-folder, lOpenScriptFolder
 		Menu, Misc, add, Open Settings, lOpenSettings
