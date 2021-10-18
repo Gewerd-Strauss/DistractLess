@@ -1,6 +1,7 @@
 ﻿	#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 	#SingleInstance,Force
 	;#Persistent
+	;#Warn All, Off
 	;#Warn All  ; Enable warnings to assist with detecting common errors.
 	SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 	SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
@@ -20,17 +21,21 @@
 	;}______________________________________________________________________________________
 	;{#[File Overview]
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 ;Set custom Script icon
-	; menu, tray, nostandard
 	;}______________________________________________________________________________________
 	;{#[Autorun Section] - variable-setup
 	/*
 		For the love of god, don't edit anything in this section.
 	*/
+
 	if WinActive("Visual Studio Code")	; if run in vscode, deactivate notify-messages to avoid crashing the program.
 		global bRunNotify:=!vsdb:=1
 	else
 		global bRunNotify:=!vsdb:=0
 	
+	;; If you are debugging this script and the notify-messages keep crashing the debugger when they are still visible and the debugger runs into a breakpoint, activate the following line:
+	;bRunNotify:=!vsdb:=true
+
+
 	bEnableAdvancedSettings:=false ; don't edit this. stuff breaks otherwhise
 	bLastSessionSettingsNoStringsInArrays:=false
 	bIsLocked:=false
@@ -258,18 +263,23 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle 
 	if (IniObj["General Settings"].OnExitBehaviour!="Nothing") && (IniObj["General Settings"].OnExitBehaviour!="Empty Restart")
 	{
-		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle 
+		if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle") && (IniObj["General Settings"].sDefaultBundle!="") ; take the simpler version because the use is _starting_, not _restarting_. In this case, we don't assume to lock the gui anymore because it is the first startup of the day - due to the safety restarts in place, as soon as this program _is_ running, the safety-restart functions take responsibility to start with specifics. 
+		{
+			LastSessionSettings:=fReadINI(A_ScriptDir "\" IniObj["General Settings"].sDefaultBundle)
+			
+		}
+		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle, _or_ we have tried to end the program while it is running. As the file only exists in restart-scenarios or if we choose to "restart with last bundle", we have to check this _after_ we load the possible settings. 
 		{
 			LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
-			for k,v in LastSessionSettings[5]
-				LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
-			bRestoreLastSession:=true
-			if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
-				m("Rstored LastSessionSettings")
-			FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
-			if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
-				m(LastSessionSettings[5])
 		}
+		for k,v in LastSessionSettings[5]
+			LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
+		bRestoreLastSession:=true
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+			m("Rstored LastSessionSettings")
+		FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
+		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+			m(LastSessionSettings[5])
 	}
 	f_CreateTrayMenu(IniObj)
 	gui, font, %FONT_LV1% , %FONT_LV2%
@@ -306,7 +316,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		if bLastSessionSettingsNoStringsInArrays
 			gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 		Else
-			Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
+			if !vsdb
+				Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
+			Else
+				ttip("DistractLess:`nFinished initialising.",,2600)
 	}
 	else if !bRestoreLastSession and !vsdb
 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
@@ -321,7 +334,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 
 
 	!-:: 
-	; ttip()
 	Gui1_ShowLogic:
 	{
 		if bMainGuiDestroyed
@@ -405,7 +417,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	Esc:: 
  	gosub, lGuiHide_1
 	gosub, lClearAdditionFields
-	return
+ 		return
 	+1::
 	GuiControl, focus, vLV1
 	return
@@ -649,6 +661,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			return
 		if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
 		{
+			sCurrentURL:=""
 			sCurrentURL:=fgetUrl(WinActive("A"))
 			if Instr(sCurrTitle, " || "sCurrentURL) ;; fallback safety for the authors own convenience, as the browser tab names all contain the url as well due to a browser plugin. This ensures my testing works on "normal" tab-names.
 				sCurrTitle:=StrSplit(sCurrTitle," || ").1
@@ -1012,7 +1025,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		vLastCreationScreenWidth:=vGuiWidth
 		
 		hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
-		if (vGUIWidth="") || (vGuiHeight="") || ((vLastCreationScreenHeight!=A_ScreenHeight) || (vLastCreationScreenWidth!=A_ScreenWidth))
+		if (vGUIWidth="") || (vGuiHeight="") || ((vLastCreationScreenHeight!=(vGuiHeightOriginal-vGuiHeight_Reduction)) || (vLastCreationScreenWidth!=(A_ScreenWidth - 20)))
 			gosub, lGuiCreate_1
 		if !bGui1IsVisible
 		{
@@ -1031,10 +1044,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		guicontrol, focus, sCriteria_Substring
 		gosub, lUpdateStatusOnStatusBar
 	}
-	return
+		return
 	lGuiCreate_1:
 	{
 		bMainGuiDestroyed:=false
+		gui, 1: destroy
 		gui,1: new, +AlwaysOnTop -SysMenu -ToolWindow -caption +Border  ;+Resize +MinSize1000x
 		gui, 1: default
 		gui, +hwndMainGUI
@@ -1064,7 +1078,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, font, s9 cWhite, Segoe UI
 		vLastCreationScreenHeight:=vGuiHeight
 		vLastCreationScreenWidth:=vGuiWidth
-		if !vGUIWidth and !vGuiHeight
+		if (!vGUIWidth and !vGuiHeight) || (vGUIWidth!=(A_ScreenWidth-20)) || (vGuiHeight!=(A_ScreenHeight)) ; assign outer gui dimensions either if they don't exist or if the resolution of the active screen has changed - f.e. when undocking or docking to a higher resolution display. The lGuiCreate_1-subroutine is also invoked in total if the resolution changes, but this is the necessary inner check to reassign dimensions.
 		{ 
 			vGUIWidth:=A_ScreenWidth - 20  ;-910
 			vGUIHeight:=A_ScreenHeight 
@@ -1073,7 +1087,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		vGuiHeightControl:=A_ScreenHeight-vGuiHeight_Reduction
 		
 		if (vGUIHeight>vGuiHeightControl)
+		{
+
+			vGuiHeightOriginal:=vGuiHeight
 			vGUIHeight:=vGUIHeight-vGuiHeight_Reduction
+		}
 		
 		if vGUIWidth<1000
 			f_ThrowError(A_ThisFunc,"Screen Width is smaller than 1000 pixels. As a result, the gui cannot be properly shown.`nIf this error is shown after opening the IniSettingsCreator, ignore it and open the gui again.",A_ScriptNameNoExt . "_"2 , Exception("",-1).Line)
@@ -1083,23 +1101,24 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		vGUITabHeight:=vGUIHeight-40
 		
 		vGroupBoxHeight:=vGUITabHeight-(2*20)
-		vGroupBoxWidth:=(vGUIWidth/2)-2*200 ; Finetune this value to scale in x direction to ratio of screen used for each section
-		if (vGroupBoxWidth<226) ;; don't allow too small groupbox widths, otherwhise buttons glitch outside their groupboxes
-			vGroupBoxWidth:=240
+		vOuterGroupBoxWidth:=(vGUIWidth/2)-2*200 ; Finetune this value to scale in x direction to ratio of screen used for each section
+		; 
+		if (vOuterGroupBoxWidth<226) ;; don't allow too small groupbox widths, otherwhise buttons glitch outside their groupboxes
+			vOuterGroupBoxWidth:=240
 		
-		vLV_Width:=vGroupBoxWidth-2*15
+		vLV_Width:=vOuterGroupBoxWidth-2*15
 		;vLV_Heigth	:= (vGroupBoxHeight - Buttons+Text "stored/active lists" - margin top/bottom) / number of LVs
 		vLV_Heigth:=((vGroupBoxHeight-88-32)-40)/2
 		vGUITab_HorizontalLine_Length:=vGUITabWidth
 		
 		; Calculate positions of Right side LV's, relative to the anchors at xp/yp
 		xMax_TabWidth:= 16 + vGUITabWidth
-		; Positioning:=[vGUIWidth,vGUIHeight,vGUITabWidth,vGUITabHeight,vGroupBoxWidth,vGroupBoxHeight,vLV_Width,vLV_Heigth]
-		OffsetFromRightEdge:=vGroupBoxWidth+10
+		; Positioning:=[vGUIWidth,vGUIHeight,vGUITabWidth,vGUITabHeight,vOuterGroupBoxWidth,vGroupBoxHeight,vLV_Width,vLV_Heigth]
+		OffsetFromRightEdge:=vOuterGroupBoxWidth+10
 		vGroupBoxHeight2:=vGroupBoxHeight-1
 		
-		vRightCorner_WhiteListGroupBox:= 16 + 10 + vGroupBoxWidth ; This marks the end of whitelist-groupbox
-		vLeftCorner_BlackListGroupBox:= vGUIWidth - 24  - vGroupBoxWidth 
+		vRightCorner_WhiteListGroupBox:= 16 + 10 + vOuterGroupBoxWidth ; This marks the end of whitelist-groupbox
+		vLeftCorner_BlackListGroupBox:= vGUIWidth - 24  - vOuterGroupBoxWidth ; This marks the beginning of the right-sided blacklist-groupbox
 		
 		vDistanceWhiteListToBlackList:=vLeftCorner_BlackListGroupBox-vRightCorner_WhiteListGroupBox
 		; vWidthCentralGroupBox:= vDistanceWhiteListToBlackList - xMarginToWhiteListGroupBox - xMarginToBlackListGroupBox
@@ -1127,10 +1146,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, tab, Main
 		;{ WhiteList
 		gui, add, text, ym xm w0 h0,AnchorWhiteList ; get an anchor to control the position of following controls
-		gui, add, groupbox, xm+10 yp+23 w%vGroupBoxWidth% h%vGroupBoxHeight% w%vGroupBoxWidth% ; screw pixel-perfect alignments. yp+23 seems to do it, but idgaf why. Scales properly with all tested random injected guiheights
+		gui, add, groupbox, xm+10 yp+23 w%vOuterGroupBoxWidth% h%vGroupBoxHeight% w%vOuterGroupBoxWidth% ; screw pixel-perfect alignments. yp+23 seems to do it, but idgaf why. Scales properly with all tested random injected guiheights
 		Gui, Font, s7 cWhite, Verdana
 		gui, add, text, xm+25 yp+12 vText_ActiveWhiteList, Active Whitelist
-		gui, add, ListView, xm+25 yp+25  +NoSortHdr h%vLV_Heigth% w%vLV_Width% vvLV1 glLV_WhiteActive_EditSelected, Type|Name|URL
+		gui, add, ListView, xm+25 yp+25  +Report +NoSortHdr h%vLV_Heigth% w%vLV_Width% vvLV1 glLV_WhiteActive_EditSelected, Type|Name|URL
 		f_UpdateLV(ActiveArrays[1]) ; SysListView321
 		
 		gui, add, button, vbtn1 glSaveWhiteActiveToStorage, ↓ Save
@@ -1141,7 +1160,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, add, button, yp+35 xp w103 vbtn6 glRestoreWhiteStorageFromBackup, Reverse last action
 		gui, add, button, yp-17.5 xp+123 w103 vbtn7 glRemoveWhiteAll, x Clear All
 		gui, add, text, xp-296 yp+42.5 vText_StoredWhiteList, Stored WhiteList
-		gui, add, ListView, xm+25 yp+25 +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV2 glLV_WhiteStorage_EditSelected , Type|Name|URL  
+		gui, add, ListView, xm+25 yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV2 glLV_WhiteStorage_EditSelected , Type|Name|URL  
 		f_UpdateLV(StoredArrays[1]) ; SysListView322
 		;}
 		
@@ -1151,9 +1170,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		Gui, Font, s7 cWhite, Verdana
 		gui, add, text,ym+14 xm cRed x%xMax_TabWidth% vHiD w20 h20, AnchorBlackList ; create anchor text for the right side
 		
-		gui, add, groupbox, xp-%OffsetFromRightEdge% yp+010 w%vGroupBoxWidth% h%vGroupBoxHeight2%  Section
+		gui, add, groupbox, xp-%OffsetFromRightEdge% yp+010 w%vOuterGroupBoxWidth% h%vGroupBoxHeight2%  Section
 		gui, add, text, yp+21 xp+15 yp+12 vText_ActiveBlackList, Active Blacklist ;-550
-		gui, add, ListView, yp+25 xp+vGroupBoxWidth +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV3 glLV_BlackActive_EditSelected, Type|Name|URL ; replace the xp-1550 by xp-OffSetTopLeftCornerFromTopRightCornerOfTab3
+		gui, add, ListView, yp+25 xp+vOuterGroupBoxWidth +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV3 glLV_BlackActive_EditSelected, Type|Name|URL ; replace the xp-1550 by xp-OffSetTopLeftCornerFromTopRightCornerOfTab3
 		f_UpdateLV(ActiveArrays[2]) ; SysListView323
 		gui, add, button, vbtn8 glSaveBlackActiveToStorage, ↓ Save
 		gui, add, button, yp+35 xp vbtn9 glLoadBlackStorageToActive, ↑ Load
@@ -1163,7 +1182,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gui, add, button, yp+35 xp w103 vbtn13 glRestoreBlackStorageFromBackup, Reverse last action
 		gui, add, button, yp-17.5 xp+123 w103 vbtn14 glRemoveBlackAll, x Clear All
 		gui, add, text, xp-296 yp+42.5 vText_StoredBlackList, Stored BlackList
-		gui, add, ListView, xp yp+25 +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV4 glLV_BlackStorage_EditSelected, Type|Name|URL
+		gui, add, ListView, xp yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV4 glLV_BlackStorage_EditSelected, Type|Name|URL
 		f_UpdateLV(StoredArrays[2]) ; SysListView324
 
 		
@@ -1173,7 +1192,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		 
 		if (0>1)
 		{
-
 			gui, add, text, yp+33 xs+145 vTextSelectType, Select T&ype:
 			gui, add, DropDownList, yp+20 xs+145 vTypeSelected  glCallBack_EnableAssortmentButtons, Website|Program
 			; gui, add, Checkbox, yp+3 xp+120 vbFetchBrowserURL glCallBack_EnableAssortmentButtons, &Check URL's
@@ -1248,7 +1266,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			checkbox - check URL's :: if checking websites, make checks more consistent by only checking if the url is equal. ← figure out how to do partial string comparisons properly here
 		*/
 		
-		XPositionTitleString:=vPositionCenteredSliderText+vGroupBoxWidth
+		XPositionTitleString:=vPositionCenteredSliderText+vOuterGroupBoxWidth
 		gui, add, text,x%vPositionCenteredSliderText% ym, DistractLess v.%VN% - by %AU% 
 		gui, tab
 		gui, add, statusbar, -Theme vStatusBarMainWindow BackGround373b41 glCallBack_StatusBarMainWindow
@@ -1291,7 +1309,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	lClearURLField:
 	{ ; clear out edit fields when closing the window.
 		gui, 1: default
-		guicontrol, 1:, URLToCheckAgainst, 
+		guicontrol, 1:, URLToCheckAgainst,
 		GuiControl, 1: disable, Button_AddSubsttringToActiveWhiteList
 		GuiControl, 1: disable, Button_AddSubsttringToActiveBlackList
 		gosub, lCallBack_EnableProgram
@@ -2000,7 +2018,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					gosub, lGuiCreate_5
 					gosub, lGUIShow_5
 					WinWaitClose, DistractLess_5
-					m(DefaultTime)
 					gosub, lGuiHide_1
 				}
 			}
@@ -2883,7 +2900,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			fWriteIni(Arr,INI_File)
 		else
 			m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
-		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu|Reload")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 		{
 			if A_IsCompiled
 			{
@@ -2895,7 +2912,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			{
 				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
-				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
+				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 		}
 	}
@@ -2916,6 +2933,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
 			}
 			tmparr:=fReadINI((A_ScriptDir "\" INI_File ".ini"))
+			if bIsLocked && (IniObj["General Settings"].LockingBehaviour="Time-protected") && (DefaultTime!="")
+			{
+				vDefaultTime:=DefaultTime A_Space "; program is again unlocked after this timestamp"
+				tmparr[5].push(vDefaultTime)
+			}
 			Splitpath, A_ScriptFullPath,,ScriptPath
 			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
 			if (SubStr(INI_File,-4,4)==".ini")
@@ -2942,7 +2964,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			else
 				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
 		}
-		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit|Menu|Reload")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
 		{
 			if A_IsCompiled
 			{
@@ -2954,7 +2976,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			{
 				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
-				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
+				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 		}
 	}
@@ -2990,7 +3012,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			{
 				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
 					m("Restarting now")
-				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
+				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 		}
 	}
@@ -3861,7 +3883,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	
 	lLaunchWindowSpy:
-	#Include %A_ScriptDir%\includes\DistractLess_WindowSpy.ahk
+	run, %A_ScriptDir%\includes\DistractLess_WindowSpy.exe ; explicitly choose the compiled version so we don't run into the gui-error that seems to happen when I include the script here instead of just running it. If we need to run it anyways, I can just evade this error by taking the compiled version, as there doesn't need to be any direct code-sided interaction between both scripts anyways. 
 	return
 	
 	
@@ -3891,7 +3913,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		? (-1, Clk:=2) : ( Clk=2 ? ("Off", Clk:=1) : ( IsFunc(Chk) || IsLabel(Chk) ? T : -1) )
 		Return True
 	}
-	LogError(exception) {
+	LogError(exception) 
+	{
+		If Instr(exception.File,"DistractLess_WindowSpy.ahk")
+			return -1
 		FileAppend % "Error on line " exception.Line ": " exception.Message "`n"
         , errorlog.txt
 	; FileRead, errorlog.txt,

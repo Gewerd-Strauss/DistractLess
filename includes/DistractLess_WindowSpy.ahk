@@ -5,6 +5,7 @@
 #NoEnv
 ;#NoTrayIconsa
 #SingleInstance Ignore
+#Warn, All,Off
 SetWorkingDir, %A_ScriptDir%
 SetBatchLines, -1
 CoordMode, Pixel, Screen
