@@ -24,9 +24,10 @@ The left section displays stored and active _whitelisted_ strings. The right thi
 
 The middle section allows the creation of new conditions, the loading from and saving to a file (both in the upper section) and to quickly change the program behaviour (lower section)
 
-## 2.1 Adding a criterium to a list
+## 2.1. Adding a criterium to a list
 
-### 2.1.1 Criteria categories
+### 2.1.1. Criteria 
+
 Criteria are split into two categories:
 
 1. programs
@@ -34,7 +35,8 @@ Criteria are split into two categories:
 
 Both are exclusively checked depending on the current window. 
 
-### 2.1.1.1 Browser matches
+### 2.1.1.1. Browser matches
+
 The rules to detect a browser are predefined for the following browsers out of the box:
 
 1. Google Chrome 
@@ -48,7 +50,7 @@ To edit these rules, open the settings (cf. Changing program settings) and edit 
 A browser match requires the "website"-type to be selected. 
 
 
-### 2.1.1.2 Program matches
+### 2.1.1.2. Program matches
 
 A program, for DistractLess, is any application that is not considered a browser - and therefore doesn't match the `BrowserClasses` and `BrowserExes` with their respective class and exe as displayed by the window spy. For people who don't have autohotkey itself installed and are using the compiled version of the window spy in `DistractLess\includes\DistractLess_WindowSpy.exe`. Keep the window open and click on the browser you want to add. 
 
@@ -69,7 +71,7 @@ Now that you have added any possible browsers you might be using, let's go over 
 
 A program is only matched according to its window title against any ***p***rogram-condition currently visible within the top two listviews visible in figure 1.
 
-### 2.1.2 Syntax
+### 2.1.2. Syntax
 
 
 DistractLess always checks if the current window's title _contains_ the substring. There is no distinction made between upper and lowercase, only the order of symbols must match anywhere within the current window's title.
@@ -84,7 +86,7 @@ A few notes:
 
 These restrictions are necessary so the program doesn't suddenly start closing everything in an uncontrollable manner.
 
-### 2.1.3 Adding an existing window's conditions.
+### 2.1.3. Adding an existing window's conditions
 
 When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a helper-tool for setting conditions faster.
 
@@ -100,7 +102,7 @@ Alteratively, you can just create your conditions by hand, but usually that will
 
 Pressing `Save LV's` will open a dialogue to save the current configuration for later access. The default folder can be changed under `sLocationUserBackup` in the [settings](#3-accessing-and-editing-the-settings).
 
-### 2.2 The lower middle section: The filter mechanism
+### 2.2. The lower middle section: The filter mechanism
    #-2.2-the-lower-middle-section:-the-filter-mechanism
 This section is pretty quickly explained, because not a lot is happening here.
 Two Dropdownlists influence the behaviour of the program.
@@ -112,12 +114,12 @@ The program has three filter-modes.
 The easiest to use, fastest to balance mode. 
 Rules for the "Both"-mode:
 
-##### 2.2.1.1 White>Black
+##### 2.2.1.1. White>Black
 
 1. If both the whitelist and blacklist contain a matching entry, the window/browser tab is not closed.
 2. If only black contains a matching criterium, and whitelist does not match at all, the window/website _is_ closed.
 
-##### 2.2.1.2 Black>White
+##### 2.2.1.2. Black>White
 As soon as blacklist matches the current window/browser tab, it _is_ closed, regardless of wether or not whitelist matches. After I finished implementing this, I realised that it is effectively just a more confusing blacklist-only mode. I might rehaul it at some point to work differently, but I am not sure.
 
 
@@ -134,12 +136,13 @@ This extra barrier of entry is necessary because this mode is extremely restrict
 When setting up criteria sets for this mode, please ensure you are running in [diagnostics mode](#4-entering-and-exiting-diagnostics-mode) first.
 
 
-A detailed flowsheet of each mode can be found in [5. Understanding the filter mechanism](#5-understanding-the-filter-mechanism)
+A detailed flowsheet of each mode can be found in [5. Understanding the filter](#5-understanding-the-filter)
 
 
 ### 3. Accessing and editing the settings
 
-In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_ (cf. Figure 5). You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (cf Figure 6). 
+In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_ (cf. Figure 5). You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (cf. Figure 6). 
+Alternatively, pressing `Ctrl+O` while  the main window is active will also open the GUI.
 
 ![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpToolBar.PNG "")
 
@@ -194,9 +197,79 @@ CONTINUE THE Flowchart in the browser.
 
 ![Figure 13: Logic for "Both"-mode, with black trumping white](Documentation\DL_BlackTrumpsWhiteLogic.png "")
 
-[syntax](#212-syntax)
 
 
 
 
-### 6. 
+
+### 6. Hotkeys
+
+All Hotkeys are active while GUIs are active, and most are restricted to the main-gui, except when noted.
+
+#### 6.1. Main Gui
+
+| Hotkey | Function
+|:------------------|:------------------:|
+| Alt+E   | Launch [title-adder-tool](213-adding-an-existing-windows-conditions) 
+| Escape  | Close Gui
+| Ctrl+T  | Enter/Exit Testmode (cf. [Entering and exiting diagnostics-mode](#4-entering-and-exiting-diagnostics-mode) )
+| Ctrl+L  | Lock the Gui
+| Ctrl+O  | Open Settings
+| Shift+1 | Focus on WhiteActive Listview
+| Shift+2 | Focus on WhiteStorage Listview
+| Shift+3 | Focus on BlackActive Listview
+| Shift+4 | Focus on BlackStorage Listview
+| Alt+F   | Focus on Filtermode Dropdown-List
+| Alt+T   | Focus on Trumpingrule Dropdown-List
+| Alt+-   | Open Main Gui (active globally)
+| ^ / Sc029 | Toggle on/off program
+| 
+Table 1: Main Gui Hotkeys and Accelerator Keys
+
+### 6.2 "Title-Adder"-GUI 
+
+Launched by pressing Alt+E, cf. table 1
+
+| Hotkey  | Function
+|:------------------|:------------------:|
+| Ctrl+LButton | When pressed _on_ a window, choose its info and import it for further processing into main GUI
+| Escape | return to the main gui, don't add current selection into program
+| Alt+E | When the display in the bottom right corner has focus, pressing Alt+E results in the same outcome as pressing Escape while the Title-Adder-GUI is visible
+Table 2: "Title-Adder" Hotkeys and Accelerator Keys
+
+### 6.3 Submit Password/Time GUI
+
+When entering a password to unlock the GUI^[Only possible if "LockingBehaviour" in settings is set to "Password-protected"] or setting the unlock-time^[Only possible if "LockingBehaviour" is set to "Time-protected"], the following hotkeys are available:
+
+| Hotkey | Function
+|:------------------|:------------------:|
+| Ctrl+Enter | Time-Protected: Submit chosen time after which access to the program is possible again. For more info, see [7. Locking the GUI](#7-locking-the-gui)
+| Esc/Alt+E | close the respective window and return to main GUI
+### 7. Locking the Gui
+| Tab / Shift+Tab | cycle forwards/backwards through positions of the select-time-GUI
+
+You can lock the GUI by pressing `Ctrl+L` while the main GUI is active. 
+There are two locking modes:
+
+### 7.1 Time-Protected
+
+
+
+### 7.2 Password-protected
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,14 @@
-﻿	#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+﻿/*
+	Preliminaries:
+	
+	; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
+*/
+
+	#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 	#SingleInstance,Force
 	;#Persistent
 	;#Warn All, Off
-	;#Warn All  ; Enable warnings to assist with detecting common errors.
+	;#Warn  ; Enable warnings to assist with detecting common errors.
 	SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 	SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 	DetectHiddenWindows, Off ; needs to be off so we don't close invisible windows by accident, and only restrict ourselves to the visible ones
@@ -15,18 +21,19 @@
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
 	VNpublic=1.4.9.4
 	VN=VNpublic
-	VNdev=1.4.9.4                                                                    
-	LE=13.10.2021 19:32:41                                                       
+	VNdev=1.4.10.4                                                                    
+	LE=08.11.2021 23:16:45                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[File Overview]
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 ;Set custom Script icon
+	if !(A_ComputerName="DESKTOP-FH4RU5C")
+		Menu, Tray, NoStandard
 	;}______________________________________________________________________________________
 	;{#[Autorun Section] - variable-setup
 	/*
 		For the love of god, don't edit anything in this section.
 	*/
-
 	if WinActive("Visual Studio Code")	; if run in vscode, deactivate notify-messages to avoid crashing the program.
 		global bRunNotify:=!vsdb:=1
 	else
@@ -34,7 +41,7 @@
 	
 	;; If you are debugging this script and the notify-messages keep crashing the debugger when they are still visible and the debugger runs into a breakpoint, activate the following line:
 	;bRunNotify:=!vsdb:=true
-
+	bLockOutAdmin:=false ;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the second check refers to the computername, and it is unlikely you'll have the same. Obviously, if you are up to changing this value also nothing stops you from changing the respective hard-coded comparison. 
 
 	bEnableAdvancedSettings:=false ; don't edit this. stuff breaks otherwhise
 	bLastSessionSettingsNoStringsInArrays:=false
@@ -43,6 +50,8 @@
 	global testFlag:=dbFlag:=false
 	bGuiHasBeenResized:=false
 	bShowDebugPanelINMenuBar:=false
+	if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
+		CodeTimer()
 	IniSettingsFilePath:=A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.Ini"
 	if !Instr(FileExist(A_ScriptDir "\DistractLess_Storage"),"D") ; check if folder structure exists
 		FileCreateDir, % A_ScriptDir "\DistractLess_Storage"
@@ -56,13 +65,6 @@ RefreshTime=200
 ;RefreshTime Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
 ;RefreshTime Type: Integer 
 ;RefreshTime Default: 200
-bAllowLocking=1
-;bAllowLocking Allows the gui to be locked from further access until the time specified in vLockedTime has run out, or the password is entered  correctly.
-;bAllowLocking Note: vLockedTime is not existant yet, the same goes for the logic behind the locking.
-;bAllowLocking Type: Checkbox 
-;bAllowLocking Default: 1
-;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
-;bAllowLocking Hidden:
 LockingBehaviour=Time-protected
 ;LockingBehaviour set wether or not to lock until
 ;LockingBehaviour - time has passed
@@ -183,6 +185,13 @@ bShowOnProgramStart=1
 ;Invisible Settings Set Font for all texts, excluding the listviews.
 ;Invisible Settings Type: Text
 ;Invisible Settings Hidden:
+bAllowLocking=1
+;bAllowLocking Allows the gui to be locked from further access until the time specified in vLockedTime has run out, or the password is entered  correctly.
+;bAllowLocking Note: vLockedTime is not existant yet, the same goes for the logic behind the locking.
+;bAllowLocking Type: Checkbox 
+;bAllowLocking Default: 1
+;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
+;bAllowLocking Hidden:
 bEditDirectStringIn_f_EditArrayElement=0
 ;bEditDirectStringIn_f_EditArrayElement If checked, the entries are displayed as the strings they are saved as, and not chopped up. In that way, more finely tuned edits can be made (such as moving a condition from being program-only to website-only, or moving it to the other list)
 ;bEditDirectStringIn_f_EditArrayElement Type: Text 
@@ -201,7 +210,17 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 ;NoFilterTitles Comma-separated list of window Titles which are not filtered, ever. Mostly hard-coded precautions to protect this program and its vital submenus.
 ;NoFilterTitles Type: Text 
 ;NoFilterTitles Default: DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,Edit Array Element
+sUnlockPassword=-1
+;sUnlockPassword Password asked for when unlocking the gui.
+;sUnlockPassword Type: Text
+;sUnlockPassword Password chosen by the user to unlock the gui again, if Lockingbehaviour is set to "Password-protected"
 )
+	if FileExist("errorlog.txt") ; make sure the errorlog doesn't grow exponentially on someones system. Realistically, as it is a plain text file, and only the newest errors should be tracked anyways, resetting at 30  
+	{
+		FileGetSize, vErrorlogSize,errorlog.txt, M
+		if vErrorlogSize>30
+			FileDelete, errorlog.txt
+	}
 	if !FileExist(IniSettingsFilePath)
 	{
 		; m("figure out how to write a continuation section to file successfully")
@@ -213,10 +232,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		FixedDescriptionFile:=f_FixInfoTextLinesInIniFile(DefSettings,IniSettingsFilePath)
 		str:=""
 		for k,v in FixedDescriptionFile[1]
-			str.=v "`n"
+		{
+			if v!=""
+				str.=v "`n"
+		}
 		FixedIniFile:=FileOpen(IniSettingsFilePath,"w")
 		FixedIniFile.write(str)
-		FixedIniFile.close()
+		FixedIniFile.close() ; all part of precaution to prevent faulty setting descriptions being saved between restarts. This is a hotfix that has, as far as I can tell, resolved the issue for my instance of IniSettingsEditor, because necessary edits might have added some, for me unfixable bugs. I just don't understand the source-code to the level of detail necessary to resolve it. This section resolves that issue with a once/run rewrite of the settings-file.
 	}
 	NotifyTrayClick(DllCall("GetDoubleClickTime")) ; Handle double left click on tray events and prevent them to open the script history
 	OnMessage(0x404, "f_TrayIconSingleClickCallBack")
@@ -224,7 +246,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	if (IniOBj["General Settings"].BrowserNewTabs=-1) ; initialising for first time, notify user to edit this.
 	{
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
-		Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab"
+		Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab" ; laziness on my end, as I often need to rewrite my settings-file when testing, and don't want to search out all titles again.
 		gosub, lLaunchWindowSpy
 		IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
 		gosub, lLoadSettingsFromIniFile
@@ -243,12 +265,14 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; SetWorkingDir, UserBackups
 		}
 	}
-	if (IniObj["Invisible Settings"].sUnlockPassword=-1)
+	if (IniObj["Invisible Settings"].sUnlockPassword=-1) || (!IniObj["Invisible Settings"].sUnlockPassword)
 	{
-		InputBox, setPWstr  , "Setup DistractLess", "Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards, please check the documentation on GitHub."
+		InputBox, setPWstr  , Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
 		IniObj["Invisible Settings"].sUnlockPassword:=setPWstr
-		fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
-		
+		;f_WriteSpecificSettingToFile(Setting,KeyStr,File)
+		DL_TF_ReplaceInLines("!D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\DistractLess_Storage\INI-Files\DistractLessSettings.ini",1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
+		;fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
+		ttip("Line:" Exception("",-1).Line)
 	}
 	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
 		OnExit("f_RestartWithLastBundle")
@@ -275,10 +299,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		for k,v in LastSessionSettings[5]
 			LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
 		bRestoreLastSession:=true
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin)
 			m("Rstored LastSessionSettings")
 		FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin)
 			m(LastSessionSettings[5])
 	}
 	f_CreateTrayMenu(IniObj)
@@ -321,19 +345,21 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			Else
 				ttip("DistractLess:`nFinished initialising.",,2600)
 	}
-	else if !bRestoreLastSession and !vsdb
+	else if !bRestoreLastSession and !vsdbdddd
 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
-	if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+	if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 		m("bRestoreLastSession: " bRestoreLastSession,"vsdb: " vsdb , "I need to embed another setting into LastSessionSettings[5] to figure out in which case to display the startup notification, and in which we don't want to display it.","The logic is the following: because right now the current settings are always stored → there is always gonna be a lastSessionrestored now. " )
 
 	SetWorkingDir, %A_ScriptDir%
+	if ((StartTimer) and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
+		CodeTimer()
 	return
 
 	;}______________________________________________________________________________________
 	;{#[Hotkeys Section]
 
 
-	!-:: 
+	!-:: ;; global || open Gui 
 	Gui1_ShowLogic:
 	{
 		if bMainGuiDestroyed
@@ -342,7 +368,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			bMainGuiDestroyed:=false
 		}
 
-		if !Winactive("DistractLess_1")
+		if !Winactive("DistractLess_1") 	;; if gui is closed → open
 		{
 			if (IniObj["General Settings"].LockingBehaviour="Password-protected")
 			{
@@ -353,14 +379,14 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			}
 			else if (IniObj["General Settings"].LockingBehaviour="Time-protected")
 			{
-				if bIsLocked ; we have locked till time is up, so display time 
+				if bIsLocked 				;; we have locked till time is up, so display time 
 				{
 					if (A_Now>=DefaultTime)
 					{
 						gosub, lLockProgram
 						gosub, lGuiShow_1
 					}
-					else if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+					else if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					{
 						bIsLocked:=TRUE
 						gosub, lLockProgram
@@ -380,7 +406,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				}
 				if bIsLocked || IniObj["General Settings"].bAlwaysAskPW
 				{
-					gosub, lGUIShow_4 ; if locked, show unlocking screen instead
+					gosub, lGUIShow_4 		;; if locked, show unlocking screen instead
 					WinWaitNotActive, DistractLess_4
 				}
 				Else
@@ -390,12 +416,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				}
 			}
 			Else
-				f_ThrowError("Main Code Body","Setting 'LockingBehaviour', found in the settings under the same name under 'General Settings' contains a non-valid value. Please try and reset the setting via the settings-editor.`nIf that does not work, delete the ini-file located at`n" A_ScriptDir "\DistractLess_Storage\INI-Files\DistractLessSettings.ini`nand restart the program.")
+				f_ThrowError("Main Code Body","Setting 'LockingBehaviour', found in the settings under the same name under 'General Settings' contains a non-valid value. Please try and reset the setting via the settings-editor.`nIf that does not work, delete the ini-file located at`n" A_ScriptDir "\DistractLess_Storage\INI-Files\DistractLessSettings.ini`nand restart the program.",A_ScriptNameNoExt . "_"2,Exception("",-1).Line)
 				
 		}
-		Else
+		Else								;; if gui is open → close
 		{
 			gosub, lGuiHide_1
+			Settimer, lEnforceRules, Off
 			gosub, lClearAdditionFields
 		}
 		hk(0,0)
@@ -404,38 +431,48 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	
 
 	#IfWinActive DistractLess_1
-	Sc029::
+	Sc029:: ;; Gui1 || toggle Program On/Off
+	if bIsLocked ; block the user trying to disable the program when it is locked, can't believe this has still been active.
+		return
 	GuiControlGet,CurrentState,, bIsProgramOn
 	CurrentState:=CurrentState+0
 	CurrentState:=!CurrentState
 	GuiControl,,bIsProgramOn, %CurrentState%
+	;GuiControl, Focus, 
 	gosub, lCallBack_EnableProgram
 	return
-	!-::
+	!-:: ;; Gui1 || open Gui
 	gosub, Gui1_ShowLogic
 	return
-	Esc:: 
+	Esc:: ;; Gui1 ||  close Gui1
  	gosub, lGuiHide_1
+	Settimer, lEnforceRules, Off
 	gosub, lClearAdditionFields
  		return
-	+1::
+	+1:: ;; Gui1 || focus on WhiteActive Listview
 	GuiControl, focus, vLV1
 	return
-	+2::
+	+2:: ;; Gui1 || focus on WhiteStorage Listview
 	GuiControl, focus, vLV2
 	return
-	+3::
+	+3:: ;; Gui1 || focus on BlackActive Listview
 	GuiControl, focus, vLV3
 	return
-	+4::
+	+4:: ;; Gui1 || focus on BlackActive Listview
 	GuiControl, focus, vLV4
 	return
-
-	!t:: guicontrol, focus, bTrumping
-	!f:: guicontrol, focus, vActiveFilterMode
-
+	^L:: ;; Gui1 || open locking prompt
+	if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
+		ttip("line 451:`nbefore going into 'lLockProgram'-routine")
+	if IniObj["Invisible Settings"].bAllowLocking
+		gosub, lLockProgram
+	return
+	!t:: guicontrol, focus, bTrumping 			;; Gui1 || focus on Trumping DDL
+	!f:: guicontrol, focus, vActiveFilterMode 	;; Gui1 || focus on Filtermode DDL
+	^t:: gosub, lHotkey_ToggleTestmode 			;; Gui1 || enter/exit Testmode
+	^O:: gosub, lOpenNormalSettings				;; Gui1 || open Settings
 	#If (bDistractLess_3IsVisible) || WinActive("DistractLess_3")
-	Escape::
+	Esc:: ;; Gui3 || close Gui3
 	{
 		Gui, 3: hide
 		SetTimer, UpdateCriteriaPickerURL,off
@@ -445,7 +482,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gosub, lGUIShow_1
 	}
 	return
-	^LButton::
+	^LButton:: ;; Gui3 ||  select current Window's information to be added to either blacklist or whitelist
 	{
 		gui, 3: Submit
 		SetTimer, UpdateCriteriaPickerURL,off
@@ -484,19 +521,19 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	return
 
 	#IfWinActive DistractLess_3
-	!e::
+	!e:: ;; Gui3 || close Gui3
 	GC3Escape()
 	gosub, lGUIShow_1
 	return
 
 	#IfWinActive, DistractLess_5
-	Tab::SendInput,{Right}
-	+Tab::SendInput,{Left}
-	^Enter::GC5Submit()
+	Tab::SendInput,{Right} 	;; Gui5 || go to next digit of time edit
+	+Tab::SendInput,{Left} 	;; Gui5 || go to previous digit of time edit
+	^Enter::GC5Submit() 	;; Gui5 || submit time
 
 	#IfWinActive, Edit Array Element
-	^Enter::eAe_Submit()
-
+	^Enter::eAe_Submit()  	;; Gui4 || submit changes
+	
 
 	#IF
 	;}______________________________________________________________________________________
@@ -515,7 +552,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		if (LastSessionSettings[4].MaxIndex()!="")
 			Count:=Count+ LastSessionSettings[4].MaxIndex()
 
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 			m("Count after checking all data arrays: " Count)
 		if (!Count)
 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
@@ -526,7 +563,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		ActiveArrays:=[[],[]]
 		StoredArrays:=[[],[]]
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 			m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
 		if (LastSessionSettings[1].MaxIndex()!="")
 		{
@@ -1005,22 +1042,24 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			ttip(A_ThisLabel "`nLastWinClosed:" bLastWindowWasClosed "`nMatched Title Entry:" MatchedTitleEntry "`nBlack contains:" bBlackContainsThisTitle "´nWhite Contains:" bWhiteContainsThisTitle,4)
 	}
 	return
-
+	
 	lGuiHide_1:
 	{
 		gui, 1: hide
 		bGui1IsVisible:=false
 		menu, tray, rename, Hide Gui, Show Gui
-		; sleep, 1300
-		; menu, tray, show
-		; sleep, 1300
-		; menu, tray, rename, Show Gui, HELLO WORLD'
 	}
 	return
-
+	lEnableEnforceRules:
+	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if gui is hidden again. Because this gui is always the last gui to be visible whenever you close any submenu, it is also the last one to be active when "closing" the GUI altogether - Hence if it is hidden, reenable. 
 	; Main-Gui
+	return
+	lDisableEnforceRules:
+	Settimer, lEnforceRules,Off
+	return
 	lGUIShow_1:
 	{
+		Settimer, lEnforceRules, Off
 		vLastCreationScreenHeight:=vGuiHeight
 		vLastCreationScreenWidth:=vGuiWidth
 		
@@ -1035,7 +1074,9 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		else
 		{
+			bGui1IsVisible:=false
 			gosub, lGuiHide_1
+			Settimer, lEnforceRules, Off
 		}
 		gui, 2: hide
 		gui, 3: hide
@@ -1044,7 +1085,20 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		guicontrol, focus, sCriteria_Substring
 		gosub, lUpdateStatusOnStatusBar
 	}
-		return
+	;Settimer, lCheckifGui1IsVisible, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again. ;; Feels like 
+	return
+
+	lCheckifGui1IsVisible:
+	if !Winactive("DistractLess_1")
+	{
+		Settimer, lCheckifGui1IsVisible, Off
+		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
+		ttip("not visible, renenable checker routine")
+	}
+	Else
+		ttip("visible")
+	Return
+
 	lGuiCreate_1:
 	{
 		bMainGuiDestroyed:=false
@@ -1094,7 +1148,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		
 		if vGUIWidth<1000
-			f_ThrowError(A_ThisFunc,"Screen Width is smaller than 1000 pixels. As a result, the gui cannot be properly shown.`nIf this error is shown after opening the IniSettingsCreator, ignore it and open the gui again.",A_ScriptNameNoExt . "_"2 , Exception("",-1).Line)
+			f_ThrowError(A_ThisFunc,"Screen Width is smaller than 1000 pixels. As a result, the gui cannot be properly shown.`nIf this error is shown after opening the IniSettingsCreator, ignore it and open the gui again.",A_ScriptNameNoExt . "_"3, Exception("",-1).Line)
 		
 		
 		vGUITabWidth:=vGUIWidth-30
@@ -1334,7 +1388,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{
 		gosub, lGuiHide_1
 		gosub, lClearAdditionFields
-
+		Settimer, lEnforceRules, Off
 		gui, 2: hide
 		TLCx:=A_ScreenWidth-300
 		TLCy:=A_ScreenHeight-200
@@ -1426,12 +1480,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{
 		; gui, 3
 		Gui, 3: hide
+		Settimer, lEnforceRules, Off
 		SetTimer, UpdateCriteriaPickerURL,off
 		; gui, 1: default
 		; gui, 1: show
 		ttip(,99)
 		ttip("")
-		global GuiACtion:="Escaped"
+		global GuiAction:="Escaped"
 	}
 		
 		
@@ -1440,6 +1495,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	lGUIShow_4:
 	{
 		gosub, lGuiHide_1
+		Settimer, lEnforceRules, Off
 		gosub, lClearAdditionFields
 		gui, 2: hide
 		gui, 3: hide
@@ -1478,11 +1534,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	; Lock till Time
 	lGuiShow_5:
 	{
+		global GuiAction5:=""
 		gosub, lGuiCreate_5
 		hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
 		Gui,5: Show, AutoSize, DistractLess_5
-		; SendMessage, 0x1006, 4, 0xFFAA99, SysDateTimePick321 ; 0x1006 is DTM_SETMCCOLOR. 4 is MCSC_MONTHBK (background color). The color must be specified in BGR vs. RGB format (red and blue components swapped).
 		WinWaitNotActive, DistractLess_5
+		if (A_Now>=DefaultTime) and (GuiAction5="Submitted")
+			f_ThrowError("Time-Locking subroutine lGuiShow_5","Designated Time lies in the past. This will happen automatically if the time set rolls over into the new day i.e. If it is 22:00, and you want to lock the program for three hours, you would lock it until 01:00 in the morning. In this case, the program breaks. Then, the current time is taken, which will obviously have passed in a second - and as a result the program effectively won't lock.`n`nTo circumvent this issue, don't lock over midnight. Instead, lock until midnight and relock again afterwards.", A_ScriptNameNoExt . "_"4,Exception("",-1).Line)
 	}
 	return
 	lGuiCreate_5:
@@ -1494,20 +1552,22 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		Gui, Color, 1d1f21, 373b41, 
 		Gui, Font, s11 cWhite, Segoe UI 
 		gui, add, text,xm ym, Set unlocking time:
-		Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%%TimeInSetNumberOfHours%00, HH:mm:ss ; HH = hours with leading zero; 24-hour format (00– 23)
+		if (TimeInSetNumberOfHours>=24)
+			Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%235959, HH:mm:ss ; fallback if time rolls over.
+		else
+			Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%%TimeInSetNumberOfHours%0000, HH:mm:ss ; HH = hours with leading zero; 24-hour format (00– 23)
 		Gui, Font, s7 cWhite, Verdana
-		; m("figure out how to add the timestamp correctly:`nif TimeInSetNumberOfHours is calculated to reach/overreach 25, we need to wrap around on day, month and possibly year")
-		; Gui +LastFound
 	}
 	return
 	GC5Escape()
 	{
-		ttIP()
+		global GuiAction5:="Escaped"
 		gui, 5: destroy
 	}
 	return
 	GC5Submit()
 	{
+		global GuiAction5:="Submitted"
 		gui, 5: submit
 		gui, 5: destroy
 	}
@@ -1517,6 +1577,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	lSaveLVs:
 	{
 		gosub, lGuiHide_1
+		Settimer, lEnforceRules, Off
 		gui, 2: hide
 		gui, 3: hide
 		gui, 4: hide
@@ -1594,6 +1655,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{
 		gui, 1: default
 		gosub, lGuiHide_1
+		Settimer, lEnforceRules, Off
 		; str:= "*_DLUserBackup.ini"
 		
 		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
@@ -1601,7 +1663,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; create file
 			; m("folder does not exist")
 			FileCreateDir,% IniObj["General Settings"].sLocationUserBackup
-			f_ThrowError("Main Code Body","The Folder specified under 'sLocationUserBackup' in settings does not exist in and no backups could be found therefore. The folder is now created. Please save a set of lists/settings via the 'Load LV's'-button into this folder first before trying to read load them.",A_ScriptNameNoExt . "_"4,Exception("",-1).Line)
+			f_ThrowError("Main Code Body","The Folder specified under 'sLocationUserBackup' in settings does not exist in and no backups could be found therefore. The folder is now created. Please save a set of lists/settings via the 'Load LV's'-button into this folder first before trying to read load them.",A_ScriptNameNoExt . "_"5,Exception("",-1).Line)
 			; SetWorkingDir, UserBackups
 		}
 		FileSelectFile, vSelectedFile,1, % IniObj["General Settings"]["sLocationUserBackup"] ,Select File
@@ -1695,7 +1757,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			SB_SetText(sDiagnosticsOff,5)
 		if (A_ComputerName="DESKTOP-FH4RU5C") and bShowDebugPanelINMenuBar
 		{
-
 			sTestSimOn:="DoubleClick to exit testsimulation"
 			sTestSimOff:="DoubleClick to enter testsimulation"
 			if testFlag 
@@ -1711,6 +1772,29 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
  	return
 
+	lHotkey_ToggleTestmode:
+	if dbflag
+	{
+		SoundBeep, 150, 150
+		sleep, 300
+		SoundBeep, 150, 150
+		sleep, 300
+		; SoundBeep, 150, 150
+		; sleep, 300
+		dbFlag:=False
+	}
+	Else
+	{
+		SoundBeep, 1750, 150
+		sleep, 300
+		SoundBeep, 1750, 150
+		sleep, 300
+		; SoundBeep, 1750, 150
+		; sleep, 300
+		dbFlag:=True
+	}
+	gosub, lUpdateStatusOnStatusBar
+	Return
 	lCallBack_EnableProgram:
 	{
 		gui, 1: default
@@ -1746,7 +1830,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				}
 				Else
 				{
-					
 					if (vActiveFilterMode="Black")
 						f_EnableDisableGuiElements(aAllControlsGui1_VisibleDefault_2_plusBlack,1,1)
 					else if (vActiveFilterMode="White")
@@ -1757,7 +1840,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			}
 			Else
 			{
-				
 				if (vActiveFilterMode="Black")
 					f_EnableDisableGuiElements(aAllControlsGui1_VisibleDefault_2_plusBlack,1,1)
 				else if (vActiveFilterMode="White")
@@ -1773,10 +1855,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		gosub, lUpdateStatusOnStatusBar
 	}
 	return
+
 	lCallBack_StatusBarMainWindow:
 	{
 		gui, 1: default
-		if IniObj["General Settings"].bAllowLocking	; check if locking is even allowed.
+		if IniObj["Invisible Settings"].bAllowLocking	; check if locking is even allowed.
 		{
 			if ((A_GuiEvent="DoubleClick") && (A_EventInfo=1)) ; icon clicked: show lock gui/unlock
 				gosub, lLockProgram
@@ -1787,7 +1870,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			if bEnableAdvancedSettings
 			{
 				bEnableAdvancedSettings:=False
-				loop, 2
+				loop, 3
 				{
 					SoundBeep, 350, 
 					sleep, 200
@@ -1796,23 +1879,15 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			Else
 			{
 				bEnableAdvancedSettings:=true
-				loop, 2
+				loop, 3
 				{
 					SoundBeep, 750, 
 					sleep, 200
 				}
 			} 
 		}
-		else if (((A_GuiEvent="DoubleClick") && (A_EventInfo=2)) && bEnableAdvancedSettings) ; double left click: Edit normal settings
-		{
-			gosub, lGuiHide_1
-			gosub, lClearAdditionFields
-			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
-			if IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0) ; settings have changed
-				gosub, lLoadSettingsFromIniFile
-			; Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
-			
-		}
+		else if (((A_GuiEvent="DoubleClick") && (A_EventInfo=2))) ; double left click: Edit normal settings
+			gosub, lOpenNormalSettings
 		else if (((A_GuiEvent="R") && (A_EventInfo=2)) && bEnableAdvancedSettings) ; double right click: Edit hidden settings
 		{
 			gosub, lGuiHide_1
@@ -1822,8 +1897,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				gosub, lLoadSettingsFromIniFile
 			Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
 		}
-		else if (((A_GuiEvent="R") && (A_EventInfo=3)) && bEnableAdvancedSettings) ; double right click: Create Settings
-		{ 
+		else if ((((A_GuiEvent="R") && (A_EventInfo=3)) && bEnableAdvancedSettings) || bEnterFromTrayMenu) ; double right click: Create Settings
+		{
+			bEnterFromTrayMenu:=false
+			; gosub, lOpenIniFileCreator 
 			gui, 1: destroy
 			gui, 99: destroy
 			gui, color
@@ -1833,6 +1910,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			FedFile:= IniSettingsFilePath
 			bMainGuiDestroyed:=true
 			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
+			;gosub, lIniFileCreator
 			#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
 			WinWaitNotActive, IniFileCreator 8
 			gosub, lGuiCreate_1
@@ -1840,7 +1918,26 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		}
 		else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=5))
 		{
-			dbFlag:=!dbFlag
+			if dbflag
+			{
+				SoundBeep, 150, 150
+				sleep, 300
+				SoundBeep, 150, 150
+				sleep, 300
+				; SoundBeep, 150, 150
+				; sleep, 300
+				dbFlag:=False
+			}
+			Else
+			{
+				SoundBeep, 1750, 150
+				sleep, 300
+				SoundBeep, 1750, 150
+				sleep, 300
+				; SoundBeep, 1750, 150
+				; sleep, 300
+				dbFlag:=True
+			}
 			gosub, lUpdateStatusOnStatusBar
 		}
 		else  if ((A_GuiEvent="DoubleClick") && (A_EventInfo=6)) ; double left Click: Toggle advanced settings availability
@@ -1943,6 +2040,8 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	lLockProgram:
 	{ ; 
 		; if bIsLocked ; locked → disable everything
+		if !bIsProgramOn
+			return
 		if bIsLocked ; this is invoked when UNLOCKING
 		{
 			if bRestartLocked and (A_Now<LastSessionSettings[5].5)
@@ -1969,16 +2068,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			}
 			else if (IniObj["General Settings"].LockingBehaviour="Time-protected")
 			{
-				if (A_Now >=DefaultTime) 
+				if (A_Now >=DefaultTime) || ((GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin))
 				{
 					bIsLocked:=false
 					gosub, lCallBack_EnableProgram
-				}
-				else if  (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C"))
-				{
-					bIsLocked:=false
-					gosub, lCallBack_EnableProgram
-					; bIsLocked:=true
 				}
 				else
 					ttip("keep locked")
@@ -2011,19 +2104,37 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				}
 				Else
 				{ ; locking now → hide controls
+					gosub, lGuiHide_1
+					gosub, lGuiCreate_5
+					gosub, lGUIShow_5
+					WinWaitClose, DistractLess_5
+					if (GuiAction5="Escaped")
+					{
+						gosub, lGuiSHow_1
+						return
+					}
 					f_EnableDisableGuiElements(aAllControlsGui1_VisibleDefault,0,1,1)
 					if (TypeSelected="Website")
 						f_EnableDisableGuiElements(["bFetchBrowserURL","URLToCheckAgainst","TextURLAddition"],0,1)
 					bIsLocked:=true
-					gosub, lGuiCreate_5
-					gosub, lGUIShow_5
-					WinWaitClose, DistractLess_5
-					gosub, lGuiHide_1
+					Settimer, lEnforceRules, Off
 				}
 			}
 		}
 		gosub, lUpdateStatusOnStatusBar
 	}
+	return
+	lIniFileCreator:
+	bEnterFromTrayMenu:=true
+	gosub, lCallBack_StatusBarMainWindow ; I am getting headaches. If I include the same section of code here, the IniFileCreator won't ever open - but routing through the same label works just fine. No clue why.
+	return
+	lOpenNormalSettings:
+	gosub, lGuiHide_1
+			gosub, lClearAdditionFields
+			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
+			if IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0) ; settings have changed
+				gosub, lLoadSettingsFromIniFile
+			; Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
 	return
 
 	lManageTestSimulation:
@@ -2043,7 +2154,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			f_UpdateLV(StoredArrays[1])
 			gui, listview, SysListView324
 			f_UpdateLV(StoredArrays[2])
-
 		}
 		else
 		{
@@ -2059,7 +2169,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			StoredArrays:=TestSimStorage[2]
 			TestSimStorage:=[]
 		}
-		; m(ActiveArrays,StoredArrays)
 	}
 	return
 
@@ -2151,7 +2260,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		{
 			if sEditedString ; whatever is stored in sEditedString is now either the original value or a changed value
 			{ ; LastGuiEvent_f_EditArrayElement
-				
 				StoredBlacKBackup:=StoredArrays[2].clone()
 				StoredArrays[2][A_EventInfo]:=sEditedString
 				gui, 1: default
@@ -2441,6 +2549,31 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		f_UpdateLV(f_CopySelectionIntoArray(sel,ActiveArrays[2],"BlackDef"))
 	}
 	return
+
+	lOpenIniFileCreator:
+	; gui, 1: destroy
+	; gui, 99: destroy
+	; gui, color
+	; gui, font
+	; gui, 99: new
+	; lChooseFile:=false
+	; FedFile:= IniSettingsFilePath
+	; bMainGuiDestroyed:=true
+	; Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
+	; #Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
+	; WinWaitNotActive, IniFileCreator 8
+	gui, 1: destroy
+	gui, 99: destroy
+	gui, color
+	gui, font
+	gui, 99: new
+	lChooseFile:=false
+	FedFile:= IniSettingsFilePath
+	bMainGuiDestroyed:=true
+	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
+	#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
+	WinWaitNotActive, IniFileCreator 8
+	return
 	;_________________ common labels
 	NotifyTrayClick_203:
 	menu, tray, show
@@ -2639,6 +2772,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			static EditedURL
 			RegExMatch(Element, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
 			gosub, lGuiHide_1
+			Settimer, lEnforceRules, Off
 			gosub, lClearAdditionFields ;; this gosub clears all arrays before VN=1.2.2.4
 			gui, 2: destroy
 			Gui, 2: New, -Caption +LastFound +ToolWindow +LabeleAE_ +AlwaysOnTop 
@@ -2666,7 +2800,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			Else
 			{
 				gui, add, edit, %gui_control_options% -VScroll vEditedElement, % sName
-				; gui, add, Checkbox, lToggleURLAdder
 				if (stype="w")
 				{
 					Gui, Font, s9 cWhite, Segoe UI 
@@ -2743,7 +2876,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 				if AlsoDisable1OnlyHide0
 					GuiControl, %GuiNumberOrIdentifier%: enable, %CurrentControl%
 				GuiControl, %GuiNumberOrIdentifier%: show, %CurrentControl%
-				; sleep, 20
 			}
 		else
 			loop, % ArrayOfControlVariables.Length()
@@ -2755,7 +2887,6 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			}
 		return
 	}
-
 
 	f_Confirm_Question(q,AU:="Gewerd Strauss",VN:="VNI",b:="Yes",b2:="No",Wrap:=1)
 	{
@@ -2881,12 +3012,11 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
 		global
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
 		; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
-		
 		Arr:=f_CreateStoredArrays()
 		Count:=0
 		loop, % Arr.MaxIndex() - 1
@@ -2904,15 +3034,15 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					m("Restarting now")
-				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
+				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
 		}
 	}
@@ -2921,7 +3051,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{
 		global
 		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		if FileExist(IniObj["General Settings"].sDefaultBundle) && (IniObj["General Settings"].sDefaultBundle!="")
 		{
@@ -2968,15 +3098,15 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					m("Restarting now")
-				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
+				run, %A_ScriptDir%\includes\DistractLess_Restart.ahk
 			}
 		}
 	}
@@ -2985,7 +3115,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	{	
 		global
 		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+		if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		/*
 			; restarts the script from a hidden secondary script using a timer
@@ -3004,13 +3134,13 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C")) 
+				if (GetKeyState("CapsLock","T") and (A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) 
 					m("Restarting now")
 				run, %A_ScriptDir%\includes\DistractLess_Restart.exe
 			}
@@ -3164,7 +3294,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 					ttip(A_ThisFunc "9",4)
 				
 					; sURL:=""
-				str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
+				str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]" (MatchedTitleEntry=".*"?" - See Current URL and Matched URL for more Info":"")"`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
 				if dbFlag
 					ttip(A_ThisFunc "10",4)
 				if IniObj["General Settings"].EnableDiagnosticMode
@@ -3247,10 +3377,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 		Menu, Misc, add, Open Settings, lOpenSettings
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
-		if (GetKeyState("CapsLock") and (A_ComputerName="DESKTOP-FH4RU5C"))  and lDevelopmentFlag ; toggle to add development buttons easier. 
+		if ((A_ComputerName="DESKTOP-FH4RU5C") and !bLockOutAdmin) ; toggle to add development buttons easier. 
 		{
-			menu, Misc, Add, New Settings Dialogue (rename later), lSettingsOverall
-			menu, Misc, Add, Edit Settings File , lEditSettingsOverall
+			menu, Misc, Add, DEV: Hidden Settings, lHiddenSettings
+			menu, Misc, Add, DEV: Edit Settings File , lEditSettingsOverall
 		}
 		SplitPath, A_ScriptName,,,, ScriptName
 		f_AddStartupToggleToTrayMenu(ScriptName,"Misc")
@@ -3321,6 +3451,41 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			
 		*/
 	}
+	lEditSettingsOverall:
+		; gui, 1: destroy
+		; 	gui, 99: destroy
+		; 	gui, color
+		; 	gui, font
+		; 	gui, 99: new
+		; 	lChooseFile:=false
+		; 	FedFile:= IniSettingsFilePath
+		; 	bMainGuiDestroyed:=true
+		; 	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
+			gosub, lIniFileCreator
+			; #Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
+			; sleep, 3000
+			WinWaitNotActive, IniFileCreator 8
+			gosub, lGuiCreate_1
+			Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
+			return
+	gui, 1: destroy
+	gui, 99: destroy
+	gui, color
+	gui, font
+	gui, 99: new
+	lChooseFile:=false
+	FedFile:= IniSettingsFilePath
+	bMainGuiDestroyed:=true
+	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
+	;#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
+	gosub, lIniFileCreator
+	WinWaitNotActive, IniFileCreator 8
+	; gosub, lGuiCreate_1
+	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
+	return 
+	lHiddenSettings:
+	IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,1)
+	return
 	lOpenSettings:
 	IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
 	return
@@ -3462,9 +3627,29 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 			str.=v "`n"
   		return [newArr,str]
 	}
-
+	f_WriteSpecificSettingToFile(Setting,KeyStr,File)
+	{
+		File:=FileOpen(File,"rw")
+		Arr:=StrSplit(String, [Delimiters, OmitChars])
+	}
 	;}_____________________________________________________________________________________
 	;{#[Include Section]
+/*
+	For all functions, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
+	All Functions below have the URL at which they were retrieved stated.
+	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
+	st_wordwrap | tidbit | located at https://www.autohotkey.com/boards/viewtopic.php?t=53
+	st_removeDuplicates
+	st_count
+	WriteINI/ReadINI | wolf_II | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
+	hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
+	HideFocusBorder | this specific version by "just me" | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
+	getURL | anonymous1184 | adopted from reddit: https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
+	ACC.ahk | could not find definitive author | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=26201
+	fTray	| retrieved from https://autohotkey.com/board/topic/26639-tray-menu-show-gui/
+*/
+
+
 	HasVal(haystack, needle) 
 	{	; code from jNizM on the ahk forums: https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
  		if !(IsObject(haystack)) || (haystack.Length() = 0)
@@ -3649,7 +3834,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	
 	hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen:=false, screencolor:="blue") 
 	{ ; disables the keyboard without relying on admin privileges. Can hide the screen and or show a message
-		; retrieved 20.09.2021 20:56:58 at https://www.autohotkey.com/boards/viewtopic.php?t=33925
+		; retrieved 20.09.2021 20:56:58 at https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
 		
 		;keyboard (true/false).......................... disable/enable keyboard
 		;mouse=1........................................ disable all mouse buttons
@@ -3747,7 +3932,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	
 	HideFocusBorder(wParam, lParam := "", uMsg := "", hWnd := "") 
 	{ ; removes the focus border from a gui control
-		;  fetched from https://www.autohotkey.com/boards/viewtopic.php?t=9684
+		;  fetched from https://www.autohotkey.com/boards/viewtopic.php?t=9684, version from "just me", adapted
 		; ==================================================================================================================================
 		; Hides the focus border for the given GUI control or GUI and all of its children.
 		; Call the function passing only the HWND of the control / GUI in wParam as only parameter.
@@ -3771,7 +3956,10 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	
 	
 	fgetUrl(hWnd)
-	{ ; obtains the url of the current browser window. works in chrome, firefox, IE and opera
+	{ ; obtains the url of the current browser window. works in chrome, firefox, IE and opera. 
+	/*
+		retrieved from https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
+	*/
 		accWindow := Acc_ObjectFromWindow(hWnd)
 		Out:=getAddressBar(accWindow).accValue(0)
 		return Out
@@ -3888,7 +4076,7 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	
 	
 	f_TrayIconSingleClickCallBack(wParam, lParam)
-	{ ; taken from https://autohotkey.com/board/topic/26639-tray-menu-show-gui/
+	{ ; taken and adapted from //www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 		VNI:=1.0.3.12
 		; 0x201 WM_LBUTTONDOWN
 		; 0x202 WM_LBUTTONUP
@@ -3915,13 +4103,335 @@ NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,Distr
 	}
 	LogError(exception) 
 	{
+		d:=exception.File
 		If Instr(exception.File,"DistractLess_WindowSpy.ahk")
 			return -1
-		FileAppend % "Error on line " exception.Line ": " exception.Message "`n"
-        , errorlog.txt
-	; FileRead, errorlog.txt,
+		FileAppend % "Error on line " exception.Line ": " exception.Message "`n", errorlog.txt
 		return true
 	}
-	;}_____________________________________________________________________________________
-	;
 	
+	CodeTimer(Description="",x:=500,y:=500,ClipboardFlag:=0)
+	{ ; adapted from https://www.autohotkey.com/boards/viewtopic.php?t=45263
+		
+		Global StartTimer
+		If (StartTimer != "")
+		{
+			FinishTimer := A_TickCount
+			TimedDuration := FinishTimer - StartTimer
+			StartTimer := ""
+			If ClipboardFlag
+				Clipboard:=TimedDuration
+			tooltip, Timer`n%Description%`n%TimedDuration% ms have elapsed!, x,y,14
+			Settimer,lCodeTimer_RemoveToolTip, -2500
+			Return TimedDuration
+		}
+		Else
+			StartTimer := A_TickCount
+		Return
+
+		lCodeTimer_RemoveToolTip:
+		tooltip,,,,14
+		return
+	}
+	;}_____________________________________________________________________________________
+	; Includes from TF-lib see below.
+
+	/*
+Name          : TF: Textfile & String Library for AutoHotkey
+Version       : 3.8
+Documentation : https://github.com/hi5/TF
+AutoHotkey.com: https://.wwwautohotkey.com/boards/viewtopic.php?f=6&t=576
+AutoHotkey.com: http://www.autohotkey.com/forum/topic46195.html (Also for examples)
+License       : see license.txt (GPL 2.0) | filename changed to "license (TF.ahk)", found under A_ScriptDir\DistractLess_Storage\licenses\license(TF.ahk).txt
+Credits & History: See documentation at GH above.
+
+Structure of most functions:
+
+TF_...(Text, other parameters)
+	{
+	 ; get the basic data we need for further processing and returning the output:
+	 TF_GetData(OW, Text, FileName)
+	 ; OW = 0 Copy inputfile
+	 ; OW = 1 Overwrite inputfile
+	 ; OW = 2 Return variable
+	 ; Text : either contents of file or the var that was passed on
+	 ; FileName : Used in case OW is 0 or 1 (=file), not used for OW=2 (variable)
+
+	 ; Creates a matchlist for use in Loop below
+	 TF_MatchList:=_MakeMatchList(Text, StartLine, EndLine, 0, A_ThisFunc) ; A_ThisFunc useful for debugging your scripts
+
+	 Loop, Parse, Text, `n, `r
+		{
+		 If A_Index in %TF_MatchList%
+			{
+			...
+			}
+		 Else
+			{
+			...
+			}
+		}
+	 ; either copy or overwrite file or return variable
+	 Return TF_ReturnOutPut(OW, OutPut, FileName, TrimTrailing, CreateNewFile)
+	 ; OW 0 or 1 = file
+	 ; Output = new content of file to save or variable to return
+	 ; FileName
+	 ; TrimTrailing: because of the loops used most functions will add trailing newline, this will remove it by default
+	 ; CreateNewFile: To create a file that doesn't exist this parameter is needed, only used in few functions
+	}
+
+*/
+	DL_TF_ReplaceInLines(Text, StartLine = 1, EndLine = 0, SearchText = "", ReplaceText = "")
+	{
+	 DL_TF_GetData(OW, Text, FileName)
+	 IfNotInString, Text, %SearchText%
+		Return Text ; SearchText not in TextFile so return and do nothing, we have to return Text in case of a variable otherwise it would empty the variable contents bug fix 3.3
+	 TF_MatchList:=DL__MakeMatchList(Text, StartLine, EndLine, 0, A_ThisFunc) ; create MatchList
+	 Loop, Parse, Text, `n, `r
+		{
+		 If A_Index in %TF_MatchList%
+			{
+			 StringReplace, LoopField, A_LoopField, %SearchText%, %ReplaceText%, All
+			 OutPut .= LoopField "`n"
+			}
+		 Else
+			OutPut .= A_LoopField "`n"
+		}
+	 Return DL_TF_ReturnOutPut(OW, OutPut, FileName)
+	}
+
+	DL_TF_GetData(byref OW, byref Text, byref FileName)
+	{
+	 If (text = 0 "") ; v3.6 -> v3.7 https://github.com/hi5/TF/issues/4 and https://autohotkey.com/boards/viewtopic.php?p=142166#p142166 in case user passes on zero/zeros ("0000") as text - will error out when passing on one 0 and there is no file with that name
+		{
+		 IfNotExist, %Text% ; additional check to see if a file 0 exists
+			{
+			 MsgBox, 48, TF Lib Error, % "Read Error - possible reasons (see documentation):`n- Perhaps you used !""file.txt"" vs ""!file.txt""`n- A single zero (0) was passed on to a TF function as text"
+			 ExitApp
+			}
+		}
+	 OW=0 ; default setting: asume it is a file and create file_copy
+	 IfNotInString, Text, `n ; it can be a file as the Text doesn't contact a newline character
+		{
+		 If (SubStr(Text,1,1)="!") ; first we check for "overwrite"
+			{
+			 Text:=SubStr(Text,2)
+			 OW=1 ; overwrite file (if it is a file)
+			}
+		 IfNotExist, %Text% ; now we can check if the file exists, it doesn't so it is a var
+			{
+			 If (OW=1) ; the variable started with a ! so we need to put it back because it is variable/text not a file
+				Text:= "!" . Text
+			 OW=2 ; no file, so it is a var or Text passed on directly to TF
+			}
+		}
+	 Else ; there is a newline character in Text so it has to be a variable
+		{
+		 OW=2
+		}
+	 If (OW = 0) or (OW = 1) ; it is a file, so we have to read into var Text
+		{
+		 Text := (SubStr(Text,1,1)="!") ? (SubStr(Text,2)) : Text
+		 FileName=%Text% ; Store FileName
+		 FileRead, Text, %Text% ; Read file and return as var Text
+		 If (ErrorLevel > 0)
+			{
+			 MsgBox, 48, TF Lib Error, % "Can not read " FileName
+			 ExitApp
+			}
+		}
+	 Return
+	}
+
+
+	; DL__MakeMatchList()
+	; Purpose:
+	; Make a MatchList which is used in various functions
+	; Using a MatchList gives greater flexibility so you can process multiple
+	; sections of lines in one go avoiding repetitive fileread/append actions
+	; For TF 3.4 added COL = 0/1 option (for TF_Col* functions) and CallFunc for
+	; all TF_* functions to facilitate bug tracking
+	DL__MakeMatchList(Text, Start = 1, End = 0, Col = 0, CallFunc = "Not available")
+		{
+		ErrorList=
+		(join|
+	Error 01: Invalid StartLine parameter (non numerical character)`nFunction used: %CallFunc%
+	Error 02: Invalid EndLine parameter (non numerical character)`nFunction used: %CallFunc%
+	Error 03: Invalid StartLine parameter (only one + allowed)`nFunction used: %CallFunc%
+		)
+		StringSplit, ErrorMessage, ErrorList, |
+		Error = 0
+
+		If (Col = 1)
+			{
+			LongestLine:=TF_Stat(Text)
+			If (End > LongestLine) or (End = 1) ; FIXITHERE BUG
+				End:=LongestLine
+			}
+
+		TF_MatchList= ; just to be sure
+		If (Start = 0 or Start = "")
+			Start = 1
+
+		; some basic error checking
+
+		; error: only digits - and + allowed
+		If (RegExReplace(Start, "[ 0-9+\-\,]", "") <> "")
+			Error = 1
+
+		If (RegExReplace(End, "[0-9 ]", "") <> "")
+			Error = 2
+
+		; error: only one + allowed
+		If (TF_Count(Start,"+") > 1)
+			Error = 3
+
+		If (Error > 0 )
+			{
+			MsgBox, 48, TF Lib Error, % ErrorMessage%Error%
+			ExitApp
+			}
+
+		; Option #0 [ added 30-Oct-2010 ]
+		; Startline has negative value so process X last lines of file
+		; endline parameter ignored
+
+		If (Start < 0) ; remove last X lines from file, endline parameter ignored
+			{
+			Start:=TF_CountLines(Text) + Start + 1
+			End=0 ; now continue
+			}
+
+		; Option #1
+		; StartLine has + character indicating startline + incremental processing.
+		; EndLine will be used
+		; Make TF_MatchList
+
+		IfInString, Start, `+
+			{
+			If (End = 0 or End = "") ; determine number of lines
+				End:= TF_Count(Text, "`n") + 1
+			StringSplit, Section, Start, `, ; we need to create a new "TF_MatchList" so we split by ,
+			Loop, %Section0%
+				{
+				StringSplit, SectionLines, Section%A_Index%, `+
+				LoopSection:=End + 1 - SectionLines1
+				Counter=0
+					TF_MatchList .= SectionLines1 ","
+				Loop, %LoopSection%
+					{
+					If (A_Index >= End) ;
+						Break
+					If (Counter = (SectionLines2-1)) ; counter is smaller than the incremental value so skip
+						{
+						TF_MatchList .= (SectionLines1 + A_Index) ","
+						Counter=0
+						}
+					Else
+						Counter++
+					}
+				}
+			StringTrimRight, TF_MatchList, TF_MatchList, 1 ; remove trailing ,
+			Return TF_MatchList
+			}
+
+		; Option #2
+		; StartLine has - character indicating from-to, COULD be multiple sections.
+		; EndLine will be ignored
+		; Make TF_MatchList
+
+		IfInString, Start, `-
+			{
+			StringSplit, Section, Start, `, ; we need to create a new "TF_MatchList" so we split by ,
+			Loop, %Section0%
+				{
+				StringSplit, SectionLines, Section%A_Index%, `-
+				LoopSection:=SectionLines2 + 1 - SectionLines1
+				Loop, %LoopSection%
+					{
+					TF_MatchList .= (SectionLines1 - 1 + A_Index) ","
+					}
+				}
+			StringTrimRight, TF_MatchList, TF_MatchList, 1 ; remove trailing ,
+			Return TF_MatchList
+			}
+
+		; Option #3
+		; StartLine has comma indicating multiple lines.
+		; EndLine will be ignored
+
+		IfInString, Start, `,
+			{
+			TF_MatchList:=Start
+			Return TF_MatchList
+			}
+
+		; Option #4
+		; parameters passed on as StartLine, EndLine.
+		; Make TF_MatchList from StartLine to EndLine
+
+		If (End = 0 or End = "") ; determine number of lines
+				End:= TF_Count(Text, "`n") + 1
+		LoopTimes:=End-Start
+		Loop, %LoopTimes%
+			{
+			TF_MatchList .= (Start - 1 + A_Index) ","
+			}
+		TF_MatchList .= End ","
+		StringTrimRight, TF_MatchList, TF_MatchList, 1 ; remove trailing ,
+		Return TF_MatchList
+		}
+
+
+; Write to file or return variable depending on input
+DL_TF_ReturnOutPut(OW, Text, FileName, TrimTrailing = 1, CreateNewFile = 0) {
+	If (OW = 0) ; input was file, file_copy will be created, if it already exist file_copy will be overwritten
+		{
+		 IfNotExist, % FileName ; check if file Exist, if not return otherwise it would create an empty file. Thanks for the idea Murp|e
+			{
+			 If (CreateNewFile = 1) ; CreateNewFile used for TF_SplitFileBy* and others
+				{
+				 OW = 1
+				 Goto lCreateNewFile
+				}
+			 Else
+				Return
+			}
+		 If (TrimTrailing = 1)
+			 StringTrimRight, Text, Text, 1 ; remove trailing `n
+		 SplitPath, FileName,, Dir, Ext, Name
+		 If (Dir = "") ; if Dir is empty Text & script are in same directory
+			Dir := A_WorkingDir
+		 IfExist, % Dir "\backup" ; if there is a backup dir, copy original file there
+			FileCopy, % Dir "\" Name "_copy." Ext, % Dir "\backup\" Name "_copy.bak", 1
+		 FileDelete, % Dir "\" Name "_copy." Ext
+		 FileAppend, %Text%, % Dir "\" Name "_copy." Ext
+		 Return Errorlevel ? False : True
+		}
+	 lCreateNewFile:
+	 If (OW = 1) ; input was file, will be overwritten by output
+		{
+		 IfNotExist, % FileName ; check if file Exist, if not return otherwise it would create an empty file. Thanks for the idea Murp|e
+			{
+			If (CreateNewFile = 0) ; CreateNewFile used for TF_SplitFileBy* and others
+				Return
+			}
+		 If (TrimTrailing = 1)
+			 StringTrimRight, Text, Text, 1 ; remove trailing `n
+		 SplitPath, FileName,, Dir, Ext, Name
+		 If (Dir = "") ; if Dir is empty Text & script are in same directory
+			Dir := A_WorkingDir
+		 IfExist, % Dir "\backup" ; if there is a backup dir, copy original file there
+			FileCopy, % Dir "\" Name "." Ext, % Dir "\backup\" Name ".bak", 1
+		 FileDelete, % Dir "\" Name "." Ext
+		 FileAppend, %Text%, % Dir "\" Name "." Ext
+		 Return Errorlevel ? False : True
+		}
+	If (OW = 2) ; input was var, return variable
+		{
+		 If (TrimTrailing = 1)
+			StringTrimRight, Text, Text, 1 ; remove trailing `n
+		 Return Text
+		}
+	}
+
