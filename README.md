@@ -231,7 +231,8 @@ All Hotkeys are active while GUIs are active, and most are restricted to the mai
 | Alt+T   | Focus on Trumpingrule Dropdown-List
 | Alt+-   | Open Main Gui (active globally)
 | ^ / Sc029 | Toggle on/off program
-| 
+
+
 Table 1: Main Gui Hotkeys and Accelerator Keys
 
 ### 6.2 "Title-Adder"-GUI 
@@ -243,6 +244,7 @@ Launched by pressing Alt+E, cf. table 1
 | Ctrl+LButton | When pressed _on_ a window, choose its info and import it for further processing into main GUI
 | Escape | return to the main gui, don't add current selection into program
 | Alt+E | When the display in the bottom right corner has focus, pressing Alt+E results in the same outcome as pressing Escape while the Title-Adder-GUI is visible
+
 Table 2: "Title-Adder" Hotkeys and Accelerator Keys
 
 ### 6.3 Submit Password/Time GUI
@@ -254,6 +256,7 @@ When entering a password to unlock the GUI^[Only possible if "LockingBehaviour" 
 | Ctrl+Enter | `Time-Protected`: Submit chosen time after which access to the program is possible again. For more info, see [7. Locking the GUI](#7-locking-the-gui)
 | Ctrl+Enter | `Password-Protected`: Confirm Password to unlock the gui
 | Escape/Alt+E | close the respective window and return to main GUI
+
 Table 3: Hotkeys available when locking/unlocking the GUI via Password/Setting time
 
 ### 7. Locking the Gui
