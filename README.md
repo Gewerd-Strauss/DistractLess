@@ -18,6 +18,7 @@ For more information, see [5. Understanding the filter mechanism](#5-understandi
 # 2. The GUI
 
 ![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "")
+![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "")
 
 The main overlay can be broken up into three different sections:
 The left section displays stored and active _whitelisted_ strings. The right third displays _blacklisted_ ones. 
@@ -64,6 +65,7 @@ In case of the following example, you would add `MozillaWindowClass` to `Browser
 You can ignore the first and last line of this first field (under "Window Title, Class and Process"), as well as all other info displayed.
 
 ![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "")
+![Figure 2: relevant contents of the window spy overlay](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ContentsWindowSpy.PNG "")
 
 ---
 
@@ -91,11 +93,13 @@ These restrictions are necessary so the program doesn't suddenly start closing e
 When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a helper-tool for setting conditions faster.
 
 ![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "")
+![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "")
 
 After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
 If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
 
 ![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "")
+![Figure 4: Create a (website) condition](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpAddSSAllShown.PNG "")
 
 
 Alteratively, you can just create your conditions by hand, but usually that will be more prone to error and take longer :P
@@ -103,7 +107,7 @@ Alteratively, you can just create your conditions by hand, but usually that will
 Pressing `Save LV's` will open a dialogue to save the current configuration for later access. The default folder can be changed under `sLocationUserBackup` in the [settings](#3-accessing-and-editing-the-settings).
 
 ### 2.2. The lower middle section: The filter mechanism
-   #-2.2-the-lower-middle-section:-the-filter-mechanism
+
 This section is pretty quickly explained, because not a lot is happening here.
 Two Dropdownlists influence the behaviour of the program.
 
@@ -145,16 +149,19 @@ In order to access the settings, double-click the author-section of the bar at t
 Alternatively, pressing `Ctrl+O` while  the main window is active will also open the GUI.
 
 ![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpToolBar.PNG "")
+![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpToolBar.PNG "")
 
 Each setting comes with a small description about its usecase, and possible options. The type of the input is displayed, as well as a default value which is restored when pressing "Restore". Settings are saved automatically. In the example of figure 6, we are looking at the `OnExitBehaviour`, and a dropdown-list displays possible options.
 
 ![Figure 6: Settings Menu](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_SettingsMenu.PNG "")
+![Figure 6: Settings Menu](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_SettingsMenu.PNG "")
 
 Figure 7 displays a known, but to me not solvable bug. The description displayed can sometimes be muddied by the display of another setting's description. 
 
 These cases can be identified because the "Default:...."- and "Type:...."- information is displayed twice. In these cases, the _lowest_ description is the "correct" one.
 
 ![Figure 7: Faulty double description](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_FaultySettingsDescription.PNG "")
+![Figure 7: Faulty double description](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_FaultySettingsDescription.PNG "")
 
 Settings are autosaved upon change or closing of the window. Most settings take effect immediately, but some require a program restart.
 
@@ -168,6 +175,7 @@ In diagnostics mode, windows will not be closed. Instead, information on matches
 
 
 ![Figure 8: Diagnostics information](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_Diagnostics.PNG "")
+![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.PNG "")
 
 Displayed will be
 
@@ -185,17 +193,22 @@ Displayed will be
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
 ![Figure 9: Preliminary Checking routine of the filter](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\Prelim Checks.png "")
+![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/Prelim Checks.png "")
 
 Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
 
 ![Figure 10: Logic for White-only mode](Documentation\DL_WhiteOnlyLogic.png "")
+![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
 
 ![Figure 11: Logic for Black-only mode](Documentation\DL_BlackOnlyLogic.png "")
+![Figure 11: Logic for Black-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_BlackOnlyLogic.png "")
 CONTINUE THE Flowchart in the browser.
 
 ![Figure 12: Logic for "Both"-mode, with white trumping black](Documentation\DL_WhiteTrumpsBlackLogic.png "")
+![Figure 12: Logic for "Both"-mode, with white trumping black](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_WhiteTrumpsBlackLogic.png "")
 
 ![Figure 13: Logic for "Both"-mode, with black trumping white](Documentation\DL_BlackTrumpsWhiteLogic.png "")
+![Figure 13: Logic for "Both"-mode, with black trumping white](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_BlackTrumpsWhiteLogic.png "")
 
 ### 6. Hotkeys
 
@@ -263,6 +276,7 @@ If `LockingBehaviour` is set to `Time-protected`, the time at which the GUI is u
 By default, the GUI is locked until the third next full hour has passed. I.e. if you lock et 14:49, the default time is calculated to be 17:00:00. Not 18:00:00. See the setting `LockingDefaultOffsetHours` in the settings. Only integers (and therefore full hours) can be preset.
 
 ![Figure 14: Set Time at which the GUI is unlocked again](Documentation\DL_SetUnlockTime.png "")
+![Figure 14: Set Time at which the GUI is unlocked again](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_SetUnlockTime.png "")
 
 
 
@@ -271,6 +285,7 @@ By default, the GUI is locked until the third next full hour has passed. I.e. if
 If `LockingBehaviour` is set to `Password-protected`, a password check is performed against the password set by the user during the first time the program has been started. The password submits itself if it is correct.
 
 ![Figure 15: Enter Password to unlock the GUI again](Documentation\DL_EnterPassword.png "")
+![Figure 15: Enter Password to unlock the GUI again](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_EnterPassword.png "")
 
 
 
