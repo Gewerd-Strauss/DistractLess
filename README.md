@@ -344,8 +344,8 @@ For all functions, see the function definition and associated documentation for 
 |:------------------|:------------------|:------------------|
 |	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
 |	st_wordwrap | tidbit | located at https://www.autohotkey.com/boards/viewtopic.php?t=53
-|	st_removeDuplicates | s.a.
-|	st_count | s.a.
+|	st_removeDuplicates | see above
+|	st_count | see above
 |	WriteINI/ReadINI | wolf_II | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
 |	hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
 |	HideFocusBorder | this specific version by "just me" | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
@@ -355,11 +355,10 @@ For all functions, see the function definition and associated documentation for 
 |	f_TrayIconSingleClickCallBack | Lexikos, afaik | retrieved from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 |	NotifyTrayClick | SKAN | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=81157
 |	TF_ReplaceInLines | forum name ahk7, github hi5 | retrieved from https://www.autohotkey.com/boards/viewtopic.php?f=6&t=576
-|	TF_GetData | s.a.
-|	\_MakeMatchList | s.a.
-|	TF_ReturnOutPut | s.a.
-|	; IniSettingsEditor v6 see below.
-|	IniSettingsEditor v6 | Rajat, mod by toralf | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the  download
+|	TF_GetData | see above
+|	\_MakeMatchList | see above
+|	TF_ReturnOutPut | see above
+|	IniSettingsEditor_v6 | Rajat, mod by toralf | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the  download
 |	IniFileCreator_v8 |  toralf, modded by Gewerd Strauss | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download
 
 
