@@ -186,7 +186,7 @@ In diagnostics mode, windows will not be closed. Instead, information on matches
 
 Displayed will be
 
-* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](https://github.com/Gewerd-Strauss/DistractLess/blob/dev/README.md#213-adding-an-existing-windows-conditions) )
+* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#213-adding-an-existing-windows-conditions) )
 * the current filter mode
 * the current trumping rule (always displayed, but only relevant if Filtermode is "Both")
 * the title of the active window which has been matched to close
@@ -367,3 +367,19 @@ Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:
 [^1]: Note that while this is valid Regex-syntax, the program does _not_ perform a regex-search. The `Instr()`-function is used. This syntax is solely used because I needed something that can be expected not to be an actual pattern a user is looking for.
 [^2]:Only possible if "LockingBehaviour" is set to "Time-protected".
 [^3]:Only possible if "LockingBehaviour" in settings is set to "Password-protected".
+
+
+---
+
+
+### 10. TODO
+
+Finish this damn document:
+* finish writing it
+* finish up the code
+* merge to main branch
+* fix all the intra-document links in here that are broken because you need to have the branch specified in the url
+* spellcheck
+
+
+* maybe more?
