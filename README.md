@@ -6,7 +6,7 @@ NOT finished by any means.
 First version is operational. 
 Documentation is in the works, but won't be published for some time, because I have more important things to do right now.
 
-Manual version 1.0
+Manual version 1.3
 
 # 1. Fundamentals
 
