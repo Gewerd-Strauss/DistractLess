@@ -19,7 +19,7 @@ For more information, see [5. Understanding the filter mechanism](#5-understandi
 
 ![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "What Does This DO?")
 
-![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "")
+![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "What does this do?")
 
 The main overlay can be broken up into three different sections:
 The left section displays stored and active _whitelisted_ strings. The right third displays _blacklisted_ ones. 
