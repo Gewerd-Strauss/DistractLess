@@ -13,7 +13,7 @@ Manual version 1.0
 DistractLess is a program designed to shut down distracting programs and browser tabs as soon as they gain focus.
 It does so by comparing the current window's title against your sets of whitelisted and blacklisted criteria. Depending on the type of the criteria, a URL can be compared as well. 
 
-For more information, see [5. Understanding the filter mechanism](#5-understanding-the-filter-mechanism) 
+For more information, see [5. Understanding the filter mechanism](#5-understanding-the-filter) 
 
 # 2. The GUI
 
