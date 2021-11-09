@@ -206,7 +206,7 @@ Afterwards, refer to the figures 10-13 for the working mechanisms of the differe
 
 ![Figure 10: Logic for White-only mode](Documentation\DL_WhiteOnlyLogic.png "")
 
-![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
+![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Stra>uss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
 
 ![Figure 11: Logic for Black-only mode](Documentation\DL_BlackOnlyLogic.png "")
 
