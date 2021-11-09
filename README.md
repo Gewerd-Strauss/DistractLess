@@ -334,7 +334,34 @@ bAlwaysAskPW | When checked, the gui is always locked (equivalent to left-clicki
 Table 5: Settings of the program. All non-bolded settings have little importance and should not necessarily be customised.  Inversely, bolded settings are recommended to be edited.
 
 
-### 9. 
+### 9. Credits
+
+This project hinges on a lot of code by others. The following table gives an overview over what functions are written by whom - if I could attribute a function properly.
+
+For all functions, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
+	All Functions below have the URL at which they were retrieved stated.
+| Function | Author | Link
+|:------------------|:------------------|:------------------|
+|	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
+|	st_wordwrap | tidbit | located at https://www.autohotkey.com/boards/viewtopic.php?t=53
+|	st_removeDuplicates | s.a.
+|	st_count | s.a.
+|	WriteINI/ReadINI | wolf_II | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
+|	hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
+|	HideFocusBorder | this specific version by "just me" | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
+|	getURL | anonymous1184 | adopted from reddit: https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
+|	ACC.ahk | could not find definitive author | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=26201
+|	CodeTimer | CodeKnight | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
+|	f_TrayIconSingleClickCallBack | Lexikos, afaik | retrieved from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
+|	NotifyTrayClick | SKAN | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=81157
+|	TF_ReplaceInLines | forum name ahk7, github hi5 | retrieved from https://www.autohotkey.com/boards/viewtopic.php?f=6&t=576
+|	TF_GetData | s.a.
+|	\_MakeMatchList | s.a.
+|	TF_ReturnOutPut | s.a.
+|	; IniSettingsEditor v6 see below.
+|	IniSettingsEditor v6 | Rajat, mod by toralf | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the  download
+|	IniFileCreator_v8 |  toralf, modded by Gewerd Strauss | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download
+
 
 
 [^1]: Note that while this is valid Regex-syntax, the program does _not_ perform a regex-search. The `Instr()`-function is used. This syntax is solely used because I needed something that can be expected not to be an actual pattern a user is looking for.
