@@ -197,11 +197,6 @@ CONTINUE THE Flowchart in the browser.
 
 ![Figure 13: Logic for "Both"-mode, with black trumping white](Documentation\DL_BlackTrumpsWhiteLogic.png "")
 
-
-
-
-
-
 ### 6. Hotkeys
 
 All Hotkeys are active while GUIs are active, and most are restricted to the main-gui, except when noted.
@@ -209,7 +204,7 @@ All Hotkeys are active while GUIs are active, and most are restricted to the mai
 #### 6.1. Main Gui
 
 | Hotkey | Function
-|:------------------|:------------------:|
+|:------------------|:------------------|
 | Alt+E   | Launch [title-adder-tool](213-adding-an-existing-windows-conditions) 
 | Escape  | Close Gui
 | Ctrl+T  | Enter/Exit Testmode (cf. [Entering and exiting diagnostics-mode](#4-entering-and-exiting-diagnostics-mode) )
@@ -231,7 +226,7 @@ Table 1: Main Gui Hotkeys and Accelerator Keys
 Launched by pressing Alt+E, cf. table 1
 
 | Hotkey  | Function
-|:------------------|:------------------:|
+|:------------------|:------------------|
 | Ctrl+LButton | When pressed _on_ a window, choose its info and import it for further processing into main GUI
 | Escape | return to the main gui, don't add current selection into program
 | Alt+E | When the display in the bottom right corner has focus, pressing Alt+E results in the same outcome as pressing Escape while the Title-Adder-GUI is visible
@@ -242,34 +237,67 @@ Table 2: "Title-Adder" Hotkeys and Accelerator Keys
 When entering a password to unlock the GUI^[Only possible if "LockingBehaviour" in settings is set to "Password-protected"] or setting the unlock-time^[Only possible if "LockingBehaviour" is set to "Time-protected"], the following hotkeys are available:
 
 | Hotkey | Function
-|:------------------|:------------------:|
-| Ctrl+Enter | Time-Protected: Submit chosen time after which access to the program is possible again. For more info, see [7. Locking the GUI](#7-locking-the-gui)
-| Esc/Alt+E | close the respective window and return to main GUI
+|:------------------|:------------------|
+| Ctrl+Enter | `Time-Protected`: Submit chosen time after which access to the program is possible again. For more info, see [7. Locking the GUI](#7-locking-the-gui)
+| Ctrl+Enter | `Password-Protected`: Confirm Password to unlock the gui
+| Escape/Alt+E | close the respective window and return to main GUI
+Table 3: Hotkeys available when locking/unlocking the GUI via Password/Setting time
+
 ### 7. Locking the Gui
-| Tab / Shift+Tab | cycle forwards/backwards through positions of the select-time-GUI
+
+
 
 You can lock the GUI by pressing `Ctrl+L` while the main GUI is active. 
 There are two locking modes:
 
 ### 7.1 Time-Protected
 
+| Hotkey | Function
+|:------------------|:------------------|
+| Tab / Shift+Tab | cycle forwards/backwards through positions of the select-time-GUI
+
+Table 4: Additional Hotkeys in the "Select Time"-Gui
+
+If `LockingBehaviour` is set to `Time-protected`, the time at which the GUI is unlocked can be set. The GUI becomes fully locked until the time of day has passed. 
+
+By default, the GUI is locked until the third next full hour has passed. I.e. if you lock et 14:49, the default time is calculated to be 17:00:00. Not 18:00:00. See the setting `LockingDefaultOffsetHours` in the settings. Only integers (and therefore full hours) can be preset.
+
+![Figure 14: Set Time at which the GUI is unlocked again](Documentation\DL_SetUnlockTime.png "")
+
 
 
 ### 7.2 Password-protected
 
+If `LockingBehaviour` is set to `Password-protected`, a password check is performed against the password set by the user during the first time the program has been started. The password submits itself if it is correct.
+
+![Figure 15: Enter Password to unlock the GUI again](Documentation\DL_EnterPassword.png "")
 
 
 
 
 
+### 8. Overview over Settings
 
+| Hotkey | Function | Type | Default
+|:-------------|:------------------|:--------|:--------|
+| **RefreshTime** | Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks. Increase the value if the program causes significant lags - even though that really shouldn't happen, unless you are switching windows/tabs very quickly. In my tests, 200 consecutive "browser tab"-closures took an average of 97ms. Programs are harder to test, and take longer to close usually. | Integer | 200
+LockingBehaviour |set wether or not to lock until either time has passed or until pw is inputted | DropDownList | Time-protected
+| LockingDefaultOffsetHours | Set the number of hours used when calculating the default unlocking time when locking the program for a set time. Value in hours. | Integer | 3
+bAlwaysAskPW | When checked, the gui is always locked (equivalent to left-clicking the padlock-icon on the main GUI window), and a password is checked. | Checkbox | 0
+| OnExitBehaviour | Decide what to do when the script is manually closed by any means, except for shutting down, logging off or restarting the PC. Changes in this setting only take effect after restarting the program once. `Restart with current bundle`: the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when script is closed. This prevents the script from being closed by hand. `Empty Restart`: Program is restarted without reloading the current session. `Nothing`:Script exits normally, without restarting at all. `Restart with specific bundle`: Restart with a specific bundle by default. Bundle must be specified under "sDefaultBundle" | DropDownList |Restart with specific bundle
+| sDefaultBundle | Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program. | File | -
+| EnableDiagnosticMode | Enable Diagnostics-mode for the Closing-function. This results in: CLOSING WINDOWS: more information about matching criteria being displayed, instead of closing the window/tab outright. DoubleClick the fifth part of the statusbar of the main gui to enable and disable diagnostic mode quickly. | Checkbox |0
+| bEnableBlockingBanner |If checked, the closing function will briefly flash a notification when temporarily disabling all keyboard and mouse input. Another message is sent when keyboard and mouse inputs are restored. If not checked, the kbm will be silently blocked and unblocked. | Checkbox |0
+|BrowserClasses|Comma-separated list of ahk_classes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4. The ahk_exe of the browser needs to be added to BrowserExes as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers. (Looking at you, Spotify)  | Text | MozillaWindowClass, Chrome_WidgetWin_1, Chrome_WidgetWin_2, OpWindow, IEFrame
+|BrowserExes|Comma-separated list of ahk_exes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4. The ahk_class of the browser needs to be added to BrowserClasses as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers. (Looking at you, Spotify) |Text| firefox.exe, chrome.exe, iexplore.exe, opera.exe, msedge.exe
+|BrowserNewTabs|Comma-separated list of new-tab names for each browser you are using. Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user. To do so, please replace the "-1" by the names of the new tab in your respective browser(s).You are asked to configure this setting upon first start. Afterwards, you can add further cases here if an empty tab is suddenly closed.| Text | -1
+|bLVDelete_RequireConfirmation | If  checked, any action removing items from a listview requires specific confirmation. If unchecked, this double-check is skipped. Items can still be restored as usual. | Checkbox |0
+|bStartup|Create shortcut (lnk) in the startup folder for DistractLess to start automatically. | Checkbox |0
+|sLocationUserBackup|Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks. Choose the folder to store custom lists in via the "Save LV's"-button. | Folder | DistractLess_Storage\\UserBackups
+| sFontSize_Text|Set font-size for the following controls: Text, Edit-fields, Sliders | Integer | 7
+| sFontType_Text|Set Font for all texts, excluding the listviews.|DropDownList|Times New Roman
+| sFontSize_ListView|Set font-size for all listviews | Integer | 7
+| sFontType_ListView|Set Font for all listviews.|DropDownList|Segoe UI
+| bShowOnProgramStart | Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour). This has no effect if no set of conditions is loaded. I.e. if "OnExitBehaviour" is set to "Empty", the GUI will never be shown.  | Checkbox |1
 
-
-
-
-
-
-
-
-
-
+Table 5: Settings of the program. All non-bolded settings have little importance and should not necessarily be customised.  Inversely, bolded settings are recommended to be edited.
