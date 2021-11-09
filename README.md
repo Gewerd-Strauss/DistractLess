@@ -17,9 +17,9 @@ For more information, see [5. Understanding the filter mechanism](#5-understandi
 
 # 2. The GUI
 
-![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "What Does This DO?")
+![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "Figure 1: The Main Window")
 
-![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "What does this do?")
+![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "Figure 1: The Main Window")
 
 The main overlay can be broken up into three different sections:
 The left section displays stored and active _whitelisted_ strings. The right third displays _blacklisted_ ones. 
@@ -65,9 +65,9 @@ In case of the following example, you would add `MozillaWindowClass` to `Browser
 
 You can ignore the first and last line of this first field (under "Window Title, Class and Process"), as well as all other info displayed.
 
-![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "")
+![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
 
-![Figure 2: relevant contents of the window spy overlay](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ContentsWindowSpy.PNG "")
+![Figure 2: relevant contents of the window spy overlay](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
 
 ---
 
@@ -94,16 +94,16 @@ These restrictions are necessary so the program doesn't suddenly start closing e
 
 When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a helper-tool for setting conditions faster.
 
-![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "")
+![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
-![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "")
+![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
 After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
 If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
 
-![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "")
+![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
-![Figure 4: Create a (website) condition](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpAddSSAllShown.PNG "")
+![Figure 4: Create a (website) condition](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
 
 Alteratively, you can just create your conditions by hand, but usually that will be more prone to error and take longer :P
@@ -186,7 +186,7 @@ In diagnostics mode, windows will not be closed. Instead, information on matches
 
 Displayed will be
 
-* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#2111-browser-matches) )
+* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#213-adding-an-existing-windows-conditions) )
 * the current filter mode
 * the current trumping rule (always displayed, but only relevant if Filtermode is "Both")
 * the title of the active window which has been matched to close
