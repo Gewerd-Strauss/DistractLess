@@ -186,7 +186,7 @@ In diagnostics mode, windows will not be closed. Instead, information on matches
 
 Displayed will be
 
-* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#213-adding-an-existing-windows-conditions) )
+* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](https://github.com/Gewerd-Strauss/DistractLess/blob/dev/README.md#213-adding-an-existing-windows-conditions) )
 * the current filter mode
 * the current trumping rule (always displayed, but only relevant if Filtermode is "Both")
 * the title of the active window which has been matched to close
