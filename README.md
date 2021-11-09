@@ -200,13 +200,13 @@ Displayed will be
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
 ![Figure 9: Preliminary Checking routine of the filter](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\Prelim Checks.png "")
-![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/Prelim Checks.png "")
+![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/PrelimChecks.png "")
 
 Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
 
 ![Figure 10: Logic for White-only mode](Documentation\DL_WhiteOnlyLogic.png "")
 
-![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Stra>uss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
+![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
 
 ![Figure 11: Logic for Black-only mode](Documentation\DL_BlackOnlyLogic.png "")
 
