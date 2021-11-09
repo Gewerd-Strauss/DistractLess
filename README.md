@@ -278,7 +278,7 @@ If `LockingBehaviour` is set to `Password-protected`, a password check is perfor
 
 ### 8. Overview over Settings
 
-| Hotkey | Function | Type | Default
+| Hotkey | respective function| Type | Default
 |:-------------|:------------------|:--------|:--------|
 | **RefreshTime** | Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks. Increase the value if the program causes significant lags - even though that really shouldn't happen, unless you are switching windows/tabs very quickly. In my tests, 200 consecutive "browser tab"-closures took an average of 97ms. Programs are harder to test, and take longer to close usually. | Integer | 200
 LockingBehaviour |set wether or not to lock until either time has passed or until pw is inputted | DropDownList | Time-protected
@@ -301,3 +301,6 @@ bAlwaysAskPW | When checked, the gui is always locked (equivalent to left-clicki
 | bShowOnProgramStart | Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour). This has no effect if no set of conditions is loaded. I.e. if "OnExitBehaviour" is set to "Empty", the GUI will never be shown.  | Checkbox |1
 
 Table 5: Settings of the program. All non-bolded settings have little importance and should not necessarily be customised.  Inversely, bolded settings are recommended to be edited.
+
+
+### 9. 
