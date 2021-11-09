@@ -278,7 +278,7 @@ If `LockingBehaviour` is set to `Password-protected`, a password check is perfor
 
 ### 8. Overview over Settings
 
-| Hotkey | respective function| Type | Default
+| Hotkey | respective_function| Type | Default
 |:-------------|:------------------|:--------|:--------|
 | **RefreshTime** | Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks. Increase the value if the program causes significant lags - even though that really shouldn't happen, unless you are switching windows/tabs very quickly. In my tests, 200 consecutive "browser tab"-closures took an average of 97ms. Programs are harder to test, and take longer to close usually. | Integer | 200
 LockingBehaviour |set wether or not to lock until either time has passed or until pw is inputted | DropDownList | Time-protected
