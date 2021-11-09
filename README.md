@@ -144,7 +144,7 @@ This extra barrier of entry is necessary because this mode is extremely restrict
 When setting up criteria sets for this mode, please ensure you are running in [diagnostics mode](#4-entering-and-exiting-diagnostics-mode) first.
 
 
-A detailed flowsheet of each mode can be found in [5. Understanding the filter](#5-understanding-the-filter)
+A detailed flowsheet of each mode can be found in [5. Understanding the filter](#5-understanding-the-filter).
 
 
 ### 3. Accessing and editing the settings
