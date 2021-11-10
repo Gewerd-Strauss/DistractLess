@@ -1,6 +1,6 @@
 # DistractLess
 
-A small program meant to keep you focused by closing websites and programs matching different set of rules regarding their window/tab name and URL
+A small program meant to keep you focused by closing websites and programs matching different set of rules regarding their window/tab name and URL.
 
 
 Manual version 1.3
@@ -156,6 +156,7 @@ Alternatively, pressing `Ctrl+O` while  the main window is active will also open
 Each setting comes with a small description about its usecase, and possible options. The type of the input is displayed, as well as a default value which is restored when pressing "Restore". Settings are saved automatically. In the example of figure 6, we are looking at the `OnExitBehaviour`, and a dropdown-list displays possible options.
 
 ![Figure 6: Settings Menu](Documentation\DL_SettingsMenu.PNG "")
+
 ![Figure 6: Settings Menu](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_SettingsMenu.PNG "")
 
 Figure 7 displays a known, but to me not solvable bug. The description displayed can sometimes be muddied by the display of another setting's description. 
@@ -197,6 +198,7 @@ Displayed will be
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
 ![Figure 9: Preliminary Checking routine of the filter](Documentation\DL_PrelimChecks.png "")
+
 ![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_PrelimChecks.png "")
 
 Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
