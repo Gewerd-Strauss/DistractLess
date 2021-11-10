@@ -337,7 +337,7 @@ Table 5: Settings of the program. All non-bolded settings have little importance
 
 This project hinges on a lot of code by others. The following table gives an overview over what functions are written by whom - if I could attribute a function properly.
 
-For all functions, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
+For all functions, see the function definition and associated documentation for more details. License-files are located under `A_SCriptDir\DistractLess_Storage\licenses` where required.
 All Functions below have the URL at which they were retrieved stated.
 
 | Function | Author | Link
