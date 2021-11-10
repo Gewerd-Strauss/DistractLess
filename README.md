@@ -370,6 +370,7 @@ All Functions below have the URL at which they were retrieved stated.
 |	TF_ReturnOutPut | see above
 |	IniSettingsEditor_v6 | Rajat, mod by toralf | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the  download
 |	IniFileCreator_v8 |  toralf, modded by Gewerd Strauss | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download
+|   f_AddStartupToggleToTrayMenu | Exaskryz, modified by Gewerd Strauss | adapted from https://www.autohotkey.com/boards/viewtopic.php?p=176247#p176247
 
 Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:45 CET.
 
