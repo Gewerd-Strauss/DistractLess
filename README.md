@@ -240,7 +240,7 @@ All Hotkeys are active while GUIs are active, and most are restricted to the mai
 | Shift+4 | Focus on BlackStorage Listview
 | Alt+F   | Focus on Filtermode Dropdown-List
 | Alt+T   | Focus on Trumpingrule Dropdown-List
-| Alt+-   | Open Main Gui (active globally)
+| Alt+-   | Open/close Main Gui (active globally)
 | ^ / Sc029 | Toggle on/off program
 
 
