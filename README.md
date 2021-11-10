@@ -6,7 +6,7 @@ NOT finished by any means.
 First version is operational. 
 Documentation is in the works, but won't be published for some time, because I have more important things to do right now.
 
-Manual version 1.0
+Manual version 1.3
 
 # 1. Fundamentals
 
@@ -17,9 +17,9 @@ For more information, see [5. Understanding the filter mechanism](#5-understandi
 
 # 2. The GUI
 
-![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "")
+![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "Figure 1: The Main Window")
 
-![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "")
+![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "Figure 1: The Main Window")
 
 The main overlay can be broken up into three different sections:
 The left section displays stored and active _whitelisted_ strings. The right third displays _blacklisted_ ones. 
@@ -65,9 +65,9 @@ In case of the following example, you would add `MozillaWindowClass` to `Browser
 
 You can ignore the first and last line of this first field (under "Window Title, Class and Process"), as well as all other info displayed.
 
-![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "")
+![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
 
-![Figure 2: relevant contents of the window spy overlay](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ContentsWindowSpy.PNG "")
+![Figure 2: relevant contents of the window spy overlay](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
 
 ---
 
@@ -94,16 +94,16 @@ These restrictions are necessary so the program doesn't suddenly start closing e
 
 When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a helper-tool for setting conditions faster.
 
-![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "")
+![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
-![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "")
+![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
 After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
 If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
 
-![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "")
+![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
-![Figure 4: Create a (website) condition](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpAddSSAllShown.PNG "")
+![Figure 4: Create a (website) condition](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
 
 Alteratively, you can just create your conditions by hand, but usually that will be more prone to error and take longer :P
@@ -144,7 +144,7 @@ This extra barrier of entry is necessary because this mode is extremely restrict
 When setting up criteria sets for this mode, please ensure you are running in [diagnostics mode](#4-entering-and-exiting-diagnostics-mode) first.
 
 
-A detailed flowsheet of each mode can be found in [5. Understanding the filter](#5-understanding-the-filter)
+A detailed flowsheet of each mode can be found in [5. Understanding the filter](#5-understanding-the-filter).
 
 
 ### 3. Accessing and editing the settings
@@ -180,13 +180,13 @@ In order to enter diagnostics mode, doubleclick the fifth section of the toolbar
 In diagnostics mode, windows will not be closed. Instead, information on matches that _would have_ closed the current window/tab will be displayed. I intend to change this mode so that information on why a particular window is _not_ matched will be displayed in those casees as well.
 
 
-![Figure 8: Diagnostics information](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_Diagnostics.PNG "")
+![Figure 8: Diagnostics information](Documentation\DL_Diagnostics.png "")
 
-![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.PNG "")
+![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.png "")
 
 Displayed will be
 
-* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#2111-browser-matches) )
+* the type of match (browser match vs program match) - can be useful if you are using browsers that are not defined as such for the program (cf. [Browser Matches](#213-adding-an-existing-windows-conditions) )
 * the current filter mode
 * the current trumping rule (always displayed, but only relevant if Filtermode is "Both")
 * the title of the active window which has been matched to close
@@ -199,19 +199,18 @@ Displayed will be
 
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
-![Figure 9: Preliminary Checking routine of the filter](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\Prelim Checks.png "")
-![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/Prelim Checks.png "")
+![Figure 9: Preliminary Checking routine of the filter](Documentation\DL_PrelimChecks.png "")
+![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_PrelimChecks.png "")
 
 Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
 
 ![Figure 10: Logic for White-only mode](Documentation\DL_WhiteOnlyLogic.png "")
 
-![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Stra>uss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
+![Figure 10: Logic for White-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_WhiteOnlyLogic.png "")
 
 ![Figure 11: Logic for Black-only mode](Documentation\DL_BlackOnlyLogic.png "")
 
 ![Figure 11: Logic for Black-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_BlackOnlyLogic.png "")
-CONTINUE THE Flowchart in the browser.
 
 ![Figure 12: Logic for "Both"-mode, with white trumping black](Documentation\DL_WhiteTrumpsBlackLogic.png "")
 
@@ -240,7 +239,7 @@ All Hotkeys are active while GUIs are active, and most are restricted to the mai
 | Shift+4 | Focus on BlackStorage Listview
 | Alt+F   | Focus on Filtermode Dropdown-List
 | Alt+T   | Focus on Trumpingrule Dropdown-List
-| Alt+-   | Open Main Gui (active globally)
+| Alt+-   | Open/close Main Gui (active globally)
 | ^ / Sc029 | Toggle on/off program
 
 
@@ -334,9 +333,47 @@ bAlwaysAskPW | When checked, the gui is always locked (equivalent to left-clicki
 Table 5: Settings of the program. All non-bolded settings have little importance and should not necessarily be customised.  Inversely, bolded settings are recommended to be edited.
 
 
-### 9. 
+### 9. Credits
+
+This project hinges on a lot of code by others. The following table gives an overview over what functions are written by whom - if I could attribute a function properly.
+
+For all functions, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
+All Functions below have the URL at which they were retrieved stated.
+
+| Function | Author | Link
+|:------------------|:------------------|:------------------|
+|	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
+|	st_wordwrap | tidbit | located at https://www.autohotkey.com/boards/viewtopic.php?t=53
+|	st_removeDuplicates | see above
+|	st_count | see above
+|	WriteINI/ReadINI | wolf_II | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
+|	hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
+|	HideFocusBorder | this specific version by "just me" | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
+|	getURL | anonymous1184 | adopted from reddit: https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
+|	ACC.ahk | could not find definitive author | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=26201
+|	CodeTimer | CodeKnight | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
+|	f_TrayIconSingleClickCallBack | Lexikos | retrieved from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
+|	NotifyTrayClick | SKAN | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=81157
+|	TF_ReplaceInLines | forum name ahk7, github hi5 | retrieved from https://www.autohotkey.com/boards/viewtopic.php?f=6&t=576
+|	TF_GetData | see above
+|	\_MakeMatchList | see above
+|	TF_ReturnOutPut | see above
+|	IniSettingsEditor_v6 | Rajat, mod by toralf | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the  download
+|	IniFileCreator_v8 |  toralf, modded by Gewerd Strauss | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download
+
+Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:45 CET.
 
 
 [^1]: Note that while this is valid Regex-syntax, the program does _not_ perform a regex-search. The `Instr()`-function is used. This syntax is solely used because I needed something that can be expected not to be an actual pattern a user is looking for.
 [^2]:Only possible if "LockingBehaviour" is set to "Time-protected".
 [^3]:Only possible if "LockingBehaviour" in settings is set to "Password-protected".
+
+
+---
+
+
+### 10. TODO
+
+Finish this damn document:
+* merge to main branch
+* fix all the intra-document links in here that are broken because you need to have the branch specified in the url

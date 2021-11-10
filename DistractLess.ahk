@@ -1,9 +1,8 @@
-﻿/*
-	Preliminaries:
-	
-	; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
-*/
-
+﻿	/*
+		Preliminaries:
+		
+		; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
+	*/
 	#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 	#SingleInstance,Force
 	;#Persistent
@@ -19,20 +18,24 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VNpublic=1.4.9.4
+	VNpublic=1.5.0.4
 	VN=VNpublic
-	VNdev=1.4.11.4                                                                    
-	LE=09.11.2021 12:30:27                                                       
+	VNdev=1.5.0.4                                                                    
+	LE=10.11.2021 13:19:42                                                       
 	AU=Gewerd Strauss
 	;}______________________________________________________________________________________
 	;{#[]
-	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 ;Set custom Script icon
-	global bIsDevPC:=(A_ComputerName="DESKTOP-FH4RU5C"?1:0) ;; overwrite this line to true if you want to be able to break out of locking yourself out.
-	; that is the only actually functional addition this flag yields, aside from a few coded-in
-	bLockOutAdmin:=false + 0 ;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the second check refers to the computername, and it is unlikely you'll have the same. Obviously, if you are up to changing this value also nothing stops you from changing the respective hard-coded comparison. 
+	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
+	global bIsDevPC:=(A_ComputerName="DESKTOP-FH4RU5C"?1:0) + 0 	;; overwrite this line to true if you want to be able to break out of locking yourself out.
+																	;; that is the only actually functional addition this flag yields, aside from a few coded-in debug infos about some arrays.
 	
+	global bLockOutAdmin:=true + 0									;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the 
+																	;; second check refers to the computername, and it is unlikely you'll have the same. Obviously, if you are up to changing this 
+																	;; value also nothing stops you from changing the respective hard-coded comparison. 
 	
-	if !bIsDevPC
+	global bIsExitWOSaving:=false 									;; necessary for 
+	
+	if ((!bIsDevPC && !Winactive("Visual Studio Code")) || (bIsDevPC && bLockOutAdmin && !Winactive("Visual Studio Code")))
 		Menu, Tray, NoStandard
 	;}______________________________________________________________________________________
 	;{#[Autorun Section] - variable-setup
@@ -46,7 +49,6 @@
 	;; If you are debugging this script and the notify-messages keep crashing the debugger when they are still visible and the debugger runs into a breakpoint, activate the following line:
 	;bRunNotify:=!vsdb:=true
 	bEnableAdvancedSettings:=false + 0 ; start with advanced settings being locked
-	
 	global testFlag:=dbFlag:=false + 0
 	bLastSessionSettingsNoStringsInArrays:=false + 0
 	bIsLocked:=false + 0
@@ -190,8 +192,8 @@ bShowOnProgramStart=1
 ;Invisible Settings Type: Text
 ;Invisible Settings Hidden:
 bAllowLocking=1
-;bAllowLocking Allows the gui to be locked from further access until the time specified in vLockedTime has run out, or the password is entered  correctly.
-;bAllowLocking Note: vLockedTime is not existant yet, the same goes for the logic behind the locking.
+;bAllowLocking Allows the gui to be locked from further access until the time specified in has passed, or the password is entered correctly (depending on the mode)
+;bAllowLocking Note that if this setting is deactivated, the GUI cannot be locked anymore.
 ;bAllowLocking Type: Checkbox 
 ;bAllowLocking Default: 1
 ;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
@@ -205,15 +207,14 @@ NoFilterClasses=TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,
 ;NoFilterClasses Comma-separated list of ahk_classes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
 ;NoFilterClasses Type: Text 
 ;NoFilterClasses Default: TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,
-;NoFilterClasses CheckboxName: Do you want to enable diagnostics mode?
 NoFilterExes=Code.exe,Taskmgr.exe,Autohotkey.exe
 ;NoFilterExes Comma-separated list of ahk_exes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
 ;NoFilterExes Type: Text 
 ;NoFilterExes Default: Code.exe,Taskmgr.exe,Autohotkey.exe
-NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,Edit Array Element
+NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,DistracLess_2
 ;NoFilterTitles Comma-separated list of window Titles which are not filtered, ever. Mostly hard-coded precautions to protect this program and its vital submenus.
 ;NoFilterTitles Type: Text 
-;NoFilterTitles Default: DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,Edit Array Element
+;NoFilterTitles Default: DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess_5,DistractLess Settings,IniFileCreator,DistracLess_2
 sUnlockPassword=-1
 ;sUnlockPassword Password chosen by the user to unlock the gui again, if LockingBehaviour is set to "Password-protected"
 ;sUnlockPassword Type: Text
@@ -534,10 +535,10 @@ sUnlockPassword=-1
 	#IfWinActive, DistractLess_5
 	Tab::SendInput,{Right} 	;; Gui5 || go to next digit of time edit
 	+Tab::SendInput,{Left} 	;; Gui5 || go to previous digit of time edit
-	^Enter::GC5Submit() 	;; Gui5 || submit time
+	^Enter::GC5_Submit() 	;; Gui5 || submit time
 
-	#IfWinActive, Edit Array Element
-	^Enter::eAe_Submit()  	;; Gui4 || submit changes
+	#IfWinActive, DistracLess_2
+	^Enter::GC2_Submit()  	;; Gui4 || submit changes
 	
 	
 	#IF
@@ -661,13 +662,13 @@ sUnlockPassword=-1
 		aBlackStor:=[]
 		aWhiteAct:=[]
 		aBlackAct:=[]
-		; ActiveArrays:=[[],[]]
-		ActiveArrays:=fCreateActiveArraysFromActiveWindows()
+		ActiveArrays:=[[],[]]
+		;ActiveArrays:=fCreateActiveArraysFromActiveWindows()
 		; ActiveWhiteBackup:=[1]
 		; ActiveBlackBackup:=[1]
 		StoredWhiteBackUp:=0
 		StoredBlacKBackup:=0
-		StoredArrays:=fCreateStoredArraysFromStorage("Storage") ; Arrays1: aWhiteStor, Arrays2: aBlackStor
+		StoredArrays:=[[],[]]
 		aWhiteControls_ToDisable:=["vLV1","vLV2","btn1","btn2","btn3","btn4","btn5","btn6","btn7","Text_ActiveWhiteList","Text_StoredWhiteList"] ;,"Text_SelectTrumpingRule","bTrumping"]
 		aBlackControls_ToDisable:=["vLV3","vLV4","btn8","btn9","btn10","btn11","btn12","btn13","btn14","Text_ActiveBlackList","Text_StoredBlackList"] ;,"Text_SelectTrumpingRule","bTrumping"]
 		aAllControlsGui1_VisibleDefault:=["TextEnterSubstringCriteriaToAdd", "sCriteria_Substring", "TextSelectType", "TypeSelected",  "Button_AddSubsttringToActiveWhiteList", "Button_AddSubsttringToActiveBlackList", "Button_AddFromExistingWindows", "Button_SaveSelectedListViews", "Button_RestoreFromSave", "TextHorizontalLine", "TextSelectFilterMode", "vActiveFilterMode", "Text_SelectTrumpingRule", "bTrumping","bCheckURLsInBrowsers","Text_CheckURLsInBrowsers"]
@@ -1332,9 +1333,9 @@ sUnlockPassword=-1
 		; Gui, Font, s9 cWhite, Segoe UI 
 		
 		if ((bShowDebugPanelINMenuBar) && bIsDevPC) 
-			SB_SetParts(23,120,100,175,145,70,80,170)
+			SB_SetParts(23,120,100,175,95,70,80,170)
 		Else
-			SB_SetParts(23,120,100,175,145,70,80)
+			SB_SetParts(23,120,100,175,95,70,80)
 		SB_SetIcon("C:\WINDOWS\system32\shell32.dll",48,1)
 		SB_SetText("DistractLess v." VNpublic,2)
 		SB_SetText(" by " AU,3)
@@ -1388,9 +1389,9 @@ sUnlockPassword=-1
 		GuiControl, 1: disable, Button_AddSubsttringToActiveBlackList
 	}
 	return
-	; Add from existing windows
+	
 	lGUIShow_3:
-	{
+	{ 	; "Add from existing windows"-GUI
 		gosub, lGuiHide_1
 		gosub, lClearAdditionFields
 		Settimer, lEnforceRules, Off
@@ -1402,18 +1403,12 @@ sUnlockPassword=-1
 		global bDistractLess_3IsVisible:=true
 		gui, 4: hide
 		gui, 5: hide
-		; HideFocusBorder(MainGUI)
 		if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
 			guicontrol, show, CurrentBrowserURL_CriteriaPicker
 		Else
 			guicontrol, hide, CurrentBrowserURL_CriteriaPicker
 		Click,
-		; MouseMove, -3,-3
-		MouseGetPos, xmos,ymos
-		Click, -3,-3
-		mousemove, %xmos%,%ymos%
 		SetTimer, UpdateCriteriaPickerURL,200
-		; GuiControl, Focus, sCriteria_Substring
 	}
 	return
 	lGuiCreate_3: ; Submenu to choose from current windows
@@ -1578,13 +1573,13 @@ sUnlockPassword=-1
 		gui, 5: destroy
 	}
 	return
-	GC5Submit()
+	GC5_Submit()
 	{
 		global GuiAction5:="Submitted"
 		gui, 5: submit
 		gui, 5: destroy
 	}
-	
+	return
 
 
 	lSaveLVs:
@@ -1602,9 +1597,8 @@ sUnlockPassword=-1
 		
 		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
 		{	; folder and file doesn't exist -> create
-			; create file
+			; create folder
 			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
-			; SetWorkingDir, UserBackups
 		}
 		FileSelectFile, SavedFilePath, S24, % IniObj["General Settings"].sLocationUserBackup
 		if (SavedFilePath="")
@@ -1616,11 +1610,6 @@ sUnlockPassword=-1
 				SavedFilePath:=SubStr(SavedFilePath,1,StrLen(SavedFilePath)-4) ; and remove the last instance
 
 		}
-			; HideFocusBorder(MainGUI)
-			; If !INstr(SavedFilePath,"_DLUserBackup.ini")
-			; 	SavedFilePath .= "_DLUserBackup.ini"
-		; m(Arr)
-		; if 
 		if !testFlag
 			fWriteINI(Arr,SavedFilePath)
 		Else
@@ -1766,8 +1755,8 @@ sUnlockPassword=-1
 		gui, 1: default
 		strProgramStatus:="Program is " (bIsProgramOn?"active":"disabled" ) " and "(bIsLocked?"locked":"not locked")
 		SB_SetText(strProgramStatus,4)
-		sDiagnosticsOn:="Running in Diagnostics-Mode"
-		sDiagnosticsOff:="Running in normal Mode"
+		sDiagnosticsOn:="Mode: Diagnostics"
+		sDiagnosticsOff:="Mode: Normal"
 		if dbFlag
 			SB_SetText(sDiagnosticsOn,5)
 		Else
@@ -2181,8 +2170,9 @@ sUnlockPassword=-1
 	{ 
 		if testFlag
 		{
+			bActiveSetIsOriginal:=false
 			TestSimStorage:=[ActiveArrays,StoredArrays]
-			TestArrays:=f_ReadBackTestArraysFromFile()
+			TestArrays:=f_ReadBackTestArraysFromFile(1)
 			ActiveArrays:=TestArrays[1]
 			StoredArrays:=TestArrays[2]
 			; ActiveArrays:=StoredArrays:=[[],[]] ; insert test simulation 
@@ -2197,6 +2187,7 @@ sUnlockPassword=-1
 		}
 		else
 		{
+			bActiveSetIsOriginal:=true
 			gui, listview, SysListView321
 			f_UpdateLV(TestSimStorage[1][1])
 			gui, listview, SysListView323
@@ -2630,73 +2621,6 @@ sUnlockPassword=-1
 	return
 	;}______________________________________________________________________________________
 	;{#[Functions Section]
-	; setup functions
-	fCreateStoredArraysFromStorage(Storage)
-	{ ; read back stored criteria from file
-		return [[],[]]
-		testing:=false  ; shorts out the logic and removes necessity to have a properly formatted file on hand. Used for reddit questions.
-		if testing 		;; for the reddit version, to make sure they don't need the text file or the directory this script operates upon. The string is hard.coded for now because the function to create these strings doesn't exist yet - hence this is hardcoded by hand, and this will break if anything in this string is changed.
-			sReadBack:="list:(WhiteDef)|type:(w)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(w)|name:(2Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(p)|name:(2 Posteingang - Mozilla Thunderbird)|URL:()`nlist:(WhiteDef)|type:(w)|name:((1) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(w)|name:(Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(p)|name:(Posteingang - Mozilla Thunderbird)|URL:()`n`nlist:(WhiteDef)|type:(p)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(p)|name:(2Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(w)|name:(2 Posteingang - Mozilla Thunderbird)|URL:()`nlist:(WhiteDef)|type:(p)|name:((1) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(p)|name:(Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(w)|name:(Posteingang - Mozilla Thunderbird)|URL:()`n"
-		; check if file and folder exists
-		OriginalWorkingDir:=A_WorkingDir
-		CheckFilePath_Storage=%A_ScriptDir%\DistractLess_Storage
-		if !Instr(FileExist("DistractLess_Storage"),"D") ; check if folder exists
-		{	; folder and file doesn't exist -> create
-			; create file
-			FileCreateDir, DistractLess_Storage
-			SetWorkingDir, DistractLess_Storage
-		}
-		else
-		{	; folder exists
-			SetWorkingDir, DistractLess_Storage
-			str:="DistractLess_Storage.txt"
-			if FileExist(str) ; now that the folder exists, check for the file itself
-			{	; if it exists -> read the contents
-				aWhiteStor:=[]
-				aBlackStor:=[]
-				FileRead, sReadBack, %str%
-			}
-			else
-				return ;sReadBack:="list:(WhiteDef)|type:(w)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(w)|name:(2Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(p)|name:(2 Posteingang - Mozilla Thunderbird)|URL:()`nlist:(WhiteDef)|type:(w)|name:((1) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(w)|name:(Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(p)|name:(Posteingang - Mozilla Thunderbird)|URL:()`n`nlist:(WhiteDef)|type:(p)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(p)|name:(2Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(w)|name:(2 Posteingang - Mozilla Thunderbird)|URL:()`nlist:(WhiteDef)|type:(p)|name:((1) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`nlist:(WhiteDef)|type:(p)|name:(Google Calendar - September 2021)|URL:(https://calendar.google.com/calendar/u/0/r/month/2021/9/1)`nlist:(BlackDef)|type:(w)|name:(Posteingang - Mozilla Thunderbird)|URL:()`n"
-		}
-		PreSortArr:=[]
-		Lines:=StrSplit(sReadBack,"`r`n")
-		WhiteInd:=1
-		BlackInd:=1
-		aWhiteStor:=[]
-		aBlackStor:=[]
-		for k,v in Lines
-		{
-			RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-			if (sList="WhiteDef")
-			{
-				if (v!="")
-				{
-					aWhiteStor[WhiteInd]:=v
-					WhiteInd++
-				}
-			}
-			Else
-			{
-				if (v!="")
-				{
-					aBlackStor[BlackInd]:=v
-					BlackInd++
-				}
-			}
-		}
-		SetWorkingDir, OriginalWorkingDir
-		return [aWhiteStor,aBlackStor]
-	}
-
-	fCreateActiveArraysFromActiveWindows()
-	{ ; create active arrays from windows
-		; to be implemented
-		WhiteActive:=[]
-		BlackActive:=[]
-		return [WhiteActive,BlackActive]
-	}
-
 	f_GetSelectedLVEntries()
 	{
 		vRowNum:=0
@@ -2714,13 +2638,11 @@ sUnlockPassword=-1
 		}
 		return sel
 	}
-
 	
 	f_CopySelectionIntoArray(sel,DestinationArray,ListType)
 	{
 		Ind:=1
 		InsArr:=[]
-		; gui, hide
 		str:=""
 		for k,v in sel
 		{
@@ -2729,8 +2651,6 @@ sUnlockPassword=-1
 			searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
 			InsArr[Ind]:=searchedstr
 			Ind++
-			; if !
-			; list:(WhiteDef)|type:(w)|name:((2) Reddit - Dive into anything)|URL:(https://www.reddit.com/)`n
 		}
 		; InsArr contains all selected values rows that are to be inserted into the other array
 		; now check which one of those is already existing, and add all that are not already present
@@ -2750,13 +2670,6 @@ sUnlockPassword=-1
 	{
 		ArrNew:=[]
 		ArrStorage:=Array.Clone()
-		
-		; for a,b in Array ; preprocessing to trim away any url's if type is program. Should never happen, but it is an oversight of my test-data
-		; {
-		; 	CurrSet2:=StrSplit(b,"|")
-		; 	if (CurrSet2[2]=="p")
-		; 		CurrSet2[3]=""
-		; }
 		for k,v in sel
 		{ ; assemble search string, then remove hits from array
 			CurrSet:=StrSplit(v,"||")
@@ -2807,7 +2720,6 @@ sUnlockPassword=-1
 		global
 		Sel:=f_GetSelectedLVEntries()
 		LastGuiEvent_f_EditArrayElement:=A_GuiEvent
-		
 		if % (A_GuiEvent="DoubleClick") and Sel.Length()
 		{
 			static EditedURL
@@ -2835,9 +2747,7 @@ sUnlockPassword=-1
 			gui, add, text,, Edit String
 			Gui, Font, s9 cWhite, Segoe UI 
 			if IniObj["Hidden Settings"].bEditDirectStringIn_f_EditArrayElement
-			{
 				gui, add, edit, %gui_control_options% -VScroll vEditedElement, % Element
-			}
 			Else
 			{
 				gui, add, edit, %gui_control_options% -VScroll vEditedElement, % sName
@@ -2850,8 +2760,8 @@ sUnlockPassword=-1
 				}
 			}
 			hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
-			gui, show,,Edit Array Element
-			WinWaitNotActive,  Edit Array Element
+			gui, show,,DistracLess_2
+			WinWaitNotActive,  DistracLess_2
 			str:="list:(" sList ")|type:(" sType ")|name:(" EditedElement ")|URL:(" EditedURL ")"
 			if ((EditedElement=".*") && (EditedURL=".*"))
 			{
@@ -2884,7 +2794,7 @@ sUnlockPassword=-1
 			return 0
 		}
 	}
-	eAE_Submit()
+	GC2_Submit()
 	{
 		global EditedElement
 		global EditedURL
@@ -2901,11 +2811,18 @@ sUnlockPassword=-1
 		return -1
 	}
 	
-	f_ReadBackTestArraysFromFile()
+	f_ReadBackTestArraysFromFile(mode)
 	{
-		StoredTestArrays:=ActiveTestArrays:=[]
-		sReadBack:=fReadINI(A_ScriptDir . "\DistractLess_Storage\INI-Files\TestSettings.ini")
-		return [sReadBack[1],sReadBack[2]]
+		ActiveArrays:=[[],[]]
+		StoredArrays:=[[],[]]
+		if (mode=1)
+			return [ActiveArrays,StoredArrays]
+		Else if (mode=2)
+		{
+			StoredTestArrays:=ActiveTestArrays:=[]
+			sReadBack:=fReadINI(A_ScriptDir . "\DistractLess_Storage\INI-Files\TestSettings.ini")
+			return [sReadBack[1],sReadBack[2]]
+		}
 	}
 
 	f_EnableDisableGuiElements(ArrayOfControlVariables,Enable1Disable0,GuiNumberOrIdentifier,AlsoDisable1OnlyHide0:=1)
@@ -2999,7 +2916,7 @@ sUnlockPassword=-1
 	}
 
 	f_CreateStoredArrays(IncludeProgramParameters:=1)
-	{
+	{ ; creates the Array to be stored to file by the various saving functions (Save LV's, as well as some OnExit-functions)
 		global
 		if IncludeProgramParameters
 		{
@@ -3031,6 +2948,16 @@ sUnlockPassword=-1
 			StringTrimRight, bIsProgramOn, bIsProgramOn, 15
 		if Instr(vDefaultTime,";")
 			StringTrimRight, vDefaultTime, vDefaultTime, 48
+		if !bActiveSetIsOriginal ; last time the lManageTestSimulation was run, we have entered test mode - and the variables ActiveArrays/StoredArrays don't contain the "original" settings
+		{ ; prevent the 
+			temp_testFlag:=testFlag
+			testFlag:=false
+			SoundBeep, 1750, 150
+			sleep, 300
+			SoundBeep, 1750, 150
+			sleep, 300
+			gosub, lManageTestSimulation
+		}
 		if IncludeProgramParameters
 			return Arr:=[ActiveArrays[1],ActiveArrays[2],StoredArrays[1],StoredArrays[2],CurrentSettings]
 		Else
@@ -3053,6 +2980,8 @@ sUnlockPassword=-1
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
 		global
+		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
+			return
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
@@ -3071,7 +3000,7 @@ sUnlockPassword=-1
 			fWriteIni(Arr,INI_File)
 		else
 			m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
-		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit|Menu|Reload")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload")
 		{
 			if A_IsCompiled
 			{
@@ -3091,6 +3020,8 @@ sUnlockPassword=-1
 	f_RestartWithSpecificBundle(ExitReason,ExitCode)
 	{
 		global
+		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
+			return
 		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(A_ThisFunc)
@@ -3119,8 +3050,7 @@ sUnlockPassword=-1
 		Else
 		{
 			Splitpath, A_ScriptFullPath,,ScriptPath
-			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
-			
+			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
 			Arr:=f_CreateStoredArrays()
 			Count:=0
 			loop, % Arr.MaxIndex() - 1
@@ -3135,7 +3065,7 @@ sUnlockPassword=-1
 			else
 				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
 		}
-		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit|Menu|Reload")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload") ; at this point, the actual ation of the reload fn is already finished → means reloading via menu or reload doesn't need to invoke _another_ reload
 		{
 			if A_IsCompiled
 			{
@@ -3155,8 +3085,10 @@ sUnlockPassword=-1
 	f_RestartEmpty(ExitReason,ExitCode)
 	{	
 		global
+		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
+			return
 		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
-		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
 			m(A_ThisFunc)
 		/*
 			; restarts the script from a hidden secondary script using a timer
@@ -3171,7 +3103,7 @@ sUnlockPassword=-1
 			; Reload:	The script is being reloaded via the Reload command or menu item.
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
-		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit|Menu")  && !(ExitReason ~= "iAD)Logoff|Shutdown")
+		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload")
 		{
 			if A_IsCompiled
 			{
@@ -3188,6 +3120,13 @@ sUnlockPassword=-1
 		}
 	}
 	return
+	f_DoNothingOnExit(ExitReason,ExitCode)
+	{
+		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
+			return
+	}
+	return
+
 	f_ThrowError(Source,Message,ErrorCode:=0,ReferencePlace:="S")
 	{ ; throws an error-message, possibly with further postprocessing
 		if (ReferencePlace="D")
@@ -3419,11 +3358,13 @@ sUnlockPassword=-1
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
 		;bLockOutAdmin:=bLockOutAdmin+0
-		if (bIsDevPC && !bLockOutAdmin) ; toggle to add development buttons easier. 
+		if (bIsDevPC) ; toggle to add development buttons easier. 
 		{
+			;m(bIsDevPC,bLockOutAdmin,exception.Line())
 			menu, Misc, Add, DEV: Hidden Settings, lHiddenSettings
 			menu, Misc, Add, DEV: Edit Settings File, lEditSettingsOverall
 			menu, Misc, Add, DEV: RESET SETTINGS, lResetSettingsForTesting
+			menu, Misc, Add, DEV: Exit App without saving anything, lExitWOSaving
 		}
 		SplitPath, A_ScriptName,,,, ScriptName
 		f_AddStartupToggleToTrayMenu(ScriptName,"Misc")
@@ -3431,9 +3372,16 @@ sUnlockPassword=-1
 		menu, tray, add,
 		return
 	}
+	lExitWOSaving:
+	; this is useful if you just want to terminate the program without altering any files. Only accessible to Devs.
+	global bIsExitWOSaving:=true
+	OnExit("f_DoNothingOnExit",-1)
+	ExitApp
+	return
 	
 	lResetSettingsForTesting: ; necessary for testing mostly. 
-	{
+	{ ; developer shortcut for resetting the settings.
+		OnExit("f_RestartWithLastBundle") ; when rewriting settings, we don't want to loose our currently set-up conditions.
 		FileCopy, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings.ini, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings_ResetBackup.ini, 1
 		FileDelete, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings.ini
 		sleep, 200	
