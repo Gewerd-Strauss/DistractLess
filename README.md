@@ -3,7 +3,7 @@
 A small program meant to keep you focused by closing websites and programs matching different set of rules regarding their window/tab name and URL.
 
 
-Manual version 1.3
+Manual version 1.4
 
 ## 1. Fundamentals
 
@@ -72,6 +72,7 @@ Now that you have added any possible browsers you might be using, let's go over 
 
 A program is only matched according to its window title against any ***p***rogram-condition currently visible within the top two listviews visible in figure 1.
 
+
 #### 2.1.2. Syntax
 
 
@@ -79,13 +80,20 @@ DistractLess always checks if the current window's title _contains_ the substrin
 
 To have a criteria match any title, set the title string to `.*`[^1].
 
-A few notes:
-1. this must be the only element in the substring criteria
-2. it cannot be applied to **blacklisted programs**, but to blacklisted websites which have a specific url on which they act.
-3. this cannot be implemented for URL-wildcards (you cannot set title substring AND website url to ".*" simultaneously)
+To have a criteria match any website, set the URL string to `.*`[^1].
 
+There are a few limitations to prevent unforseen consequences, displayed in the next chapter.
 
-These restrictions are necessary so the program doesn't suddenly start closing everything in an uncontrollable manner.
+#### 2.1.2.1. A few rules to note
+
+The following combinations are **not** possible. These restrictions are necessary so the program doesn't suddenly start closing everything in an uncontrollable manner.
+
+| Substring | URL | Type | List | Explanation
+|-------------|----|--------|------|------------
+| .* | / | p | black | Every program would match blacklist
+| .* | .* | either | either | This would match virtually  everything
+| .* AnotherSubStringHere | / | either | either | not possible
+
 
 #### 2.1.3. Adding an existing window's conditions
 
@@ -95,8 +103,11 @@ When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a help
 
 ![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
-After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
-If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
+1. After the window of figure 3 opens, navigate to the desired program/browser tab and hold  `Ctrl` while left-clicking **onto the desired window**. 
+2. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. 
+3. Edit the substring to a suitable level of specificity and the url if necessary.
+4. Decide wether or not to add it as a blacklist- or whitelist-criteria.
+5. If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
 
 ![Figure 4: Create a (website) condition](Documentation\DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
@@ -171,7 +182,7 @@ Settings are autosaved upon change or closing of the window. Most settings take 
 
 ## 4. Entering and exiting diagnostics-mode
 
-In order to enter diagnostics mode, doubleclick the fifth section of the toolbar, saying either "Running in normal mode" or "Running in diagnostics mode". Doubleclicking will enter and exit that mode. 
+In order to enter diagnostics mode, doubleclick the fifth section of the toolbar, saying either "Running in normal mode" or "Running in diagnostics mode". Doubleclicking will enter and exit that mode. Alternatively, pressing `Ctrl+T` does the same while the main GUI is active.
 
 ---
 
@@ -363,6 +374,7 @@ All Functions below have the URL at which they were retrieved stated.
 Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:45 CET.
 
 ## 10.
+
 
 [^1]: Note that while this is valid Regex-syntax, the program does _not_ perform a regex-search. The `Instr()`-function is used. This syntax is solely used because I needed something that can be expected not to be an actual pattern a user is looking for.
 [^2]:Only possible if "LockingBehaviour" is set to "Time-protected".
