@@ -1,7 +1,12 @@
 DistractLess_Storage/UserBackups/
+includes/AHK-Studio Backup/
+Library/AHK-Studio Backup/
 AHK-Studio Backup/
 .vscode/
 DistractLess_Storage/INI-Files/DistractLessSettings.ini
+DistractLess_Storage/INI-Files/DistractLessSettings_ResetBackup.ini
+DistractLess_Storage/INI-Files/DistractLessSettings - Kopie.ini
+DistractLess_Storage/Icon_Active.JPG
+DistractLess_Storage/Icon_Disabled.JPG
 errorlog.txt
-README.html
-includes/AHK-Studio Backup/
+
