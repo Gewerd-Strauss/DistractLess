@@ -1,8 +1,8 @@
 ﻿	/*
-		Preliminaries:
-		
-		; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
+		For all code by others, refer to the documentation. Alternatively, searching for "CODE BY OTHERS" within this script will take you to a handy overview. All functions mentioned in that table are located below said table.
 	*/
+
+
 	#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 	#SingleInstance,Force
 	;#Persistent
@@ -11,10 +11,8 @@
 	SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 	SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 	DetectHiddenWindows, Off ; needs to be off so we don't close invisible windows by accident, and only restrict ourselves to the visible ones
-	;SetKeyDelay -1
-	SetBatchLines -1
+	SetBatchLines, -1
 	SetTitleMatchMode, 2
-	; ntfy:=Notify()
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
@@ -23,17 +21,17 @@
 	VNdev=1.5.0.4                                                                    
 	LE=10.11.2021 13:19:42                                                       
 	AU=Gewerd Strauss
-	;}______________________________________________________________________________________
-	;{#[]
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
-	global bIsDevPC:=(A_ComputerName="DESKTOP-FH4RU5C"?1:0) + 0 	;; overwrite this line to true if you want to be able to break out of locking yourself out.
-																	;; that is the only actually functional addition this flag yields, aside from a few coded-in debug infos about some arrays.
-	
+	;}______________________________________________________________________________________
+	;{#[Developer toggles]
 	global bLockOutAdmin:=true + 0									;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the 
 																	;; second check refers to the computername, and it is unlikely you'll have the same. Obviously, if you are up to changing this 
 																	;; value also nothing stops you from changing the respective hard-coded comparison. 
 	
-	global bIsExitWOSaving:=false 									;; necessary for 
+	global bIsDevPC:=(A_ComputerName="DESKTOP-FH4RU5C"?1:0) + 0 	;; overwrite this line to true if you want to be able to break out of locking yourself out.
+																	;; that is the only actually functional addition this flag yields, aside from a few coded-in debug infos about some arrays.
+	
+	global bIsExitWOSaving:=false 									;; necessary to allow dev's to exit the program without storing the current listviews to file. 
 	
 	if ((!bIsDevPC && !Winactive("Visual Studio Code")) || (bIsDevPC && bLockOutAdmin && !Winactive("Visual Studio Code")))
 		Menu, Tray, NoStandard
@@ -422,7 +420,6 @@ sUnlockPassword=-1
 			}
 			Else
 				f_ThrowError("Main Code Body","Setting 'LockingBehaviour', found in the settings under the same name under 'General Settings' contains a non-valid value. Please try and reset the setting via the settings-editor.`nIf that does not work, delete the ini-file located at`n" A_ScriptDir "\DistractLess_Storage\INI-Files\DistractLessSettings.ini`nand restart the program.",A_ScriptNameNoExt . "_"2,Exception("",-1).Line)
-				
 		}
 		Else								;; if gui is open → close
 		{
@@ -623,7 +620,7 @@ sUnlockPassword=-1
 			hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
 			gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 		}
-		; else
+		; else ;; not sure if I want to keep this code and adapt it later. 
 		; {
 		; 	if !vsdb
 		; 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
@@ -886,7 +883,7 @@ sUnlockPassword=-1
 											}
 											;; if we get to here, we have a match that is:
 											;; matching a black Title
-											;; along a 
+											 
 										}
 										
 
@@ -1197,11 +1194,8 @@ sUnlockPassword=-1
 		vPositionCenteredSlider:=vMiddleOfCentralGroupBox_EditFields - (vCentralGroupSliderWidth/2)
 		vPositionCenteredSliderText:=vPositionCenteredSlider+30
 		
-		; Gui, Add, Text,x25, Version: %VN%	Author: %AU% 
 		Gui, Add, Text,x25 y0 w0 h0,  AnchorTab3
 		gui, add, checkbox, xp+50 yp+20 vbIsProgramOn glCallBack_EnableProgram Checked, Enable DistractLess?
-		; gui, add, Text, yp xp+200, DistractLess %VN% - finish centering this string
-		; Gui, Add, Text,x25 y0 w0 h0,  AnchorTab3
 		gui, add, tab3, xm yp-3 w%vGUITabWidth% h%vGUITabHeight%, Main
 		gui, tab, Main
 		;{ WhiteList
@@ -1244,8 +1238,6 @@ sUnlockPassword=-1
 		gui, add, text, xp-296 yp+42.5 vText_StoredBlackList, Stored BlackList
 		gui, add, ListView, xp yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV4 glLV_BlackStorage_EditSelected, Type|Name|URL
 		f_UpdateLV(StoredArrays[2]) ; SysListView324
-
-		
 		gui, add, GroupBox, x%vCentralGroupBoxTLCx% ym+24 Section  w%vWidthCentralGroupBox% h%vGroupBoxHeight2%
 		gui, add, text, ys+20 xs+145 w190 vTextEnterSubstringCriteriaToAdd,Enter substring &criteria to add
 		gui, add, edit, yp+20 xs+145 w%vWidthCentralGroupBox_Editfields% glCallBack_EnableAssortmentButtons %gui_control_options2% -VScroll vsCriteria_Substring
@@ -1310,8 +1302,6 @@ sUnlockPassword=-1
 		guicontrol, font, vLV3
 		guicontrol, font, vLV4
 		GUI, FONT
-		; gui, add, text, x%vLeftCorner_BlackListGroupBox% y200,"hi"
-		
 		;; Middle gui groupbox: Active windows (top)
 		/*
 			Edit-field - enter criteria here
@@ -1325,13 +1315,11 @@ sUnlockPassword=-1
 			
 			checkbox - check URL's :: if checking websites, make checks more consistent by only checking if the url is equal. ← figure out how to do partial string comparisons properly here
 		*/
-		
 		XPositionTitleString:=vPositionCenteredSliderText+vOuterGroupBoxWidth
 		gui, add, text,x%vPositionCenteredSliderText% ym, DistractLess v.%VN% - by %AU% 
 		gui, tab
 		gui, add, statusbar, -Theme vStatusBarMainWindow BackGround373b41 glCallBack_StatusBarMainWindow
-		; Gui, Font, s9 cWhite, Segoe UI 
-		
+
 		if ((bShowDebugPanelINMenuBar) && bIsDevPC) 
 			SB_SetParts(23,120,100,175,95,70,80,170)
 		Else
@@ -1344,11 +1332,7 @@ sUnlockPassword=-1
 		; gui, add, text, xm+4 y200 w%vGUITab_HorizontalLine_Length% 0x10  ;Horizontal Line > Etched Gray ; the +4 shift is done to at least make the spacing equal on both sides, as the line can't seem to draw into the right tab-border, _but_ can start on the left tab border - strangely enough
 		GuiControl, Focus, sCriteria_Substring
 		gui 1: submit, NoHide ; this is the very first submit encountered, and ensures that 
-		
-		; HideFocusBorder(vActiveFilterMode) 
 		HideFocusBorder(MainGUI)
-		;gosub, lCallBack_DDL_FilterMode
-		; DllCall("SetWinEventHook","UInt",0x8005,"UInt",0x8005,"Ptr",0,"Ptr",RegisterCallback("f_CheckFocusChange","F"),"UInt",DllCall("GetCurrentProcessId"),"UInt",0,"UInt",0)
 	}
 	return
 
@@ -1489,7 +1473,6 @@ sUnlockPassword=-1
 		global GuiAction:="Escaped"
 	}
 		
-		
 
 	; Locking GUI
 	lGUIShow_4:
@@ -1556,7 +1539,6 @@ sUnlockPassword=-1
 		Gui, Font, s11 cWhite, Segoe UI 
 		gui, add, text,xm ym, Set unlocking time:
 		TimeInSetNumberOfHours:=A_Hour+IniObj["General Settings"].LockingDefaultOffsetHours
-
 		if (TimeInSetNumberOfHours>=24)
 			Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%235959, HH:mm:ss ; fallback if time rolls over.
 		else
@@ -1600,18 +1582,17 @@ sUnlockPassword=-1
 			; create folder
 			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
 		}
-		FileSelectFile, SavedFilePath, S24, % IniObj["General Settings"].sLocationUserBackup
-		if (SavedFilePath="")
+		FileSelectFile, sSavedFilePath, S24, % IniObj["General Settings"].sLocationUserBackup
+		if (sSavedFilePath="")
 			return	
-		if (st_count(SavedFilePath,".ini")>0)
+		if (st_count(sSavedFilePath,".ini")>0)
 		{
-			SavedFilePath:=st_removeDuplicates(SavedFilePath,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
-			if (st_count(SavedFilePath,".ini")>0)  
-				SavedFilePath:=SubStr(SavedFilePath,1,StrLen(SavedFilePath)-4) ; and remove the last instance
-
+			sSavedFilePath:=st_removeDuplicates(sSavedFilePath,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
+			if (st_count(sSavedFilePath,".ini")>0)  
+				sSavedFilePath:=SubStr(sSavedFilePath,1,StrLen(sSavedFilePath)-4) ; and remove the last instance
 		}
 		if !testFlag
-			fWriteINI(Arr,SavedFilePath)
+			fWriteINI(Arr,sSavedFilePath)
 		Else
 			m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
 		SetWorkingDir, %OrigWorkingDIr%
@@ -1679,13 +1660,11 @@ sUnlockPassword=-1
 			Count:=Count+ LoadedFile[4].MaxIndex()
 		if (LoadedFile[5].MaxIndex()!="")
 			Count:=Count+ LoadedFile[5].MaxIndex()
-		;ttip("Count: " Count)
 		if Count
 		{
 			StoredArrays:=[[],[]]
 			ActiveArrays:=[[],[]]
 			gui, 1: default
-			; gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 			if (LoadedFile[1].MaxIndex()!="")
 			{
 				gui, listview, SysListView321
@@ -1741,11 +1720,6 @@ sUnlockPassword=-1
 		bTrumping:=LastTrumping
 		bCheckURLsInBrowsers:=LastCheckURLsInBrowsers
 		bIsProgramOn:=bIsProgramOn + 0
-		; guicontrol,, bIsProgramOn, %LastIsProgramOn% 
-		; gosub, lCallBack_DDL_FilterMode
-		
-		; gosub, lCallBack_EnableProgram
-		; bRestoringLastSession:=false
 	}
 	return
 
@@ -1813,8 +1787,6 @@ sUnlockPassword=-1
 				f_EnableDisableGuiElements(["bFetchBrowserURL","URLToCheckAgainst","TextURLAddition"],0,1)
 			if !bRestoringLastSession
 				f_EnableDisableGuiElements(aAllControlsGui1,0,1)
-			; f_EnableDisableGuiElements(aBlackControls_ToDisable,0,1)
-			; f_EnableDisableGuiElements(aWhiteControls_ToDisable,0,1)
 			f_EnableDisableGuiElements([bIsProgramOn],1,1)
 			SetTimer, lEnforceRules,Off
 		}
@@ -1871,7 +1843,6 @@ sUnlockPassword=-1
 			if ((A_GuiEvent="DoubleClick") && (A_EventInfo=1)) ; icon clicked: show lock gui/unlock
 				gosub, lLockProgram
 		}
-		
 		if ((A_GuiEvent="DoubleClick") && (A_EventInfo=3)) ; double left Click: Toggle advanced settings availability
 		{
 			if bEnableAdvancedSettings
@@ -1907,7 +1878,6 @@ sUnlockPassword=-1
 		else if ((((A_GuiEvent="R") && (A_EventInfo=3)) && bEnableAdvancedSettings) || bEnterFromTrayMenu) ; double right click: Create Settings
 		{
 			bEnterFromTrayMenu:=false
-			; gosub, lOpenIniFileCreator 
 			gui, 1: destroy
 			gui, 99: destroy
 			gui, color
@@ -1917,10 +1887,9 @@ sUnlockPassword=-1
 			FedFile:= IniSettingsFilePath
 			bMainGuiDestroyed:=true
 			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
-			;gosub, lIniFileCreator
-			m("DistractLess-Version located at A_ScriptDir\Lib\IniFileCreator_v8.ahk")
+			if (A_ComputerName="DESKTOP-FH4RU5C")
+				m("DistractLess-Version located at A_ScriptDir\Lib\IniFileCreator_v8.ahk")
 			#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
-			;#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
 			WinWaitNotActive, IniFileCreator 8
 			gosub, lGuiCreate_1
 			Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
@@ -2582,27 +2551,15 @@ sUnlockPassword=-1
 	return
 
 	lOpenIniFileCreator:
-	; gui, 1: destroy
-	; gui, 99: destroy
-	; gui, color
-	; gui, font
-	; gui, 99: new
-	; lChooseFile:=false
-	; FedFile:= IniSettingsFilePath
-	; bMainGuiDestroyed:=true
-	; Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
-	; #Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
-	; WinWaitNotActive, IniFileCreator 8
 	gui, 1: destroy
 	gui, 99: destroy
 	gui, color
 	gui, font
 	gui, 99: new
 	lChooseFile:=false
-	FedFile:= IniSettingsFilePath
+	FedFile:=IniSettingsFilePath ; my version of IniFileCreator requires a variable called "FedFile" to hold the path to the ini-file to create. The ini-file must exist initially, but can be completely blank.
 	bMainGuiDestroyed:=true
 	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
-	;#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
 	#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
 	WinWaitNotActive, IniFileCreator 8
 	return
@@ -3159,7 +3116,6 @@ sUnlockPassword=-1
 		return
 	}
 	
-	;bCheckURLsInBrowsers sURL sCurrURL
 	f_CloseCurrentWindow(sCurrWindowTitle,sCurrClass,sCurrExe,sCurrURL,stype,MatchedTitleEntry,WindowID,BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 	{ ; closes the current window according to its type: webbrowser → Ctrl+W, program → WinClose
 		if dbFlag
@@ -3321,21 +3277,12 @@ sUnlockPassword=-1
 		lEmergencyUnlock:
 		hk(0,0)
 		SetTimer, lEmergencyUnlock, off
-		; ttip(A_ThisLabel "15",4)
+		if dbFlag
+			ttip(A_ThisLabel "15",4)
 		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
 		return 
 	}
 	
-	f_CheckFocusChange()
-	{ ; tested for checking focus change, but not sure this would even work. 
-		global 
-		PrevFocusedCtrl:=FocusedCtrl
-		GuiControlGet, FocusedCtrl, Focus
-		ToolTip, % "PrevFocusedCtrl: " PrevFocusedCtrl "`n`n" "FocusedCtrl: " FocusedCtrl
-		If (PrevFocusedCtrl!=FocusedCtrl)
-			return 1
-		SetTimer RemoveToolTip,-3000
-	}
 	f_ToggleStartup(bBootSetting)
 	{
 		startUpDir:=(A_Startup "\" A_ScriptName " - Shortcut.lnk")
@@ -3349,7 +3296,6 @@ sUnlockPassword=-1
 
 	f_CreateTrayMenu(IniObj)
 	{ ; facilitates creation of the tray menu
-		; global vAllowedTogglesCount
 		VNI=1.0.0.6
 		menu, tray, Add, Show Gui, Gui1_ShowLogic
 		menu, tray, add,
@@ -3357,10 +3303,8 @@ sUnlockPassword=-1
 		Menu, Misc, add, Open Settings, lOpenSettings
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
-		;bLockOutAdmin:=bLockOutAdmin+0
 		if (bIsDevPC) ; toggle to add development buttons easier. 
 		{
-			;m(bIsDevPC,bLockOutAdmin,exception.Line())
 			menu, Misc, Add, DEV: Hidden Settings, lHiddenSettings
 			menu, Misc, Add, DEV: Edit Settings File, lEditSettingsOverall
 			menu, Misc, Add, DEV: RESET SETTINGS, lResetSettingsForTesting
@@ -3389,110 +3333,27 @@ sUnlockPassword=-1
 	}
 	return
 
-	f_AddStartupToggleToTrayMenu(ScriptName,MenuNameToInsertAt:="Tray")
-	{ ; add a toggle to create a link in startup folder for this script to the respective menu
-		VNI=1.0.0.1
-		global startUpDir 
-		global MenuNameToInsertAt2
-		global bBootSetting
-		MenuNameToInsertAt2:=MenuNameToInsertAt
-		startUpDir:=(A_Startup "\" A_ScriptName " - Shortcut.lnk")
-		Menu, %MenuNameToInsertAt%, add, Start at Boot, lStartUpToggle
-		If FileExist(startUpDir)
-		{
-			Menu, %MenuNameToInsertAt%, Check, Start at Boot
-			bBootSetting:=1
-		}
-		else
-		{
-			Menu, %MenuNameToInsertAt%, UnCheck, Start at Boot
-			bBootSetting:=0
-		}
-		return
-		lStartUpToggle: ; I could really use a better way to know the name of the menu item that was selected
-		if !bBootSetting 
-		{
-			bBootSetting:=1
-			FileCreateShortcut, %A_ScriptFullPath%, %startUpDir%
-			Menu, %MenuNameToInsertAt2%, Check, Start at Boot
-		}
-		else if bBootSetting
-		{
-			bBootSetting:=0
-			; FileDelete, %startUpDir%
-			Menu, %MenuNameToInsertAt2%, UnCheck, Start at Boot
-		}
-		return
-		
-		/* Original from Exaskryz: https://www.autohotkey.com/boards/viewtopic.php?p=176247#p176247
-			Menu, Tray, UseErrorLevel
-			
-			If FileExist(startUpDir:=("C:\Users\" A_UserName "\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\" A_ScriptName " - Shortcut.lnk"))
-				Menu, Tray, Add, Remove from StartUp, StartUpToggle
-			else
-				Menu, Tray, Add, Add to StartUp, StartUpToggle
-			GoSub, SkipLabel_StartUp
-			return
-			
-			StartUpToggle: ; I could really use a better way to know the name of the menu item that was selected
-			; Using now errorlevel to determine if the menu item name exists
-			Menu, Tray, Rename, Remove from StartUp, Add to StartUp
-			If ErrorLevel ; Remove from StartUp doesn't exist. So Add to StartUp does. So we're adding this script to startup
-			{
-				FileCreateShortcut, %A_ScriptFullPath%, %startUpDir%
-				Menu, Tray, Rename, Add to StartUp, Remove from StartUp
-			}
-			else ; we successfully renamed the Remove from StartUp, which means that was selected, so we need to remove the script from startup
-				FileDelete, %startUpDir%
-			return
-			
-			SkipLabel_StartUp:
-			
-			
-		*/
-	}
+	
 	lEditSettingsOverall:
-	; gui, 1: destroy
-	; gui, 99: destroy
-	; gui, color
-	; gui, font
-	; gui, 99: new
-	; lChooseFile:=false
-	; FedFile:= IniSettingsFilePath
-	; bMainGuiDestroyed:=true
-	; Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 	gosub, lIniFileCreator
-	; #Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
-	; sleep, 3000
+	
 	WinWaitNotActive, IniFileCreator 8
 	gosub, lGuiCreate_1
 	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
 	return
-	gui, 1: destroy
-	gui, 99: destroy
-	gui, color
-	gui, font
-	gui, 99: new
-	lChooseFile:=false
-	FedFile:= IniSettingsFilePath
-	bMainGuiDestroyed:=true
-	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
-	#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
-	;#Include %A_MyDocuments%\AutoHotkey\Lib\IniFileCreator_v8.ahk
-	gosub, lIniFileCreator
-	WinWaitNotActive, IniFileCreator 8
-	; gosub, lGuiCreate_1
-	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
-	return 
+
 	lHiddenSettings:
 	DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,1)
 	return
+
 	lOpenSettings:
 	DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
 	return
+
 	lOpenScriptFolder:
 	run, % A_ScriptDir
 	return
+
 	lReload:
 	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
 		OnExit("f_RestartWithLastBundle")
@@ -3619,8 +3480,8 @@ sUnlockPassword=-1
 	}
 	;}_____________________________________________________________________________________
 	;{#[Include Section]
-/*
-	For all functions, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
+/*  CODE BY OTHERS
+	For all functions below this point, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
 	All Functions below have the URL at which they were retrieved stated.
 	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
 	st_wordwrap | tidbit | located at https://www.autohotkey.com/boards/viewtopic.php?t=53
@@ -3634,7 +3495,7 @@ sUnlockPassword=-1
 	CodeTimer | CodeKnight | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
 	f_TrayIconSingleClickCallBack | Lexikos, afaik | retrieved from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 	NotifyTrayClick | SKAN | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=81157
-	
+	f_AddStartupToggleToTrayMenu | Exaskryz, modified by Gewerd Strauss | adapted from https://www.autohotkey.com/boards/viewtopic.php?p=176247#p176247
 	
 	TF_ReplaceInLines | forum name ahk7, github hi5 | retrieved from https://www.autohotkey.com/boards/viewtopic.php?f=6&t=576
 	TF_GetData | s.a.
@@ -3646,7 +3507,68 @@ sUnlockPassword=-1
 	; retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download. 
 	
 */
-
+	f_AddStartupToggleToTrayMenu(ScriptName,MenuNameToInsertAt:="Tray")
+	{ ; add a toggle to create a link in startup folder for this script to the respective menu
+		VNI=1.0.0.1
+		global startUpDir 
+		global MenuNameToInsertAt2
+		global bBootSetting
+		MenuNameToInsertAt2:=MenuNameToInsertAt
+		startUpDir:=(A_Startup "\" A_ScriptName " - Shortcut.lnk")
+		Menu, %MenuNameToInsertAt%, add, Start at Boot, lStartUpToggle
+		If FileExist(startUpDir)
+		{
+			Menu, %MenuNameToInsertAt%, Check, Start at Boot
+			bBootSetting:=1
+		}
+		else
+		{
+			Menu, %MenuNameToInsertAt%, UnCheck, Start at Boot
+			bBootSetting:=0
+		}
+		return
+		lStartUpToggle: ; I could really use a better way to know the name of the menu item that was selected
+		if !bBootSetting 
+		{
+			bBootSetting:=1
+			FileCreateShortcut, %A_ScriptFullPath%, %startUpDir%
+			Menu, %MenuNameToInsertAt2%, Check, Start at Boot
+		}
+		else if bBootSetting
+		{
+			bBootSetting:=0
+			; FileDelete, %startUpDir%
+			Menu, %MenuNameToInsertAt2%, UnCheck, Start at Boot
+		}
+		return
+		
+		/* Original from Exaskryz: https://www.autohotkey.com/boards/viewtopic.php?p=176247#p176247
+			Menu, Tray, UseErrorLevel
+			
+			If FileExist(startUpDir:=("C:\Users\" A_UserName "\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\" A_ScriptName " - Shortcut.lnk"))
+				Menu, Tray, Add, Remove from StartUp, StartUpToggle
+			else
+				Menu, Tray, Add, Add to StartUp, StartUpToggle
+			GoSub, SkipLabel_StartUp
+			return
+			
+			StartUpToggle: ; I could really use a better way to know the name of the menu item that was selected
+			; Using now errorlevel to determine if the menu item name exists
+			Menu, Tray, Rename, Remove from StartUp, Add to StartUp
+			If ErrorLevel ; Remove from StartUp doesn't exist. So Add to StartUp does. So we're adding this script to startup
+			{
+				FileCreateShortcut, %A_ScriptFullPath%, %startUpDir%
+				Menu, Tray, Rename, Add to StartUp, Remove from StartUp
+			}
+			else ; we successfully renamed the Remove from StartUp, which means that was selected, so we need to remove the script from startup
+				FileDelete, %startUpDir%
+			return
+			
+			SkipLabel_StartUp:
+			
+			
+		*/
+	}
 
 	HasVal(haystack, needle) 
 	{	; code from jNizM on the ahk forums: https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
