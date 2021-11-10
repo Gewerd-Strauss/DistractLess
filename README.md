@@ -369,10 +369,3 @@ Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:
 
 
 ---
-
-
-### 10. TODO
-
-Finish this damn document:
-* merge to main branch
-* fix all the intra-document links in here that are broken because you need to have the branch specified in the url
