@@ -17,7 +17,7 @@ For more information, see [5. Understanding the filter mechanism](#5-understandi
 
 # 2. The GUI
 
-![Figure 1: The Main Window](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_MainWindow.PNG "Figure 1: The Main Window")
+![Figure 1: The Main Window](Documentation\DL_MainWindow.PNG "Figure 1: The Main Window")
 
 ![Figure 1: The Main Window](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_MainWindow.PNG "Figure 1: The Main Window")
 
@@ -65,7 +65,7 @@ In case of the following example, you would add `MozillaWindowClass` to `Browser
 
 You can ignore the first and last line of this first field (under "Window Title, Class and Process"), as well as all other info displayed.
 
-![Figure 2: relevant contents of the window spy overlay](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
+![Figure 2: relevant contents of the window spy overlay](Documentation\DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
 
 ![Figure 2: relevant contents of the window spy overlay](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ContentsWindowSpy.PNG "Figure 2: relevant contents of the window spy overlay")
 
@@ -94,14 +94,14 @@ These restrictions are necessary so the program doesn't suddenly start closing e
 
 When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a helper-tool for setting conditions faster.
 
-![Figure 3: Choose a condition from existing windows](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
+![Figure 3: Choose a condition from existing windows](Documentation\DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
 ![Figure 3: Choose a condition from existing windows](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_ChooseCurrentWindowOverlay.PNG "Figure 3: Choose a condition from existing windows")
 
 After the window of figure 3 opens, navigate to the desired program/browser tab and press Ctrl+Left Mouse **onto that window**. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically. Edit the substring to a suitable level of specificity and the url possibly and decide wether or not to add it as a blacklist- or whitelist-criteria.
 If you want to generalise a certain criteria, replace title or URL substring with ".*", according to the rules displayed in [syntax](#212-syntax).
 
-![Figure 4: Create a (website) condition](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
+![Figure 4: Create a (website) condition](Documentation\DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
 ![Figure 4: Create a (website) condition](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpAddSSAllShown.PNG "Figure 4: Create a (website) condition")
 
@@ -152,20 +152,20 @@ A detailed flowsheet of each mode can be found in [5. Understanding the filter](
 In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_ (cf. Figure 5). You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (cf. Figure 6). 
 Alternatively, pressing `Ctrl+O` while  the main window is active will also open the GUI.
 
-![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_CloseUpToolBar.PNG "")
+![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](Documentation\DL_CloseUpToolBar.PNG "")
 
 ![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_CloseUpToolBar.PNG "")
 
 Each setting comes with a small description about its usecase, and possible options. The type of the input is displayed, as well as a default value which is restored when pressing "Restore". Settings are saved automatically. In the example of figure 6, we are looking at the `OnExitBehaviour`, and a dropdown-list displays possible options.
 
-![Figure 6: Settings Menu](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_SettingsMenu.PNG "")
+![Figure 6: Settings Menu](Documentation\DL_SettingsMenu.PNG "")
 ![Figure 6: Settings Menu](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_SettingsMenu.PNG "")
 
 Figure 7 displays a known, but to me not solvable bug. The description displayed can sometimes be muddied by the display of another setting's description. 
 
 These cases can be identified because the "Default:...."- and "Type:...."- information is displayed twice. In these cases, the _lowest_ description is the "correct" one.
 
-![Figure 7: Faulty double description](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_FaultySettingsDescription.PNG "")
+![Figure 7: Faulty double description](Documentation\DL_FaultySettingsDescription.PNG "")
 
 ![Figure 7: Faulty double description](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_FaultySettingsDescription.PNG "")
 
