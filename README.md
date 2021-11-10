@@ -5,14 +5,14 @@ A small program meant to keep you focused by closing websites and programs match
 
 Manual version 1.3
 
-# 1. Fundamentals
+## 1. Fundamentals
 
 DistractLess is a program designed to shut down distracting programs and browser tabs as soon as they gain focus.
 It does so by comparing the current window's title against your sets of whitelisted and blacklisted criteria. Depending on the type of the criteria, a URL can be compared as well. 
 
 For more information, see [5. Understanding the filter mechanism](#5-understanding-the-filter) 
 
-# 2. The GUI
+## 2. The GUI
 
 ![Figure 1: The Main Window](Documentation\DL_MainWindow.PNG "Figure 1: The Main Window")
 
@@ -23,9 +23,9 @@ The left section displays stored and active _whitelisted_ strings. The right thi
 
 The middle section allows the creation of new conditions, the loading from and saving to a file (both in the upper section) and to quickly change the program behaviour (lower section)
 
-## 2.1. Adding a criterium to a list
+### 2.1. Adding a criterium to a list
 
-### 2.1.1. Criteria 
+#### 2.1.1. Criteria 
 
 Criteria are split into two categories:
 
@@ -34,7 +34,7 @@ Criteria are split into two categories:
 
 Both are exclusively checked depending on the current window. 
 
-### 2.1.1.1. Browser matches
+#### 2.1.1.1. Browser matches
 
 The rules to detect a browser are predefined for the following browsers out of the box:
 
@@ -49,7 +49,7 @@ To edit these rules, open the settings (cf. Changing program settings) and edit 
 A browser match requires the "website"-type to be selected. 
 
 
-### 2.1.1.2. Program matches
+##### 2.1.1.2. Program matches
 
 A program, for DistractLess, is any application that is not considered a browser - and therefore doesn't match the `BrowserClasses` and `BrowserExes` with their respective class and exe as displayed by the window spy. For people who don't have autohotkey itself installed and are using the compiled version of the window spy in `DistractLess\includes\DistractLess_WindowSpy.exe`. Keep the window open and click on the browser you want to add. 
 
@@ -72,7 +72,7 @@ Now that you have added any possible browsers you might be using, let's go over 
 
 A program is only matched according to its window title against any ***p***rogram-condition currently visible within the top two listviews visible in figure 1.
 
-### 2.1.2. Syntax
+#### 2.1.2. Syntax
 
 
 DistractLess always checks if the current window's title _contains_ the substring. There is no distinction made between upper and lowercase, only the order of symbols must match anywhere within the current window's title.
@@ -87,7 +87,7 @@ A few notes:
 
 These restrictions are necessary so the program doesn't suddenly start closing everything in an uncontrollable manner.
 
-### 2.1.3. Adding an existing window's conditions
+#### 2.1.3. Adding an existing window's conditions
 
 When the main gui (cf. Figure 1) is open, you can press `Alt+e` to launch a helper-tool for setting conditions faster.
 
@@ -144,7 +144,7 @@ When setting up criteria sets for this mode, please ensure you are running in [d
 A detailed flowsheet of each mode can be found in [5. Understanding the filter](#5-understanding-the-filter).
 
 
-### 3. Accessing and editing the settings
+## 3. Accessing and editing the settings
 
 In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_ (cf. Figure 5). You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (cf. Figure 6). 
 Alternatively, pressing `Ctrl+O` while  the main window is active will also open the GUI.
@@ -169,7 +169,7 @@ These cases can be identified because the "Default:...."- and "Type:...."- infor
 
 Settings are autosaved upon change or closing of the window. Most settings take effect immediately, but some require a program restart.
 
-### 4. Entering and exiting diagnostics-mode
+## 4. Entering and exiting diagnostics-mode
 
 In order to enter diagnostics mode, doubleclick the fifth section of the toolbar, saying either "Running in normal mode" or "Running in diagnostics mode". Doubleclicking will enter and exit that mode. 
 
@@ -193,7 +193,7 @@ Displayed will be
 
 
 
-### 5. Understanding the filter 
+## 5. Understanding the filter 
 
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
@@ -219,11 +219,11 @@ Afterwards, refer to the figures 10-13 for the working mechanisms of the differe
 
 ![Figure 13: Logic for "Both"-mode, with black trumping white](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_BlackTrumpsWhiteLogic.png "")
 
-### 6. Hotkeys
+## 6. Hotkeys
 
 All Hotkeys are active while GUIs are active, and most are restricted to the main-gui, except when noted.
 
-#### 6.1. Main Gui
+### 6.1. Main Gui
 
 | Hotkey | Function
 |:------------------|:------------------|
@@ -268,7 +268,7 @@ When entering a password to unlock the GUI[^3] or setting the unlock-time[^2], t
 
 Table 3: Hotkeys available when locking/unlocking the GUI via Password/Setting time
 
-### 7. Locking the Gui
+## 7. Locking the Gui
 
 
 
@@ -305,7 +305,7 @@ If `LockingBehaviour` is set to `Password-protected`, a password check is perfor
 
 
 
-### 8. Overview over Settings
+## 8. Overview over Settings
 
 | Hotkey | respective_function| Type | Default
 |:-------------|:------------------|:--------|:--------|
@@ -332,7 +332,7 @@ bAlwaysAskPW | When checked, the gui is always locked (equivalent to left-clicki
 Table 5: Settings of the program. All non-bolded settings have little importance and should not necessarily be customised.  Inversely, bolded settings are recommended to be edited.
 
 
-### 9. Credits
+## 9. Credits
 
 This project hinges on a lot of code by others. The following table gives an overview over what functions are written by whom - if I could attribute a function properly.
 
@@ -341,17 +341,17 @@ All Functions below have the URL at which they were retrieved stated.
 
 | Function | Author | Link
 |:------------------|:------------------|:------------------|
-|	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
-|	st_wordwrap | tidbit | located at https://www.autohotkey.com/boards/viewtopic.php?t=53
+|	HasVal | jNizM | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
+|	st_wordwrap | tidbit | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=53
 |	st_removeDuplicates | see above
 |	st_count | see above
 |	WriteINI/ReadINI | wolf_II | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
 |	hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
 |	HideFocusBorder | this specific version by "just me" | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
-|	getURL | anonymous1184 | adopted from reddit: https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
+|	getURL | anonymous1184 | adopted from https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
 |	ACC.ahk | could not find definitive author | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=26201
 |	CodeTimer | CodeKnight | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
-|	f_TrayIconSingleClickCallBack | Lexikos | retrieved from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
+|	f_TrayIconSingleClickCallBack | Lexikos | adopted from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 |	NotifyTrayClick | SKAN | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=81157
 |	TF_ReplaceInLines | forum name ahk7, github hi5 | retrieved from https://www.autohotkey.com/boards/viewtopic.php?f=6&t=576
 |	TF_GetData | see above
@@ -362,6 +362,7 @@ All Functions below have the URL at which they were retrieved stated.
 
 Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:45 CET.
 
+## 10.
 
 [^1]: Note that while this is valid Regex-syntax, the program does _not_ perform a regex-search. The `Instr()`-function is used. This syntax is solely used because I needed something that can be expected not to be an actual pattern a user is looking for.
 [^2]:Only possible if "LockingBehaviour" is set to "Time-protected".
