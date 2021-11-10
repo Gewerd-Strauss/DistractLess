@@ -373,6 +373,7 @@ All Functions below have the URL at which they were retrieved stated.
 
 Table 6: Contributed Code by others. All URL's last checked as of 09.11.2021 19:45 CET.
 
+## 10.
 
 
 [^1]: Note that while this is valid Regex-syntax, the program does _not_ perform a regex-search. The `Instr()`-function is used. This syntax is solely used because I needed something that can be expected not to be an actual pattern a user is looking for.
