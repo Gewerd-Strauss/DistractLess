@@ -180,9 +180,9 @@ In order to enter diagnostics mode, doubleclick the fifth section of the toolbar
 In diagnostics mode, windows will not be closed. Instead, information on matches that _would have_ closed the current window/tab will be displayed. I intend to change this mode so that information on why a particular window is _not_ matched will be displayed in those casees as well.
 
 
-![Figure 8: Diagnostics information](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\DL_Diagnostics.PNG "")
+![Figure 8: Diagnostics information](Documentation\DL_Diagnostics.png "")
 
-![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.PNG "")
+![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.png "")
 
 Displayed will be
 
@@ -199,7 +199,7 @@ Displayed will be
 
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
-![Figure 9: Preliminary Checking routine of the filter](D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\Documentation\Prelim Checks.png "")
+![Figure 9: Preliminary Checking routine of the filter](Documentation\DL_PrelimChecks.png "")
 ![Figure 9: Preliminary Checking routine of the filter](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_PrelimChecks.png "")
 
 Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
@@ -211,7 +211,6 @@ Afterwards, refer to the figures 10-13 for the working mechanisms of the differe
 ![Figure 11: Logic for Black-only mode](Documentation\DL_BlackOnlyLogic.png "")
 
 ![Figure 11: Logic for Black-only mode](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_BlackOnlyLogic.png "")
-CONTINUE THE Flowchart in the browser.
 
 ![Figure 12: Logic for "Both"-mode, with white trumping black](Documentation\DL_WhiteTrumpsBlackLogic.png "")
 
@@ -338,8 +337,9 @@ Table 5: Settings of the program. All non-bolded settings have little importance
 
 This project hinges on a lot of code by others. The following table gives an overview over what functions are written by whom - if I could attribute a function properly.
 
-For all functions, see the function definition and associated documentation for more details. License-files are located under A_SCriptDir\DistractLess_Storage\licenses where required.
-	All Functions below have the URL at which they were retrieved stated.
+For all functions, see the function definition and associated documentation for more details. License-files are located under `A_SCriptDir\DistractLess_Storage\licenses` where required.
+All Functions below have the URL at which they were retrieved stated.
+
 | Function | Author | Link
 |:------------------|:------------------|:------------------|
 |	HasVal | jNizM | https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
