@@ -189,9 +189,9 @@ In order to enter diagnostics mode, doubleclick the fifth section of the toolbar
 In diagnostics mode, windows will not be closed. Instead, information on matches that _would have_ closed the current window/tab will be displayed. I intend to change this mode so that information on why a particular window is _not_ matched will be displayed in those casees as well.
 
 
-![Figure 8: Diagnostics information](Documentation\DL_Diagnostics.png "")
+![Figure 8: Diagnostics information](Documentation\DL_Diagnostics.PNG "")
 
-![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.png "")
+![Figure 8: Diagnostics information](https://github.com/Gewerd-Strauss/DistractLess/blob/main/Documentation/DL_Diagnostics.PNG "")
 
 Displayed will be
 
