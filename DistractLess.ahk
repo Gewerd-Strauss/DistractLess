@@ -18,8 +18,8 @@
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
 	VNpublic=1.5.1.4
 	VN=VNpublic
-	VNdev=1.5.1.4                                                                    
-	LE=11.11.2021 13:14:29                                                       
+	VNdev=1.5.2.4                                                                    
+	LE=11.11.2021 16:34:56                                                       
 	AU=Gewerd Strauss
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
 	;}______________________________________________________________________________________
