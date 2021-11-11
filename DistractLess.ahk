@@ -16,10 +16,10 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VNpublic=1.5.0.4
+	VNpublic=1.5.1.4
 	VN=VNpublic
-	VNdev=1.5.0.4                                                                    
-	LE=10.11.2021 13:19:42                                                       
+	VNdev=1.5.1.4                                                                    
+	LE=11.11.2021 09:36:23                                                       
 	AU=Gewerd Strauss
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
 	;}______________________________________________________________________________________
@@ -334,7 +334,7 @@ sUnlockPassword=-1
 		DefaultTime:=LastSessionSettings[5].5
 		gosub, lLockProgram
 	}
-	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
+	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime
 	gosub, lUpdateStatusOnStatusBar
 	if IniObj["General Settings"].bShowOnProgramStart ; && (!bRestoreLastSession)
 	{
@@ -1054,7 +1054,7 @@ sUnlockPassword=-1
 	}
 	return
 	lEnableEnforceRules:
-	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if gui is hidden again. Because this gui is always the last gui to be visible whenever you close any submenu, it is also the last one to be active when "closing" the GUI altogether - Hence if it is hidden, reenable. 
+	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if gui is hidden again. Because this gui is always the last gui to be visible whenever you close any submenu, it is also the last one to be active when "closing" the GUI altogether - Hence if it is hidden, reenable. 
 	; Main-Gui
 	return
 	lDisableEnforceRules:
@@ -1088,14 +1088,14 @@ sUnlockPassword=-1
 		guicontrol, focus, sCriteria_Substring
 		gosub, lUpdateStatusOnStatusBar
 	}
-	;Settimer, lCheckifGui1IsVisible, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again. ;; Feels like 
+	;Settimer, lCheckifGui1IsVisible, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again. ;; Feels like 
 	return
 
 	lCheckifGui1IsVisible:
 	if !Winactive("DistractLess_1")
 	{
 		Settimer, lCheckifGui1IsVisible, Off
-		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
+		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime
 		ttip("not visible, renenable checker routine")
 	}
 	Else
@@ -1276,7 +1276,7 @@ sUnlockPassword=-1
 		}
 		gui, add, text, yp+90 xs  vTextHorizontalLine w%vWidthCentralGroupBox% 0x10  ;Horizontal Line > Etched Gray
 		gui, add, text, yp+30 xs+%vPositionCenteredSliderText% vTextSelectFilterMode, Select &Filter Mode
-		if IniObj["GeneralSettings"].bAllowWhiteOnly
+		if IniObj["General Settings"].bAllowWhiteOnly
 			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, White|Both||Black
 		Else
 			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, Both||Black
@@ -1792,7 +1792,7 @@ sUnlockPassword=-1
 		}
 		Else ; enable them again
 		{
-			Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
+			Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again.
 			gosub, lUpdateStatusOnStatusBar
 			if bIsLocked
 				return
@@ -1873,7 +1873,7 @@ sUnlockPassword=-1
 			Settimer, lEnforceRules, off
 			if DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,1)
 				gosub, lLoadSettingsFromIniFile
-			Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
+			Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window
 		}
 		else if ((((A_GuiEvent="R") && (A_EventInfo=3)) && bEnableAdvancedSettings) || bEnterFromTrayMenu) ; double right click: Create Settings
 		{
@@ -1892,7 +1892,7 @@ sUnlockPassword=-1
 			#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
 			WinWaitNotActive, IniFileCreator 8
 			gosub, lGuiCreate_1
-			Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
+			Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window
 		}
 		else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=5))
 		{
@@ -2121,7 +2121,7 @@ sUnlockPassword=-1
 	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 	if DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0) ; settings have changed
 		gosub, lLoadSettingsFromIniFile
-	; Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
+	; Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again.
 	return
 	lOpenHiddenSettings:
 	gosub, lGuiHide_1
@@ -2129,7 +2129,7 @@ sUnlockPassword=-1
 	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 	if DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,1) ; settings have changed
 		gosub, lLoadSettingsFromIniFile
-	; Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer if program is switched on again.
+	; Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again.
 	return
 
 
@@ -3279,7 +3279,7 @@ sUnlockPassword=-1
 		SetTimer, lEmergencyUnlock, off
 		if dbFlag
 			ttip(A_ThisLabel "15",4)
-		Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime
+		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime
 		return 
 	}
 	
@@ -3339,7 +3339,7 @@ sUnlockPassword=-1
 	
 	WinWaitNotActive, IniFileCreator 8
 	gosub, lGuiCreate_1
-	Settimer, lEnforceRules, % IniObj["GeneralSettings"].RefreshTime ; reactivate the timer once we've closed the window
+	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window
 	return
 
 	lHiddenSettings:
