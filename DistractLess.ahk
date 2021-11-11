@@ -274,7 +274,8 @@ sUnlockPassword=-1
 		
 		DL_TF_ReplaceInLines("!D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\DistractLess_Storage\INI-Files\DistractLessSettings.ini",1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
 		;fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
-		ttip("Line:" Exception("",-1).Line)
+		if (GetKeyState("CapsLock","T") and bIsDevPC) 
+			ttip("Line:" Exception("",-1).Line)
 	}
 	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
 		OnExit("f_RestartWithLastBundle")
@@ -464,7 +465,7 @@ sUnlockPassword=-1
 	GuiControl, focus, vLV4
 	return
 	^L::										;; Gui1 || open locking prompt
-	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+	if (GetKeyState("CapsLock","T") and bIsDevPC) 
 		ttip("line 451:`nbefore going into 'lLockProgram'-routine")
 	if IniObj["Invisible Settings"].bAllowLocking
 		gosub, lLockProgram
@@ -1096,10 +1097,7 @@ sUnlockPassword=-1
 	{
 		Settimer, lCheckifGui1IsVisible, Off
 		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime
-		ttip("not visible, renenable checker routine")
 	}
-	Else
-		ttip("visible")
 	Return
 
 	lGuiCreate_1:
@@ -2055,12 +2053,12 @@ sUnlockPassword=-1
 			else if (IniObj["General Settings"].LockingBehaviour="Time-protected")
 			{
 				if (A_Now >=DefaultTime) || ((GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin))
-				{
+				{ ; unlock
 					bIsLocked:=false
 					gosub, lCallBack_EnableProgram
 				}
 				else
-					ttip("keep locked")
+					ttip("Time has not passed. GUI is kept locked.")
 				return
 			}
 		}
@@ -2846,7 +2844,6 @@ sUnlockPassword=-1
 		SendInput, {Left}{Right}
 		WinWaitClose
 		gui, cQ: destroy
-		;ttip(f_cQ_Callback)
 		return {(b):1, (b2):0, (b3):-1}[f_cQ_Callback]
 	}
 	f_cQ_Callback()
@@ -2942,7 +2939,6 @@ sUnlockPassword=-1
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
-		; ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
 		Arr:=f_CreateStoredArrays()
 		Count:=0
@@ -2951,23 +2947,23 @@ sUnlockPassword=-1
 			if (Arr[A_Index].MaxIndex()!="")
 				Count+=Arr[A_Index].MaxIndex()
 		}
-		IF dbFlag
-			m("Executing " A_ThisFunc,ExitReason,Arr)
+		if (GetKeyState("CapsLock","T") and bIsDevPC)  && dbFlag
+				m("Executing " A_ThisFunc,ExitReason,Arr)
 		if !testFlag
 			fWriteIni(Arr,INI_File)
 		else
 			m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
-		if  (!GetKeyState("CapsLock", "p")) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload")
+		if  (!GetKeyState("CapsLock", "p") || !bIsDevPC) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload") ;; I am not sure if the first conditional is correct or not. If capslock is not pressed, the bIsDevPC is evaluated. That will be false for users, hence the first condition is true, second one is also true and by definition third one as well. Therefore, go on and restart the program.
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+				if (GetKeyState("CapsLock","T") and bIsDevPC) 
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+				if (GetKeyState("CapsLock","T") and bIsDevPC)
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk
 			}
@@ -2975,11 +2971,14 @@ sUnlockPassword=-1
 	}
 	return
 	f_RestartWithSpecificBundle(ExitReason,ExitCode)
-	{
+	{ 	; restarts the script with a default, specified bundle
 		global
 		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
 			return
-		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+		if bIsDevPC
+			ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+		Else
+			OverWriteRestart:=GetKeyState("CapsLock", "p")		
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		if FileExist(IniObj["General Settings"].sDefaultBundle) && (IniObj["General Settings"].sDefaultBundle!="")
@@ -3022,17 +3021,17 @@ sUnlockPassword=-1
 			else
 				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
 		}
-		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload") ; at this point, the actual ation of the reload fn is already finished → means reloading via menu or reload doesn't need to invoke _another_ reload
+		if  (!OverWriteRestart || !bIsDevPC) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload") ; at this point, the actual ation of the reload fn is already finished → means reloading via menu or reload doesn't need to invoke _another_ reload
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+				if (GetKeyState("CapsLock","T") and bIsDevPC)
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+				if (GetKeyState("CapsLock","T") and bIsDevPC)
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk
 			}
@@ -3040,11 +3039,14 @@ sUnlockPassword=-1
 	}
 	return
 	f_RestartEmpty(ExitReason,ExitCode)
-	{	
+	{	; restarts the script without loading any condition-set
 		global
 		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
 			return
-		ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+		if bIsDevPC
+			ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
+		Else
+			OverWriteRestart:=GetKeyState("CapsLock", "p")
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
 			m(A_ThisFunc)
 		/*
@@ -3060,7 +3062,7 @@ sUnlockPassword=-1
 			; Reload:	The script is being reloaded via the Reload command or menu item.
 			; Single:	The script is being replaced by a new instance of itself as a result of #SingleInstance.
 		*/
-		if  (!OverWriteRestart) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload")
+		if  (!OverWriteRestart || !bIsDevPC) && (ExitReason ~= "iAD)Close|Error|Exit")  && !(ExitReason ~= "iAD)Logoff|Shutdown|Menu|Reload")
 		{
 			if A_IsCompiled
 			{
@@ -3078,7 +3080,7 @@ sUnlockPassword=-1
 	}
 	return
 	f_DoNothingOnExit(ExitReason,ExitCode)
-	{
+	{ ; yes. this is a stupid function. 
 		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
 			return
 	}
@@ -3296,7 +3298,6 @@ sUnlockPassword=-1
 
 	f_CreateTrayMenu(IniObj)
 	{ ; facilitates creation of the tray menu
-		VNI=1.0.0.6
 		menu, tray, Add, Show Gui, Gui1_ShowLogic
 		menu, tray, add,
 		Menu, Misc, add, Open Script-folder, lOpenScriptFolder
@@ -3316,8 +3317,7 @@ sUnlockPassword=-1
 		menu, tray, add,
 		return
 	}
-	lExitWOSaving:
-	; this is useful if you just want to terminate the program without altering any files. Only accessible to Devs.
+	lExitWOSaving: ; this is useful if you just want to terminate the program without altering any files. Only accessible to Devs.
 	global bIsExitWOSaving:=true
 	OnExit("f_DoNothingOnExit",-1)
 	ExitApp
@@ -3377,9 +3377,6 @@ sUnlockPassword=-1
 			"currTip" to select a tooltip between 1 and 20. Tooltips are removed and handled
 			separately from each other, hence a removal of ttip20 will not remove tt14 
 		*/
-		
-		;if (text="TTIP: Test")
-			;m(to)
 		if (text="")
 			gosub, lRemovettip
 		static ttip_text
@@ -3396,9 +3393,7 @@ sUnlockPassword=-1
 		lUnevenTimers:=false 
 		MouseGetPos,xp1,yp1
 		if (mode=4) ; set text offset from cursor
-		{
 			yp:=yp1+15
-		}	
 		else
 		{
 			if (xp="NaN")
