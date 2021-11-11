@@ -18,8 +18,8 @@
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
 	VNpublic=1.5.1.4
 	VN=VNpublic
-	VNdev=1.5.1.4                                                                    
-	LE=11.11.2021 13:14:29                                                       
+	VNdev=1.5.2.4                                                                    
+	LE=11.11.2021 16:34:56                                                       
 	AU=Gewerd Strauss
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
 	;}______________________________________________________________________________________
@@ -201,10 +201,10 @@ bEditDirectStringIn_f_EditArrayElement=0
 ;bEditDirectStringIn_f_EditArrayElement Type: Checkbox
 ;bEditDirectStringIn_f_EditArrayElement Default: 0
 ;bEditDirectStringIn_f_EditArrayElement CheckboxName: Do you want to edit the raw information string when editing an entry?
-NoFilterClasses=TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,
+NoFilterClasses=TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
 ;NoFilterClasses Comma-separated list of ahk_classes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
 ;NoFilterClasses Type: Text 
-;NoFilterClasses Default: TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,
+;NoFilterClasses Default: TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
 NoFilterExes=Code.exe,Taskmgr.exe,Autohotkey.exe
 ;NoFilterExes Comma-separated list of ahk_exes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
 ;NoFilterExes Type: Text 
@@ -248,8 +248,12 @@ sUnlockPassword=-1
 	if (IniOBj["General Settings"].BrowserNewTabs=-1) ; initialising for first time, notify user to edit this.
 	{
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
-		Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab" ; laziness on my end, as I often need to rewrite my settings-file when testing, and don't want to search out all titles again.
-		gosub, lLaunchWindowSpy
+		if !bIsDevPC
+		{
+			gosub, lLaunchWindowSpy	
+		}
+		if bIsDevPC
+			Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab" ; laziness on my end, as I often need to rewrite my settings-file when testing, and don't want to search out all titles again.
 		DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
 		gosub, lLoadSettingsFromIniFile
 		if (IniOBj["General Settings"].BrowserNewTabs=-1) ; user has not changed this setting so far, don't start the programn
@@ -692,7 +696,7 @@ sUnlockPassword=-1
 	{
 		if !bIsProgramOn ; don't continue if program is turned off.
 			return
-		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=false ; reset flags for each call. 
+		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=bCurrWindowIsBrowser:=false ; reset flags for each call. 
 		sCurrentURL:=""
 		sCurrTitle:=""
 		WinGetActiveTitle, sCurrTitle
@@ -702,6 +706,7 @@ sUnlockPassword=-1
 			return
 		if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe) ; don't get url if we are not in a browser
 		{
+			bCurrWindowIsBrowser:=True
 			sCurrentURL:=""
 			sCurrentURL:=fgetUrl(WinActive("A"))
 			if Instr(sCurrTitle, " || "sCurrentURL) ;; fallback safety for the authors own convenience, as the browser tab names all contain the url as well due to a browser plugin. This ensures my testing works on "normal" tab-names.
@@ -735,10 +740,12 @@ sUnlockPassword=-1
 			{
 				case "White": ;if (vActiveFilterMode="White") ; whitelist only
 				{
+					bWhiteContainsThisTitle:=True
 					for k,v in ACtiveArrays[1]
 					{
 						RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-						bWhiteContainsThisTitle:=true ;; start with the assumption that it is allowed to stay open.
+						if ((stype=="w") && bCurrWindowIsBrowser) || ((stype=="p") && !bCurrWindowIsBrowser)
+							bWhiteContainsThisTitle:=true ;; start with the assumption that it is allowed to stay open.
 						if (stype="w") ; website
 						{
 							if dbFlag ; debug behaviour
@@ -760,18 +767,26 @@ sUnlockPassword=-1
 							if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
 								if (stype="w") ; website
 									if !Instr(sCurrentURL,sURL) and (sURL!=".*") ; while the title matches, the url specified doesn't → still not a whitelisted page → close || if sURL=".*", it matches every url, so it will not be closed in that case, because we have already established that the title matches.
+									{
+										MatchedType:=stype
 										bWhiteContainsThisTitle:=false
+									}
 							if bWhiteContainsThisTitle
 								return ; we have a match in whitelist -> donÄt close the current window, and no need to continue the search.
 						}
 						Else
 						{
-							MatchedTitleEntry:=sName
-							bWhiteContainsThisTitle:=false ; we are not matching the title, hence we don't have to continue to search, and just close it now.
+							if ((stype=="w") && bCurrWindowIsBrowser) || ((stype=="p") && !bCurrWindowIsBrowser)
+							{
+								MatchedTitleEntry:=sName
+								MatchedType:=stype
+								bWhiteContainsThisTitle:=false ; we are not matching the title, hence we don't have to continue to search, and just close it now.
+							}
 						}
-						if !bWhiteContainsThisTitle
-							bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 					}
+					stype:=MatchedType
+					if !bWhiteContainsThisTitle
+						bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 				}
 				case "Both": 	;else if (vActiveFilterMode="Both") ; both
 				{
@@ -3230,9 +3245,12 @@ sUnlockPassword=-1
 				; }
 				if dbFlag
 					ttip(A_ThisFunc "9",4)
-				
-					; sURL:=""
-				str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]" (MatchedTitleEntry=".*"?" - See Current URL and Matched URL for more Info":"")"`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
+				if (vActiveFilterMode="White")
+				{
+					str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[ / ]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[none]]" (MatchedTitleEntry=".*"?" - See Current URL and Matched URL for more Info":"")"`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
+				}
+				else
+					str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]" (MatchedTitleEntry=".*"?" - See Current URL and Matched URL for more Info":"")"`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
 				if dbFlag
 					ttip(A_ThisFunc "10",4)
 				if IniObj["General Settings"].EnableDiagnosticMode
@@ -3258,11 +3276,12 @@ sUnlockPassword=-1
 		;  order matters → if we open the messagebox first, the entire PC is softlocked because code cannot progress, and the code-stopping msgbox cannot be closed because the input is fully blocked.
 		if dbFlag ; debug behaviour
 		{
+			hk(0,0)
+			if (IniObj["General Settings"].bEnableBlockingBanner) ; make sure we are not softlocking the program
+				hk(0,0)
 			if (str!="")
 			{
 				ttip(A_ThisFunc "13: Closing " sCurrWindowTitle " with Class " sCurrClass)
-				if (IniObj["General Settings"].bEnableBlockingBanner) ; make sure we are not softlocking the program
-					hk(0,0)
 				m("Diagnostics:`n" (stype="w"? "Website will be closed.":"Program will be closed." ) "`n" str)
 			}
 		}
