@@ -13,9 +13,9 @@ For more information, see [5. Understanding the filter mechanism](#5-understandi
 
 ## 2. The GUI
 
-[Figure 1: The Main Window][F1]
-
 ![Figure 1: The Main Window][F1]
+
+[Figure 1: The Main Window][F1]
 
 The main overlay can be broken up into three different sections:
 The left section displays stored and active _whitelisted_ strings. The right third displays _blacklisted_ ones.
@@ -60,9 +60,9 @@ In case of the following example, you would add `MozillaWindowClass` to `Browser
 
 You can ignore the first and last line of this first field (under "Window Title, Class and Process"), as well as all other info displayed.
 
-[Figure 2: relevant contents of the window spy overlay][F2]
-
 ![Figure 2: relevant contents of the window spy overlay][F2]
+
+[Figure 2: relevant contents of the window spy overlay][F2]
 
 ---
 
@@ -94,9 +94,9 @@ The following combinations are **not** possible. These restrictions are necessar
 
 When the main gui (_cf_ Figure 1) is open, you can press <kbd>Alt</kbd>+<kbd>e</kbd> to launch a helper-tool for setting conditions faster.
 
-[Figure 3: Choose a condition from existing windows][F3]
-
 ![Figure 3: Choose a condition from existing windows][F3]
+
+[Figure 3: Choose a condition from existing windows][F3]
 
 1. After the window of figure 3 opens, navigate to the desired program/browser tab and hold <kbd>Ctrl</kbd> while left-clicking **onto the desired window**.
 1. The respective title (and url if it is considered a browser) are added into the edit fields seen in figure 4. The conditions' type (website or program) is selected automatically.
@@ -104,9 +104,9 @@ When the main gui (_cf_ Figure 1) is open, you can press <kbd>Alt</kbd>+<kbd>e</
 1. Decide wether or not to add it as a blacklist or whitelist-criteria.
 1. If you want to generalize a certain criteria, replace title or URL substring with `.*`, according to the rules displayed in [syntax](#212-syntax).
 
-[Figure 4: Create a (website) condition][F4]
-
 ![Figure 4: Create a (website) condition][F4]
+
+[Figure 4: Create a (website) condition][F4]
 
 Alteratively, you can just create your conditions by hand, but usually that will be more prone to error and take longer :P
 
@@ -151,23 +151,23 @@ A detailed flow sheet of each mode can be found in [5. Understanding the filter]
 In order to access the settings, double-click the author-section of the bar at the bottom of the main window _once_ (_cf_ Figure 5). You should hear a high-pitched double-beep, but you might also not depending on a variety of factors outside of my control. Afterwards, every double-click on the second section (DistractLess v.W.X.Y.Z) will open the settings dialogue (_cf_ Figure 6).
 Alternatively, pressing <kbd>Ctrl</kbd>+<kbd>o</kbd> while the main window is active will also open the GUI.
 
-[Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.][F5]
-
 ![Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.][F5]
+
+[Figure 5: Closeup of the menu bar. Notice that the lock symbol counts as the first section.][F5]
 
 Each setting comes with a small description about its use case, and possible options. The type of the input is displayed, as well as a default value which is restored when pressing "Restore". Settings are saved automatically. In the example of figure 6, we are looking at the `OnExitBehaviour`, and a dropdown-list displays possible options.
 
-[Figure 6: Settings Menu][F6]
-
 ![Figure 6: Settings Menu][F6]
+
+[Figure 6: Settings Menu][F6]
 
 Figure 7 displays a known, but to me not solvable bug. The description displayed can sometimes be muddied by the display of another setting's description.
 
 These cases can be identified because the "Default:..." and "Type:..." information is displayed twice. In these cases, the _lowest_ description is the "correct" one.
 
-[Figure 7: Faulty double description][F7]
-
 ![Figure 7: Faulty double description][F7]
+
+[Figure 7: Faulty double description][F7]
 
 Settings are auto-saved upon change or closing of the window. Most settings take effect immediately, but some require a program restart.
 
@@ -179,9 +179,9 @@ In order to enter diagnostics mode, double-click the fifth section of the toolba
 
 In diagnostics mode, windows will not be closed. Instead, information on matches that _would have_ closed the current window/tab will be displayed. I intend to change this mode so that information on why a particular window is _not_ matched will be displayed in those cases as well.
 
-[Figure 8: Diagnostics information][F8]
-
 ![Figure 8: Diagnostics information][F8]
+
+[Figure 8: Diagnostics information][F8]
 
 Displayed will be
 
@@ -196,27 +196,27 @@ Displayed will be
 
 At each call to the filtering subroutine, the steps in figure 9 must be passed successfully before the active window's information is compared.
 
-[Figure 9: Preliminary Checking routine of the filter][F9]
-
 ![Figure 9: Preliminary Checking routine of the filter][F9]
+
+[Figure 9: Preliminary Checking routine of the filter][F9]
 
 Afterwards, refer to the figures 10-13 for the working mechanisms of the different modes.
 
-[Figure 10: Logic for White-only mode][F10]
-
 ![Figure 10: Logic for White-only mode][F10]
 
-[Figure 11: Logic for Black-only mode][F11]
+[Figure 10: Logic for White-only mode][F10]
 
 ![Figure 11: Logic for Black-only mode][F11]
 
-[Figure 12: Logic for "Both"-mode, with white trumping black][F12]
+[Figure 11: Logic for Black-only mode][F11]
 
 ![Figure 12: Logic for "Both"-mode, with white trumping black][F12]
 
-[Figure 13: Logic for "Both"-mode, with black trumping white][F13]
+[Figure 12: Logic for "Both"-mode, with white trumping black][F12]
 
 ![Figure 13: Logic for "Both"-mode, with black trumping white][F13]
+
+[Figure 13: Logic for "Both"-mode, with black trumping white][F13]
 
 ## 6. Hotkeys
 
@@ -283,17 +283,17 @@ If `LockingBehaviour` is set to **Time-protected**, the time at which the GUI is
 
 By default, the GUI is locked until the third next full hour has passed. I.e. if you lock et 14:49, the default time is calculated to be 17:00:00. Not 18:00:00. See the setting `LockingDefaultOffsetHours` in the settings. Only integers (and therefore full hours) can be preset.
 
-[Figure 14: Set Time at which the GUI is unlocked again][F14]
-
 ![Figure 14: Set Time at which the GUI is unlocked again][F14]
+
+[Figure 14: Set Time at which the GUI is unlocked again][F14]
 
 ### 7.2 Password-protected
 
 If `LockingBehaviour` is set to **Password-protected**, a password check is performed against the password set by the user during the first time the program has been started. The password submits itself if it is correct.
 
-[Figure 15: Enter Password to unlock the GUI again][F15]
-
 ![Figure 15: Enter Password to unlock the GUI again][F15]
+
+[Figure 15: Enter Password to unlock the GUI again][F15]
 
 ## 8. Overview over Settings
 
