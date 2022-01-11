@@ -18,21 +18,21 @@
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
 	VNpublic=1.5.1.4
 	VN=VNpublic
-	VNdev=1.5.2.4
-	LE=11.11.2021 16:34:56
+	VNdev=1.5.3.4                                                                    
+	LE=11.01.2022 12:34:28                                                       
 	AU=Gewerd Strauss
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
 	;}______________________________________________________________________________________
 	;{#[Developer toggles]
-	global bLockOutAdmin:=true + 0									;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the
-																	;; second check refers to the computername, and it is unlikely you'll have the same. Obviously, if you are up to changing this
-																	;; value also nothing stops you from changing the respective hard-coded comparison.
-
+	global bLockOutAdmin:=true + 0									;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the 
+																	;; second check refers to the computername, and it is unlikely you'll have the same. Obviously, if you are up to changing this 
+																	;; value also nothing stops you from changing the respective hard-coded comparison. 
+	
 	global bIsDevPC:=(A_ComputerName="DESKTOP-FH4RU5C"?1:0) + 0 	;; overwrite this line to true if you want to be able to break out of locking yourself out.
 																	;; that is the only actually functional addition this flag yields, aside from a few coded-in debug infos about some arrays.
-
-	global bIsExitWOSaving:=false 									;; necessary to allow dev's to exit the program without storing the current listviews to file.
-
+	
+	global bIsExitWOSaving:=false 									;; necessary to allow dev's to exit the program without storing the current listviews to file. 
+	
 	if ((!bIsDevPC && !Winactive("Visual Studio Code")) || (bIsDevPC && bLockOutAdmin && !Winactive("Visual Studio Code")))
 		Menu, Tray, NoStandard
 	;}______________________________________________________________________________________
@@ -53,7 +53,7 @@
 	bRestoreLastSession:=false + 0
 	bGuiHasBeenResized:=false + 0
 	bShowDebugPanelINMenuBar:=false + 0
-	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 		CodeTimer()
 	IniSettingsFilePath:=A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.Ini"
 	if !Instr(FileExist(A_ScriptDir "\DistractLess_Storage"),"D") ; check if folder structure exists
@@ -66,7 +66,7 @@
 ;General Settings General Settings for DistractLess
 RefreshTime=200
 ;RefreshTime Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
-;RefreshTime Type: Integer
+;RefreshTime Type: Integer 
 ;RefreshTime Default: 200
 LockingBehaviour=Time-protected
 ;LockingBehaviour set wether or not to lock until
@@ -77,11 +77,11 @@ LockingBehaviour=Time-protected
 LockingDefaultOffsetHours=3
 ;LockingDefaultOffsetHours Set the number of hours used when calculating the default unlocking time when locking the program for a set time.
 ;LockingDefaultOffsetHours Value in hours.
-;LockingDefaultOffsetHours Type: Integer
+;LockingDefaultOffsetHours Type: Integer 
 ;LockingDefaultOffsetHours Default: 3
 bAlwaysAskPW=0
 ;bAlwaysAskPW When checked, the gui is always locked (equivalent to left-clicking the padlock-icon on the main GUI window), and a password is checked.
-;bAlwaysAskPW Type: Checkbox
+;bAlwaysAskPW Type: Checkbox 
 ;bAlwaysAskPW Default: 0
 ;bAlwaysAskPW CheckboxName: Do you want to always lock the GUI?
 OnExitBehaviour=Restart with specific bundle
@@ -99,60 +99,60 @@ OnExitBehaviour=Restart with specific bundle
 ;OnExitBehaviour Default: Restart with specific bundle
 sDefaultBundle=
 ;sDefaultBundle Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program.
-;sDefaultBundle Type: File
+;sDefaultBundle Type: File 
 EnableDiagnosticMode=0
 ;EnableDiagnosticMode Enable Diagnostics-mode for the Closing-function. This results in: CLOSING WINDOWS: more information about matching criteria being displayed, instead of closing the window/tab outright.
 ;EnableDiagnosticMode DoubleClick the fifth part of the statusbar of the main gui to enable and disable diagnostic mode quickly.
-;EnableDiagnosticMode Type: Checkbox
+;EnableDiagnosticMode Type: Checkbox 
 ;EnableDiagnosticMode Default: 0
 ;EnableDiagnosticMode CheckboxName: Do you want to enable diagnostics mode?
 bAllowWhiteOnly=0
 ;bAllowWhiteOnly Allows the script to run only allowing white-listed windows.
 ;bAllowWhiteOnly Note that this is _very_ restrictive, and if not done with great care, will close just about everything you have.
 ;bAllowWhiteOnly Make sure you prepare and test your whitelist in this mode using by enabling the diagnostics mode before employing it.
-;bAllowWhiteOnly Type: Checkbox
+;bAllowWhiteOnly Type: Checkbox 
 ;bAllowWhiteOnly Default: 0
 ;bAllowWhiteOnly CheckboxName: Do you want to allow white-list-only mode?
 bEnableBlockingBanner=0
 ;bEnableBlockingBanner If checked, the closing function will briefly flash a notification when temporarily disabling all keyboard and mouse input. Another message is sent when keyboard and mouse inputs are restored.
 ;bEnableBlockingBanner If not checked, the kbm will be silently blocked and unblocked.
-;bEnableBlockingBanner Type: Checkbox
+;bEnableBlockingBanner Type: Checkbox 
 ;bEnableBlockingBanner Default: 0
 ;bEnableBlockingBanner CheckboxName: Do you want to enable the banner informing you that the keyboard/mouse is locked?
 BrowserClasses=MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
 ;BrowserClasses Comma-separated list of ahk_classes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
 ;BrowserClasses The ahk_exe of the browser needs to be added to BrowserExes as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
 ;BrowserClasses (Looking at you, Spotify)
-;BrowserClasses Type: Text
+;BrowserClasses Type: Text 
 ;BrowserClasses Default: MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
 BrowserExes=firefox.exe,chrome.exe,iexplore.exe,opera.exe
 ;BrowserExes Comma-separated list of ahk_exes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
 ;BrowserExes The ahk_class of the browser needs to be added to BrowserClasses as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
 ;BrowserExes (Looking at you, Spotify)
-;BrowserExes Type: Text
-;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe,msedge.exe
+;BrowserExes Type: Text 
+;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe,msedge.exe 
 BrowserNewTabs=-1
 ;BrowserNewTabs Comma-separated list of new-tab names for each browser you are using
 ;BrowserNewTabs Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user.
 ;BrowserNewTabs To do so, please replace the "-1" by the names of the new tab in your respective browser(s).
-;BrowserNewTabs Type: Text
+;BrowserNewTabs Type: Text 
 bLVDelete_RequireConfirmation=0
-;bLVDelete_RequireConfirmation If  checked, any action removing items from a ListView requires specific confirmation.
+;bLVDelete_RequireConfirmation If  checked, any action removing items from a listview requires specific confirmation.
 ;bLVDelete_RequireConfirmation If unchecked, this double-check is skipped. Items can still be restored as usual.
-;bLVDelete_RequireConfirmation Type: Checkbox
+;bLVDelete_RequireConfirmation Type: Checkbox 
 ;bLVDelete_RequireConfirmation Default: 0
 ;bLVDelete_RequireConfirmation CheckboxName: Do you want an extra dialogue to confirm when removing items from listviews?
 bStartup=0
 ;bStartup Create shortcut (lnk) in the startup folder for DistractLess to start automatically
 ;bStartup 0=No
 ;bStartup 1=Yes
-;bStartup Type: Checkbox
+;bStartup Type: Checkbox 
 ;bStartup Default: 0
 ;bStartup CheckboxName: Do you want to add this script to start at system bootup?
 sLocationUserBackup=DistractLess_Storage\UserBackups
 ;sLocationUserBackup Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
 ;sLocationUserBackup Choose the folder to store custom lists in via the "Save LV's"-button.
-;sLocationUserBackup Type: Folder
+;sLocationUserBackup Type: Folder 
 ;sLocationUserBackup Default: DistractLess_Storage\UserBackups
 sFontSize_Text=7
 ;sFontSize_Text Set font-size for the following controls:
@@ -176,14 +176,14 @@ sFontType_Listview=Segoe UI
 ;sFontType_Listview Type: DropDown Arial|Calibri|Cambria|Consolas|Comic Sans MS|Corbel|Courier|Courier New|Georgia|Lucidia Console|Lucidia Sans|MS Sans Serif|Segoe UI||Times New Roman|Tahoma|Verdana|System
 ;sFontType_Listview Default: Segoe UI
 bWarningOnFileLoadSettingChanges=1
-;bWarningOnFileLoadSettingChanges Decide wether or not you want to be warned whenever the loading of a stores set of conditions changes the active FilterMode or the active trumping rules. Recommended to be kept on for inexperienced users who are not yet fully aware of the intricacies of how conditions work together.
+;bWarningOnFileLoadSettingChanges Decide wether or not you want to be warned whenever the loading of a stores set of conditions changes the active Filtermode or the active trumping rules. Recommended to be kept on for inexperienced users who are not yet fully aware of the intricacies of how conditions work together.
 ;bWarningOnFileLoadSettingChanges Type: Checkbox
 ;bWarningOnFileLoadSettingChanges Default: 1
-;bWarningOnFileLoadSettingChanges CheckboxName: Do you want to be warned if FilterMode/TrumpingRules changed when loading new conditions?
+;bWarningOnFileLoadSettingChanges CheckboxName: Do you want to be warned if Filtermode/trumpingrules changed when loading new conditions?
 bShowOnProgramStart=1
 ;bShowOnProgramStart Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour)
 ;bShowOnProgramStart This has no effect if no set of conditions is loaded. I.e. if "OnExitBehaviour" is set to "Empty", the GUI will never be shown.
-;bShowOnProgramStart Type: Checkbox
+;bShowOnProgramStart Type: Checkbox 
 ;bShowOnProgramStart Default: 1
 ;bShowOnProgramStart CheckboxName: Do you want to show the GUI after the program has finished its start-routine?
 [Invisible Settings]
@@ -192,7 +192,7 @@ bShowOnProgramStart=1
 bAllowLocking=1
 ;bAllowLocking Allows the gui to be locked from further access until the time specified in has passed, or the password is entered correctly (depending on the mode)
 ;bAllowLocking Note that if this setting is deactivated, the GUI cannot be locked anymore.
-;bAllowLocking Type: Checkbox
+;bAllowLocking Type: Checkbox 
 ;bAllowLocking Default: 1
 ;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
 ;bAllowLocking
@@ -203,21 +203,21 @@ bEditDirectStringIn_f_EditArrayElement=0
 ;bEditDirectStringIn_f_EditArrayElement CheckboxName: Do you want to edit the raw information string when editing an entry?
 NoFilterClasses=TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
 ;NoFilterClasses Comma-separated list of ahk_classes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
-;NoFilterClasses Type: Text
+;NoFilterClasses Type: Text 
 ;NoFilterClasses Default: TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
 NoFilterExes=Code.exe,Taskmgr.exe,Autohotkey.exe
 ;NoFilterExes Comma-separated list of ahk_exes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
-;NoFilterExes Type: Text
+;NoFilterExes Type: Text 
 ;NoFilterExes Default: Code.exe,Taskmgr.exe,Autohotkey.exe
 NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,DistracLess_2
 ;NoFilterTitles Comma-separated list of window Titles which are not filtered, ever. Mostly hard-coded precautions to protect this program and its vital submenus.
-;NoFilterTitles Type: Text
+;NoFilterTitles Type: Text 
 ;NoFilterTitles Default: DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess_5,DistractLess Settings,IniFileCreator,DistracLess_2
 sUnlockPassword=-1
 ;sUnlockPassword Password chosen by the user to unlock the gui again, if LockingBehaviour is set to "Password-protected"
 ;sUnlockPassword Type: Text
 )
-	if FileExist("errorlog.txt") ; make sure the errorlog doesn't grow exponentially on someones system. Realistically, as it is a plain text file, and only the newest errors should be tracked anyways, resetting at 30
+	if FileExist("errorlog.txt") ; make sure the errorlog doesn't grow exponentially on someones system. Realistically, as it is a plain text file, and only the newest errors should be tracked anyways, resetting at 30  
 	{
 		FileGetSize, vErrorlogSize,errorlog.txt, M
 		if vErrorlogSize>30
@@ -250,7 +250,7 @@ sUnlockPassword=-1
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
 		if !bIsDevPC
 		{
-			gosub, lLaunchWindowSpy
+			gosub, lLaunchWindowSpy	
 		}
 		if bIsDevPC
 			Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab" ; laziness on my end, as I often need to rewrite my settings-file when testing, and don't want to search out all titles again.
@@ -275,10 +275,10 @@ sUnlockPassword=-1
 	{
 		InputBox, setPWstr  , Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
 		IniObj["Invisible Settings"].sUnlockPassword:=setPWstr
-
+		
 		DL_TF_ReplaceInLines("!D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\DistractLess_Storage\INI-Files\DistractLessSettings.ini",1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
 		;fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
-		if (GetKeyState("CapsLock","T") and bIsDevPC)
+		if (GetKeyState("CapsLock","T") and bIsDevPC) 
 			ttip("Line:" Exception("",-1).Line)
 	}
 	if (IniObj["General Settings"].OnExitBehaviour="Restart with current bundle")
@@ -291,15 +291,15 @@ sUnlockPassword=-1
 	 OnError("LogError")
 	cause := error
 
-	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle
+	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle 
 	if (IniObj["General Settings"].OnExitBehaviour!="Nothing") && (IniObj["General Settings"].OnExitBehaviour!="Empty Restart")
 	{
-		if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle") && (IniObj["General Settings"].sDefaultBundle!="") ; take the simpler version because the use is _starting_, not _restarting_. In this case, we don't assume to lock the gui anymore because it is the first startup of the day - due to the safety restarts in place, as soon as this program _is_ running, the safety-restart functions take responsibility to start with specifics.
+		if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle") && (IniObj["General Settings"].sDefaultBundle!="") ; take the simpler version because the use is _starting_, not _restarting_. In this case, we don't assume to lock the gui anymore because it is the first startup of the day - due to the safety restarts in place, as soon as this program _is_ running, the safety-restart functions take responsibility to start with specifics. 
 		{
 			LastSessionSettings:=fReadINI(A_ScriptDir "\" IniObj["General Settings"].sDefaultBundle)
-
+			
 		}
-		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle, _or_ we have tried to end the program while it is running. As the file only exists in restart-scenarios or if we choose to "restart with last bundle", we have to check this _after_ we load the possible settings.
+		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle, _or_ we have tried to end the program while it is running. As the file only exists in restart-scenarios or if we choose to "restart with last bundle", we have to check this _after_ we load the possible settings. 
 		{
 			LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
 		}
@@ -344,7 +344,7 @@ sUnlockPassword=-1
 	if IniObj["General Settings"].bShowOnProgramStart ; && (!bRestoreLastSession)
 	{
 		hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
-		if !bLastSessionSettingsNoStringsInArrays
+		if !bLastSessionSettingsNoStringsInArrays 
 			gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 		Else
 			if !vsdb
@@ -352,13 +352,13 @@ sUnlockPassword=-1
 			Else
 				ttip("DistractLess:`nFinished initialising.",,2600)
 	}
-	else if !bRestoreLastSession and !vsdbdddd
+	else if !bRestoreLastSession and !vsdb
 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
-	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 		m("bRestoreLastSession: " bRestoreLastSession,"vsdb: " vsdb , "I need to embed another setting into LastSessionSettings[5] to figure out in which case to display the startup notification, and in which we don't want to display it.","The logic is the following: because right now the current settings are always stored → there is always gonna be a lastSessionrestored now. " )
 
 	SetWorkingDir, %A_ScriptDir%
-	if ((StartTimer) and bIsDevPC and !bLockOutAdmin)
+	if ((StartTimer) and bIsDevPC and !bLockOutAdmin) 
 		CodeTimer()
 	return
 
@@ -366,7 +366,7 @@ sUnlockPassword=-1
 	;{#[Hotkeys Section]
 
 
-	!-:: ;; global || open Gui
+	!-:: ;; global || open Gui 
 	Gui1_ShowLogic:
 	{
 		Settimer, lEnforceRules, Off
@@ -387,14 +387,14 @@ sUnlockPassword=-1
 			}
 			else if (IniObj["General Settings"].LockingBehaviour="Time-protected")
 			{
-				if bIsLocked 				;; we have locked till time is up, so display time
+				if bIsLocked 				;; we have locked till time is up, so display time 
 				{
 					if (A_Now>=DefaultTime)
 					{
 						gosub, lLockProgram
 						gosub, lGuiShow_1
 					}
-					else if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+					else if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 					{
 						bIsLocked:=true
 						gosub, lLockProgram
@@ -403,7 +403,7 @@ sUnlockPassword=-1
 						bIsLocked:=true
 					}
 					else
-					{
+					{ 
 						DisplayUnlockedTime:=DefaultTime
 						if !vsdb
 							Notify().AddWindow("DistractLess is locked till " Substr(DisplayUnlockedTime,9,2) ":" Substr(DisplayUnlockedTime,11,2) ":" Substr(DisplayUnlockedTime,13,2),{Title:"",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
@@ -435,7 +435,7 @@ sUnlockPassword=-1
 		hk(0,0)
 	}
 	Return
-
+	
 
 	#IfWinActive DistractLess_1
 	Sc029:: 									;; Gui1 || toggle Program On/Off
@@ -445,7 +445,7 @@ sUnlockPassword=-1
 	CurrentState:=CurrentState+0
 	CurrentState:=!CurrentState
 	GuiControl,,bIsProgramOn, %CurrentState%
-	;GuiControl, Focus,
+	;GuiControl, Focus, 
 	gosub, lCallBack_EnableProgram
 	return
 	!-:: 										;; Gui1 || open Gui
@@ -456,27 +456,27 @@ sUnlockPassword=-1
 	Settimer, lEnforceRules, Off
 	gosub, lClearAdditionFields
 	return
-	+1:: 										;; Gui1 || focus on WhiteActive ListView
+	+1:: 										;; Gui1 || focus on WhiteActive Listview
 	GuiControl, focus, vLV1
 	return
-	+2:: 										;; Gui1 || focus on WhiteStorage ListView
+	+2:: 										;; Gui1 || focus on WhiteStorage Listview
 	GuiControl, focus, vLV2
 	return
-	+3:: 										;; Gui1 || focus on BlackActive ListView
+	+3:: 										;; Gui1 || focus on BlackActive Listview
 	GuiControl, focus, vLV3
 	return
-	+4:: 										;; Gui1 || focus on BlackActive ListView
+	+4:: 										;; Gui1 || focus on BlackActive Listview
 	GuiControl, focus, vLV4
 	return
 	^L::										;; Gui1 || open locking prompt
-	if (GetKeyState("CapsLock","T") and bIsDevPC)
-		ttip("line 451:`nbefore going into 'lLockProgram'-routine")
+	if (GetKeyState("CapsLock","T") and bIsDevPC) 
+		ttip("line " Exception("",-1).Line ":`nbefore going into 'lLockProgram'-routine")
 	if IniObj["Invisible Settings"].bAllowLocking
 		gosub, lLockProgram
 	return
 	!T:: guicontrol, focus, bTrumping 			;; Gui1 || focus on Trumping DDL
-	!F:: guicontrol, focus, vActiveFilterMode 	;; Gui1 || focus on FilterMode DDL
-	^T:: gosub, lHotkey_ToggleTestMode 			;; Gui1 || enter/exit TestMode
+	!F:: guicontrol, focus, vActiveFilterMode 	;; Gui1 || focus on Filtermode DDL
+	^T:: gosub, lHotkey_ToggleTestmode 			;; Gui1 || enter/exit Testmode
 	^O:: gosub, lOpenNormalSettings				;; Gui1 || open Settings
 	^+O:: gosub, lOpenHiddenSettings			;; Gui1 || open Hidden Settings ← not sure if I want this to be a hotkey-able thing
 	#If (bDistractLess_3IsVisible) || WinActive("DistractLess_3")
@@ -541,8 +541,8 @@ sUnlockPassword=-1
 
 	#IfWinActive, DistracLess_2
 	^Enter::GC2_Submit()  	;; Gui4 || submit changes
-
-
+	
+	
 	#IF
 	;}______________________________________________________________________________________
 	;{#[Label Section]
@@ -560,7 +560,7 @@ sUnlockPassword=-1
 		if (LastSessionSettings[4].MaxIndex()!="")
 			Count:=Count+ LastSessionSettings[4].MaxIndex()
 
-		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m("Count after checking all data arrays: " Count)
 		if (!Count)
 			bLastSessionSettingsNoStringsInArrays:=(Count?1:0) ; figure out if any data is present → if possible, and we are not in a silent restart, display message.
@@ -571,29 +571,29 @@ sUnlockPassword=-1
 		}
 		ActiveArrays:=[[],[]]
 		StoredArrays:=[[],[]]
-		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(LastSessionSettings[1].MaxIndex(),LastSessionSettings[2].MaxIndex(),LastSessionSettings[3].MaxIndex(),LastSessionSettings[4].MaxIndex())
 		if (LastSessionSettings[1].MaxIndex()!="")
 		{
-			gui, ListView, SysListView321
+			gui, listview, SysListView321
 			f_UpdateLV(LastSessionSettings[1])
 			ActiveArrays[1]:=LastSessionSettings[1].clone()
 		}
 		if (LastSessionSettings[2].MaxIndex()!="")
 		{
-			gui, ListView, SysListView323
+			gui, listview, SysListView323
 			f_UpdateLV(LastSessionSettings[2])
 			ActiveArrays[2]:=LastSessionSettings[2].clone()
 		}
 		if (LastSessionSettings[3].MaxIndex()!="")
 		{
-			gui, ListView, SysListView322
+			gui, listview, SysListView322
 			f_UpdateLV(LastSessionSettings[3])
 			StoredArrays[1]:=LastSessionSettings[3].clone()
 		}
 		if (LastSessionSettings[4].MaxIndex()!="")
 		{
-			gui, ListView, SysListView324
+			gui, listview, SysListView324
 			f_UpdateLV(LastSessionSettings[4])
 			StoredArrays[2]:=LastSessionSettings[4].clone()
 		}
@@ -610,22 +610,22 @@ sUnlockPassword=-1
 			guicontrol,ChooseString,vActiveFilterMode, %LastActiveFilterMode%
 			guicontrol,ChooseString, bTrumping, %LastTrumping%
 			guicontrol,ChooseString, bCheckURLsInBrowsers, %LastCheckURLsInBrowsers%
-			guicontrol,, bIsProgramOn, %LastIsProgramOn%
+			guicontrol,, bIsProgramOn, %LastIsProgramOn% 
 			bIsProgramOn:=bIsProgramOn + 0
 		}
 		; if !bRestoreLastSession
-
-
-
+		
+		
+		
 		gosub, lCallBack_DDL_FilterMode
-
+		
 		gosub, lCallBack_EnableProgram
 		if IniObj["General Settings"].bShowOnProgramStart && (!bRestoreLastSession)
 		{
 			hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
 			gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
 		}
-		; else ;; not sure if I want to keep this code and adapt it later.
+		; else ;; not sure if I want to keep this code and adapt it later. 
 		; {
 		; 	if !vsdb
 		; 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
@@ -639,7 +639,7 @@ sUnlockPassword=-1
 	{
 		global IniObj:=fReadIni(A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.ini")
 		global dbflag:=IniObj["General Settings"].EnableDiagnosticMode
-
+ 		
 		f_ToggleStartup(IniOBj["General Settings"].bStartup)
 		BrowserClasses:=StrSplit(IniObj["General Settings"].BrowserClasses, ",")
 		BrowserExes:=StrSplit(IniObj["General Settings"].BrowserExes, ",")
@@ -674,7 +674,7 @@ sUnlockPassword=-1
 		aWhiteControls_ToDisable:=["vLV1","vLV2","btn1","btn2","btn3","btn4","btn5","btn6","btn7","Text_ActiveWhiteList","Text_StoredWhiteList"] ;,"Text_SelectTrumpingRule","bTrumping"]
 		aBlackControls_ToDisable:=["vLV3","vLV4","btn8","btn9","btn10","btn11","btn12","btn13","btn14","Text_ActiveBlackList","Text_StoredBlackList"] ;,"Text_SelectTrumpingRule","bTrumping"]
 		aAllControlsGui1_VisibleDefault:=["TextEnterSubstringCriteriaToAdd", "sCriteria_Substring", "TextSelectType", "TypeSelected",  "Button_AddSubsttringToActiveWhiteList", "Button_AddSubsttringToActiveBlackList", "Button_AddFromExistingWindows", "Button_SaveSelectedListViews", "Button_RestoreFromSave", "TextHorizontalLine", "TextSelectFilterMode", "vActiveFilterMode", "Text_SelectTrumpingRule", "bTrumping","bCheckURLsInBrowsers","Text_CheckURLsInBrowsers"]
-		aAllControlsGui1:=["TextEnterSubstringCriteriaToAdd", "sCriteria_Substring", "TextSelectType", "TypeSelected", "bFetchBrowserURL", "TextURLAddition", "URLToCheckAgainst", "Button_AddSubsttringToActiveWhiteList", "Button_AddSubsttringToActiveBlackList", "Button_AddFromExistingWindows", "Button_SaveSelectedListViews", "Button_RestoreFromSave", "TextHorizontalLine", "TextSelectFilterMode", "vActiveFilterMode", "Text_SelectTrumpingRule", "bTrumping","bCheckURLsInBrowsers","Text_CheckURLsInBrowsers"]
+		aAllControlsGui1:=["TextEnterSubstringCriteriaToAdd", "sCriteria_Substring", "TextSelectType", "TypeSelected", "bFetchBrowserURL", "TextURLAddition", "URLToCheckAgainst", "Button_AddSubsttringToActiveWhiteList", "Button_AddSubsttringToActiveBlackList", "Button_AddFromExistingWindows", "Button_SaveSelectedListViews", "Button_RestoreFromSave", "TextHorizontalLine", "TextSelectFilterMode", "vActiveFilterMode", "Text_SelectTrumpingRule", "bTrumping","bCheckURLsInBrowsers","Text_CheckURLsInBrowsers"] 
 		aAllControlsGui1_VisibleDefault_2_plusWhite:=aAllControlsGui1_VisibleDefault.Clone()
 		aAllControlsGui1_VisibleDefault_2_plusBlack:=aAllControlsGui1_VisibleDefault.Clone()
 		for k,v in aWhiteControls_ToDisable
@@ -694,9 +694,11 @@ sUnlockPassword=-1
 
 	lEnforceRules:
 	{
+		while !WinExist("A") ; stop script if PC is locked.
+			return
 		if !bIsProgramOn ; don't continue if program is turned off.
 			return
-		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=bCurrWindowIsBrowser:=false ; reset flags for each call.
+		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=bCurrWindowIsBrowser:=false ; reset flags for each call. 
 		sCurrentURL:=""
 		sCurrTitle:=""
 		WinGetActiveTitle, sCurrTitle
@@ -708,11 +710,12 @@ sUnlockPassword=-1
 		{
 			bCurrWindowIsBrowser:=True
 			sCurrentURL:=""
-			sCurrentURL:=fgetUrl(WinActive("A"))
+			;sCurrentURL:=fgetUrl(WinActive("A"))
+			sCurrentURL:=fgetUrl("A")
 			if Instr(sCurrTitle, " || "sCurrentURL) ;; fallback safety for the authors own convenience, as the browser tab names all contain the url as well due to a browser plugin. This ensures my testing works on "normal" tab-names.
 				sCurrTitle:=StrSplit(sCurrTitle," || ").1
 		}
-
+		
 		; prelim exception handling, safety returns
 		if dbFlag ; debug behaviour
 			ttip(A_ThisLabel sCurrTitle,4)
@@ -721,22 +724,22 @@ sUnlockPassword=-1
 		; NoFilterTitles NoFilterExes NoFilterClasses ← make sure these are never closed, as a precaution.
 		If HasVal(NoFilterClasses,sCurrClass) ; don't filter these windows, ever.
 			return
-		if HasVal(NoFilterExes,sCurrExe)
+		if HasVal(NoFilterExes,sCurrExe) 
 			return
 		if HasVal(NoFilterTitles,sCurrTitle)
 			return
 		if ((ActiveArrays[1].Count()=0) && (ActiveArrays[2].Count()=0)) ; if both arrays are empty, do nothing
+			return	
+		if WinActive("- Visual Studio Code") ; never close the editor. Change this if you are editing/reviewing in something else than VSC. 
 			return
-		if WinActive("- Visual Studio Code") ; never close the editor. Change this if you are editing/reviewing in something else than VSC.
-			return
-
+		
 		if (sCurrTitle!="")
 		{
 			; if (sCurrTitle==sLastWindowTitle)
 			; 	return
 			bLastWindowWasClosed:=false
 			sLastWindowTitle:=sCurrTitle
-			switch vActiveFilterMode
+			switch vActiveFilterMode 	
 			{
 				case "White": ;if (vActiveFilterMode="White") ; whitelist only
 				{
@@ -751,14 +754,14 @@ sUnlockPassword=-1
 							if dbFlag ; debug behaviour
 								ttip(A_thisLabel sCurrClass "`n" sCurrExe)
 						}
-						if (sName==".*")
+						if (sName==".*") 
 						{
 							if (stype="w") and Instr(sCurrentURL,sURL)
 								bMatchAnyName:=true
 							else if (stype="p")
 								bMatchAnyName:=true
 						}
-						else
+						else 
 							bMatchAnyName:=false
 						if Instr(sCurrTitle,sName) || (bMatchAnyName)
 						{
@@ -793,22 +796,22 @@ sUnlockPassword=-1
 					if (bTrumping="White > Black") ; white trumps black
 						bBlackTrumpedThisTitle:=!bWhiteTrumpedThisTitle:=true
 					else if (bTrumping="Black > White") ; black trumps white
-						bWhiteTrumpedThisTitle:=!bBlackTrumpedThisTitle:=true
-
+						bWhiteTrumpedThisTitle:=!bBlackTrumpedThisTitle:=true	
+					
 					if bWhiteTrumpedThisTitle
 					{
 						; If bWhiteTrumps: behaviour:
 										; iff whiteonly: don't close ← not even needs to be checked
-						; iff white and black: don't close → we only need to check the cases that are able to close anyways.
+						; iff white and black: don't close → we only need to check the cases that are able to close anyways.  
 						; → as a result, as soon as white=true, we don't close. Hence, we can check if white contains the current title, and close everything that does not contain an entry in white
-						; iff blackonly: DO close
-
+						; iff blackonly: DO close 
+						
 						for k,v in ActiveArrays[2]
 						{
 							bWhiteContainsThisTitle:=true
 							bMatchAnyName:=false
 							RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-							if (sName==".*")
+							if (sName==".*") 
 							{
 								if (stype="w") and Instr(sCurrentURL,sURL)
 									bMatchAnyName:=true
@@ -850,13 +853,13 @@ sUnlockPassword=-1
 												;; either the title matches a website, or anything matches on a website
 												;; it either matches::
 												;; white title + white type==website
-												;; any title + white type==website
-												;; Hence don't close anything in these conditionals. But because this also allows the website to exist,
+												;; any title + white type==website 
+												;; Hence don't close anything in these conditionals. But because this also allows the website to exist, 
 												;; we don't ever need to check the other conditions either, because this hit explicitly allows it to exist
-
+												
 
 												;; if we want to match an entire website, we actually must have a url match. In this case, if it matches, it is not closed
-												if bMatchAnyName and Instr(sCurrentURL,tURL)
+												if bMatchAnyName and Instr(sCurrentURL,tURL) 
 													return
 												else
 												{
@@ -868,10 +871,10 @@ sUnlockPassword=-1
 													}
 													else
 													{
-														;; we have a URL to check.
-														;; if the URL matches, the titlematch is considered allowed, and the tab is not closed,
+														;; we have a URL to check. 
+														;; if the URL matches, the titlematch is considered allowed, and the tab is not closed, 
 														;; because "AN" entry has matched on whitelist
-														;; if it doesn't match, this whitelist-entry is not considered to be for this website,
+														;; if it doesn't match, this whitelist-entry is not considered to be for this website, 
 														;; so it is not applied. because it is not applied, go on with the next elemt of the whitelist
 														;; This is okay because we are iterating through the entire whitelist if we are finding an allowed
 														;; blacklist match to check all possible whitelist entries to possible get out of closing the window.
@@ -880,7 +883,7 @@ sUnlockPassword=-1
 													}
 												}
 											}
-											else if (!Instr(sCurrTitle,tname) && (ttype="w"))
+											else if (!Instr(sCurrTitle,tname) && (ttype="w")) 
 											{
 												;; state:
 												;; black title: match
@@ -888,20 +891,20 @@ sUnlockPassword=-1
 												;; white title: no match
 												;; hence check the next conditional, and if no more conditions trap the loop, go to closing
 											}
-											else if (Instr(sCurrTitle,tname) && !(ttype="w"))
+											else if (Instr(sCurrTitle,tname) && !(ttype="w")) 
 											{
 												;; state:
 												;; black title: match
 												;; black URL: match
 												;; white title: match
-												;; white type: no match
+												;; white type: no match 
 												;; hence this entry is not meant for usage in browsers
 											}
 											;; if we get to here, we have a match that is:
 											;; matching a black Title
-
+											 
 										}
-
+										
 
 										;; none of the previous checks set this website window to _not_ close, so it is closed now
 										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
@@ -932,13 +935,13 @@ sUnlockPassword=-1
 											;; as a result, whitelist has a match, and the program is not closed
 											return
 										}
-										if (!Instr(sCurrTitle,tname) && (ttype="p"))
+										if (!Instr(sCurrTitle,tname) && (ttype="p")) 
 										{
 											;; - no program-name in whitelist matches the program
 											;; as a result, whitelist has no match, and the program is closed if no other condition overrules before the array has been fully looked through
 										}
-
-
+										
+									
 									}
 									;; none of the previous checks set this window to _not_ close, so it is closed now
 										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
@@ -957,16 +960,16 @@ sUnlockPassword=-1
 						for k,v in ActiveArrays[2]
 						{
 							RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
-							if (sName==".*")
+							if (sName==".*") 
 							{
-								if (stype="w") and Instr(sCurrentURL,sURL) and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe))
+								if (stype="w") and Instr(sCurrentURL,sURL) and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) 
 									bMatchAnyName:=true
-								if (stype="w") and !Instr(sCurrentURL,sURL) and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ;; even though this should never happen, but in case the black any title matches a webside, but we don't have  a url to match, we don't accidentally start closing everything.
+								if (stype="w") and !Instr(sCurrentURL,sURL) and (HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ;; even though this should never happen, but in case the black any title matches a webside, but we don't have  a url to match, we don't accidentally start closing everything. 
 									Continue ;; we must continue here and not return because there might be other conditions that are true which have not yet been checked
 								else if (stype="p")
 									Continue ;; precaution, but it shouldn't ever happen anyways.
 							}
-							if Instr(sCurrTitle,sName) || ((bMatchAnyName) && (sType!="p")) ; blacklist matches:
+							if Instr(sCurrTitle,sName) || ((bMatchAnyName) && (sType!="p")) ; blacklist matches: 
 							{
 								;; in this case, either
 								;; the current title matches
@@ -991,7 +994,7 @@ sUnlockPassword=-1
 				{
 					;; BLACK ONLY WORKS AS EXPECTED NOW.
 					;; finish and fix whiteonly now, and finish the reddit thread on mixed first
-
+					
 					for k,v in ACtiveArrays[2] ; now check the blacklist
 					{
 						bBlackContainsThisTitle:=false
@@ -1002,9 +1005,9 @@ sUnlockPassword=-1
 							{
 								if dbFlag ; debug behaviour
 									ttip(A_Thislabel sCurrClass "`n" sCurrExe) ; sURL
-
+								
 							}
-						if (sName==".*")
+						if (sName==".*") 
 							bMatchAnyName:=true
 						if Instr(sCurrTitle,sName) || ((bMatchAnyName) && (sType!="p"))
 						{
@@ -1061,7 +1064,7 @@ sUnlockPassword=-1
 			ttip(A_ThisLabel "`nLastWinClosed:" bLastWindowWasClosed "`nMatched Title Entry:" MatchedTitleEntry "`nBlack contains:" bBlackContainsThisTitle "´nWhite Contains:" bWhiteContainsThisTitle,4)
 	}
 	return
-
+	
 	lGuiHide_1:
 	{
 		gui, 1: hide
@@ -1070,7 +1073,7 @@ sUnlockPassword=-1
 	}
 	return
 	lEnableEnforceRules:
-	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if gui is hidden again. Because this gui is always the last gui to be visible whenever you close any submenu, it is also the last one to be active when "closing" the GUI altogether - Hence if it is hidden, reenable.
+	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if gui is hidden again. Because this gui is always the last gui to be visible whenever you close any submenu, it is also the last one to be active when "closing" the GUI altogether - Hence if it is hidden, reenable. 
 	; Main-Gui
 	return
 	lDisableEnforceRules:
@@ -1081,7 +1084,7 @@ sUnlockPassword=-1
  		Settimer, lEnforceRules, Off
 		vLastCreationScreenHeight:=vGuiHeight
 		vLastCreationScreenWidth:=vGuiWidth
-
+		
 		hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
 		if (vGUIWidth="") || (vGuiHeight="") || ((vLastCreationScreenHeight!=(vGuiHeightOriginal-vGuiHeight_Reduction)) || (vLastCreationScreenWidth!=(A_ScreenWidth - 20)))
 			gosub, lGuiCreate_1
@@ -1104,7 +1107,7 @@ sUnlockPassword=-1
 		guicontrol, focus, sCriteria_Substring
 		gosub, lUpdateStatusOnStatusBar
 	}
-	;Settimer, lCheckifGui1IsVisible, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again. ;; Feels like
+	;Settimer, lCheckifGui1IsVisible, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again. ;; Feels like 
 	return
 
 	lCheckifGui1IsVisible:
@@ -1127,7 +1130,7 @@ sUnlockPassword=-1
 		gui_control_options := "xm w220 " . cForeground . " -E0x200"  ; remove border around edit field
 		gui_control_options2 :=  cForeground . " -E0x200"
 		Gui, Margin, 16, 16
-
+		
 		; Gui,  -SysMenu -ToolWindow -caption +Border
 		cBackground := "c" . "1d1f21"
 		cCurrentLine := "c" . "282a2e"
@@ -1141,84 +1144,84 @@ sUnlockPassword=-1
 		cAqua := "c" . "8abeb7"
 		cBlue := "c" . "81a2be"
 		cPurple := "c" . "b294bb"
-		Gui, Color, 1d1f21, 373b41,
-		Gui, Font, s7 cWhite, Segoe UI
-		; gui, add, text,xm ym, DistractLess v.%VN% - by %AU%
-		;Gui, add, Edit, %gui_control_options% -VScroll
+		Gui, Color, 1d1f21, 373b41, 
+		Gui, Font, s7 cWhite, Segoe UI 
+		; gui, add, text,xm ym, DistractLess v.%VN% - by %AU% 
+		;Gui, add, Edit, %gui_control_options% -VScroll 
 		gui, font, s9 cWhite, Segoe UI
 		vLastCreationScreenHeight:=vGuiHeight
 		vLastCreationScreenWidth:=vGuiWidth
 		if (!vGUIWidth and !vGuiHeight) || (vGUIWidth!=(A_ScreenWidth-20)) || (vGuiHeight!=(A_ScreenHeight)) ; assign outer gui dimensions either if they don't exist or if the resolution of the active screen has changed - f.e. when undocking or docking to a higher resolution display. The lGuiCreate_1-subroutine is also invoked in total if the resolution changes, but this is the necessary inner check to reassign dimensions.
-		{
+		{ 
 			vGUIWidth:=A_ScreenWidth - 20  ;-910
-			vGUIHeight:=A_ScreenHeight
+			vGUIHeight:=A_ScreenHeight 
 		}
-		vGuiHeight_Reduction:=60
+		vGuiHeight_Reduction:=60 
 		vGuiHeightControl:=A_ScreenHeight-vGuiHeight_Reduction
-
+		
 		if (vGUIHeight>vGuiHeightControl)
 		{
 
 			vGuiHeightOriginal:=vGuiHeight
 			vGUIHeight:=vGUIHeight-vGuiHeight_Reduction
 		}
-
+		
 		if vGUIWidth<1000
 			f_ThrowError(A_ThisFunc,"Screen Width is smaller than 1000 pixels. As a result, the gui cannot be properly shown.`nIf this error is shown after opening the IniSettingsCreator, ignore it and open the gui again.",A_ScriptNameNoExt . "_"3, Exception("",-1).Line)
-
-
+		
+		
 		vGUITabWidth:=vGUIWidth-30
 		vGUITabHeight:=vGUIHeight-40
-
+		
 		vGroupBoxHeight:=vGUITabHeight-(2*20)
 		vOuterGroupBoxWidth:=(vGUIWidth/2)-2*200 ; Finetune this value to scale in x direction to ratio of screen used for each section
-		;
+		; 
 		if (vOuterGroupBoxWidth<226) ;; don't allow too small groupbox widths, otherwhise buttons glitch outside their groupboxes
 			vOuterGroupBoxWidth:=240
-
+		
 		vLV_Width:=vOuterGroupBoxWidth-2*15
 		;vLV_Heigth	:= (vGroupBoxHeight - Buttons+Text "stored/active lists" - margin top/bottom) / number of LVs
 		vLV_Heigth:=((vGroupBoxHeight-88-32)-40)/2
 		vGUITab_HorizontalLine_Length:=vGUITabWidth
-
+		
 		; Calculate positions of Right side LV's, relative to the anchors at xp/yp
 		xMax_TabWidth:= 16 + vGUITabWidth
 		; Positioning:=[vGUIWidth,vGUIHeight,vGUITabWidth,vGUITabHeight,vOuterGroupBoxWidth,vGroupBoxHeight,vLV_Width,vLV_Heigth]
 		OffsetFromRightEdge:=vOuterGroupBoxWidth+10
 		vGroupBoxHeight2:=vGroupBoxHeight-1
-
+		
 		vRightCorner_WhiteListGroupBox:= 16 + 10 + vOuterGroupBoxWidth ; This marks the end of whitelist-groupbox
 		vLeftCorner_BlackListGroupBox:= vGUIWidth - 24  - vOuterGroupBoxWidth ; This marks the beginning of the right-sided blacklist-groupbox
-
+		
 		vDistanceWhiteListToBlackList:=vLeftCorner_BlackListGroupBox-vRightCorner_WhiteListGroupBox
 		; vWidthCentralGroupBox:= vDistanceWhiteListToBlackList - xMarginToWhiteListGroupBox - xMarginToBlackListGroupBox
-		vWidthCentralGroupBox:=vDistanceWhiteListToBlackList - 2*16
+		vWidthCentralGroupBox:=vDistanceWhiteListToBlackList - 2*16 
 		vWidthCentralGroupBox_Editfields:=vWidthCentralGroupBox-(2*145)
-
+		
 		vCentralGroupBoxTLCx:=vRightCorner_WhiteListGroupBox + 16
 		vYPositionCentralText:=(vWidthCentralGroupBox/2)+145
 		vMiddleOfCentralGroupBox_EditFields:= 145 + (vWidthCentralGroupBox_Editfields/2)
-
+		
 		vCentralGroupBoxButtonWidth:=150
 		vPositionCenteredButtonLeft:=vMiddleOfCentralGroupBox_EditFields - vCentralGroupBoxButtonWidth-30
 		vPositionCenteredButtonRight:=vMiddleOfCentralGroupBox_EditFields +30
-
+		
 		vCentralGroupSliderWidth:=150
 		vPositionCenteredSlider:=vMiddleOfCentralGroupBox_EditFields - (vCentralGroupSliderWidth/2)
 		vPositionCenteredSliderText:=vPositionCenteredSlider+30
-
+		
 		Gui, Add, Text,x25 y0 w0 h0,  AnchorTab3
 		gui, add, checkbox, xp+50 yp+20 vbIsProgramOn glCallBack_EnableProgram Checked, Enable DistractLess?
 		gui, add, tab3, xm yp-3 w%vGUITabWidth% h%vGUITabHeight%, Main
 		gui, tab, Main
 		;{ WhiteList
 		gui, add, text, ym xm w0 h0,AnchorWhiteList ; get an anchor to control the position of following controls
-		gui, add, groupbox, xm+10 yp+23 w%vOuterGroupBoxWidth% h%vGroupBoxHeight% w%vOuterGroupBoxWidth% ; screw pixel-perfect alignments. yp+23 seems to do it, but idgaf why. Scales properly with all tested random injected guiheights
+		gui, add, groupbox, xm+10 yp+23 w%vOuterGroupBoxWidth% h%vGroupBoxHeight% ; screw pixel-perfect alignments. yp+23 seems to do it, but idgaf why. Scales properly with all tested random injected guiheights
 		Gui, Font, s7 cWhite, Verdana
 		gui, add, text, xm+25 yp+12 vText_ActiveWhiteList, Active Whitelist
 		gui, add, ListView, xm+25 yp+25  +Report +NoSortHdr h%vLV_Heigth% w%vLV_Width% vvLV1 glLV_WhiteActive_EditSelected, Type|Name|URL
 		f_UpdateLV(ActiveArrays[1]) ; SysListView321
-
+		
 		gui, add, button, vbtn1 glSaveWhiteActiveToStorage, ↓ Save
 		gui, add, button, yp+35 xp vbtn2 glLoadWhiteStorageToActive, ↑ Load
 		gui, add, button, yp-35 xp+50 vbtn3 glRemoveWhiteActiveFromActive w115, x Remove from active
@@ -1227,16 +1230,16 @@ sUnlockPassword=-1
 		gui, add, button, yp+35 xp w103 vbtn6 glRestoreWhiteStorageFromBackup, Reverse last action
 		gui, add, button, yp-17.5 xp+123 w103 vbtn7 glRemoveWhiteAll, x Clear All
 		gui, add, text, xp-296 yp+42.5 vText_StoredWhiteList, Stored WhiteList
-		gui, add, ListView, xm+25 yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV2 glLV_WhiteStorage_EditSelected , Type|Name|URL
+		gui, add, ListView, xm+25 yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV2 glLV_WhiteStorage_EditSelected , Type|Name|URL  
 		f_UpdateLV(StoredArrays[1]) ; SysListView322
 		;}
-
+		
 		; A_DefaultGui
 		;{ Blacklist
 		xStartRightThird:=xMax_TabWidth-25
 		Gui, Font, s7 cWhite, Verdana
 		gui, add, text,ym+14 xm cRed x%xMax_TabWidth% vHiD w20 h20, AnchorBlackList ; create anchor text for the right side
-
+		
 		gui, add, groupbox, xp-%OffsetFromRightEdge% yp+010 w%vOuterGroupBoxWidth% h%vGroupBoxHeight2%  Section
 		gui, add, text, yp+21 xp+15 yp+12 vText_ActiveBlackList, Active Blacklist ;-550
 		gui, add, ListView, yp+25 xp+vOuterGroupBoxWidth +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV3 glLV_BlackActive_EditSelected, Type|Name|URL ; replace the xp-1550 by xp-OffSetTopLeftCornerFromTopRightCornerOfTab3
@@ -1254,7 +1257,7 @@ sUnlockPassword=-1
 		gui, add, GroupBox, x%vCentralGroupBoxTLCx% ym+24 Section  w%vWidthCentralGroupBox% h%vGroupBoxHeight2%
 		gui, add, text, ys+20 xs+145 w190 vTextEnterSubstringCriteriaToAdd,Enter substring &criteria to add
 		gui, add, edit, yp+20 xs+145 w%vWidthCentralGroupBox_Editfields% glCallBack_EnableAssortmentButtons %gui_control_options2% -VScroll vsCriteria_Substring
-
+		 
 		if (0>1)
 		{
 			gui, add, text, yp+33 xs+145 vTextSelectType, Select T&ype:
@@ -1270,9 +1273,9 @@ sUnlockPassword=-1
 			gui, add, button, yp xp+90 w60 h21 vButton_RestoreFromSave glLoadFileIntoArrays, &Load File
 			;gui, add, button, yp+50 xs+%vPositionCenteredButtonRight% w150 %gui_control_options% h20 vButton_AddFromExistingWindows glGUIShow_3, Add from existing windows
 		}
-		else ;; new, more compact version
+		else ;; new, more compact version 
 		{
-			; GuiControlGet,
+			; GuiControlGet, 	
 			vWidthURLEDitField:=vWidthCentralGroupBox_Editfields-90
 			gui, add, text, yp+33 xs+145 vTextSelectType, Select T&ype:
 			gui, add, DropDownList, w80 yp+20 xs+145 vTypeSelected  glCallBack_EnableAssortmentButtons, Website|Program
@@ -1293,11 +1296,11 @@ sUnlockPassword=-1
 			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, White|Both||Black
 		Else
 			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, Both||Black
-
+		
 		gui, add, text, yp+30 xs+%vPositionCenteredSliderText% vText_SelectTrumpingRule, Select &Trumping Rule
 		gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth% glCallBack_DDL_Trumping vbTrumping, White > Black||Black > White
-
-
+		
+		
 		GuiControl, disable, Button_AddSubsttringToActiveWhiteList
 		GuiControl, disable, Button_AddSubsttringToActiveBlackList
 		GuiControl, disable,bFetchBrowserURL
@@ -1321,19 +1324,19 @@ sUnlockPassword=-1
 			2 buttons - add to whitelist - add to blacklist :: self-explanatory
 			Fetch criteria from current window - IfGuiActive: F2: activate tagger - IfTaggerActive - F2: Catch current window information (plus url if browser)
 			3-way switch - slider with range 1-3 - white only - both - black only :: use only either criteria and deactivate the other
-
+			
 			Trumping - w>b || w<b :: decide which criteria trumps the other if both are matching
-
+			
 			3-way switch - slider with range 1-3 - Programs only - both - websites only :: decide if you want to only supervise either programs or websites
-
+			
 			checkbox - check URL's :: if checking websites, make checks more consistent by only checking if the url is equal. ← figure out how to do partial string comparisons properly here
 		*/
 		XPositionTitleString:=vPositionCenteredSliderText+vOuterGroupBoxWidth
-		gui, add, text,x%vPositionCenteredSliderText% ym, DistractLess v.%VN% - by %AU%
+		gui, add, text,x%vPositionCenteredSliderText% ym, DistractLess v.%VN% - by %AU% 
 		gui, tab
 		gui, add, statusbar, -Theme vStatusBarMainWindow BackGround373b41 glCallBack_StatusBarMainWindow
 
-		if ((bShowDebugPanelINMenuBar) && bIsDevPC)
+		if ((bShowDebugPanelINMenuBar) && bIsDevPC) 
 			SB_SetParts(23,120,100,175,95,70,80,170)
 		Else
 			SB_SetParts(23,120,100,175,95,70,80)
@@ -1344,7 +1347,7 @@ sUnlockPassword=-1
 		SB_SetText("Documentation",7)
 		; gui, add, text, xm+4 y200 w%vGUITab_HorizontalLine_Length% 0x10  ;Horizontal Line > Etched Gray ; the +4 shift is done to at least make the spacing equal on both sides, as the line can't seem to draw into the right tab-border, _but_ can start on the left tab border - strangely enough
 		GuiControl, Focus, sCriteria_Substring
-		gui 1: submit, NoHide ; this is the very first submit encountered, and ensures that
+		gui 1: submit, NoHide ; this is the very first submit encountered, and ensures that 
 		HideFocusBorder(MainGUI)
 	}
 	return
@@ -1353,8 +1356,8 @@ sUnlockPassword=-1
 	lClearAdditionFields:
 	{ ; clear out edit fields when closing the window.
 		gui, 1: default
-		guicontrol, 1:, sCriteria_Substring,
-		guicontrol, 1:, URLToCheckAgainst,
+		guicontrol, 1:, sCriteria_Substring, 
+		guicontrol, 1:, URLToCheckAgainst, 
 		GuiControl, 1: disable, Button_AddSubsttringToActiveWhiteList
 		GuiControl, 1: disable, Button_AddSubsttringToActiveBlackList
 		gosub, lCallBack_EnableProgram
@@ -1378,7 +1381,7 @@ sUnlockPassword=-1
 	lClearCriteriaSubString:
 	{ ; clear out edit fields when closing the window.
 		gui, 1: default
-		guicontrol, 1:, sCriteria_Substring,
+		guicontrol, 1:, sCriteria_Substring, 
 		GuiControl, 1: disable, Button_AddSubsttringToActiveWhiteList
 		GuiControl, 1: disable, Button_AddSubsttringToActiveBlackList
 		gosub, lCallBack_EnableProgram
@@ -1386,7 +1389,7 @@ sUnlockPassword=-1
 		GuiControl, 1: disable, Button_AddSubsttringToActiveBlackList
 	}
 	return
-
+	
 	lGUIShow_3:
 	{ 	; "Add from existing windows"-GUI
 		gosub, lGuiHide_1
@@ -1410,9 +1413,9 @@ sUnlockPassword=-1
 	return
 	lGuiCreate_3: ; Submenu to choose from current windows
 	{
-
-		; if vsdb
-		; 	gui, -AlwaysOnTop
+		
+		if vsdb
+			gui, -AlwaysOnTop
 		gui, 3: destroy
 		gui,1: hide
 		gui, 2: hide
@@ -1436,10 +1439,10 @@ sUnlockPassword=-1
 		cAqua := "c" . "8abeb7"
 		cBlue := "c" . "81a2be"
 		cPurple := "c" . "b294bb"
-		Gui, Color, 1d1f21, 373b41,
-		Gui, Font, s9 cWhite, Segoe UI
+		Gui, Color, 1d1f21, 373b41, 
+		Gui, Font, s9 cWhite, Segoe UI 
 		gui, add, text,, Current Window Title and URL
-		Gui, Font, s9 cWhite, Segoe UI
+		Gui, Font, s9 cWhite, Segoe UI 
 		gui, add, edit, w200 %gui_control_options%  -VScroll vCurrentWindowTitle_CriteriaPicker
 		gui, add, edit, w200 %gui_control_options%  -VScroll vCurrentBrowserURL_CriteriaPicker
 		gui, add, text,, Press Ctrl + Left Mouse Button to select`n the current window's info and add it.
@@ -1485,7 +1488,7 @@ sUnlockPassword=-1
 		ttip("")
 		global GuiAction:="Escaped"
 	}
-
+		
 
 	; Locking GUI
 	lGUIShow_4:
@@ -1512,8 +1515,8 @@ sUnlockPassword=-1
 		gui, 4: new, +AlwaysOnTop -SysMenu -ToolWindow -caption +Border  +LabelGC4
 		gui_control_options := "xm w220 " . cForeground . " -E0x200"  ; remove border around edit field
 		Gui, Margin, 16, 16
-		Gui, Color, 1d1f21, 373b41,
-		Gui, Font, s11 cWhite, Segoe UI
+		Gui, Color, 1d1f21, 373b41, 
+		Gui, Font, s11 cWhite, Segoe UI 
 		gui, add, text,xm ym, Enter Password to unlock again:
 		Gui, add, Edit, %gui_control_options% -VScroll Password* vsEnteredPassword glCheckEnteredPasswordString
 		Gui, Font, s7 cWhite, Verdana
@@ -1529,7 +1532,7 @@ sUnlockPassword=-1
 	}
 	return
 
-
+	
 	; Lock till Time
 	lGuiShow_5:
 	{
@@ -1548,8 +1551,8 @@ sUnlockPassword=-1
 		gui, 5: new, +AlwaysOnTop -SysMenu -ToolWindow -caption +Border  +LabelGC5 +LastFound
 		gui_control_options := "xm w220 " . cForeground . " -E0x200"  ; remove border around edit field
 		Gui, Margin, 16, 16
-		Gui, Color, 1d1f21, 373b41,
-		Gui, Font, s11 cWhite, Segoe UI
+		Gui, Color, 1d1f21, 373b41, 
+		Gui, Font, s11 cWhite, Segoe UI 
 		gui, add, text,xm ym, Set unlocking time:
 		TimeInSetNumberOfHours:=A_Hour+IniObj["General Settings"].LockingDefaultOffsetHours
 		if (TimeInSetNumberOfHours>=24)
@@ -1558,7 +1561,7 @@ sUnlockPassword=-1
 			if (TimeInSetNumberOfHours>=0) && (TimeInSetNumberOfHours<=9) ;; if time is single-digits, prepend a zero
 				Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%0%TimeInSetNumberOfHours%0000, HH:mm:ss ; HH = hours with leading zero; 24-hour format (00– 23)
 			else
-				Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%%TimeInSetNumberOfHours%0000, HH:mm:ss ; HH = hours with leading
+				Gui, Add, DateTime, vDefaultTime %gui_control_options% 1 Choose%A_YYYY%%A_Mon%%A_DD%%TimeInSetNumberOfHours%0000, HH:mm:ss ; HH = hours with leading  
 		Gui, Font, s7 cWhite, Verdana
 	}
 	return
@@ -1585,11 +1588,11 @@ sUnlockPassword=-1
 		gui, 3: hide
 		gui, 4: hide
 		Arr:=f_CreateStoredArrays()
-		if (Arr[1].length()=0) && (Arr[2].length()=0) && (Arr[3].length()=0) && (Arr[4].length()=0)
-			return
+		if (Arr[1].length()=0) && (Arr[2].length()=0) && (Arr[3].length()=0) && (Arr[4].length()=0) 
+			return	
 		PreLoadingUserBackupWorkingDir:=A_WorkingDir
 		SetWorkingDir, %A_ScriptDir%
-
+		
 		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
 		{	; folder and file doesn't exist -> create
 			; create folder
@@ -1597,11 +1600,11 @@ sUnlockPassword=-1
 		}
 		FileSelectFile, sSavedFilePath, S24, % IniObj["General Settings"].sLocationUserBackup
 		if (sSavedFilePath="")
-			return
+			return	
 		if (st_count(sSavedFilePath,".ini")>0)
 		{
 			sSavedFilePath:=st_removeDuplicates(sSavedFilePath,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
-			if (st_count(sSavedFilePath,".ini")>0)
+			if (st_count(sSavedFilePath,".ini")>0)  
 				sSavedFilePath:=SubStr(sSavedFilePath,1,StrLen(sSavedFilePath)-4) ; and remove the last instance
 		}
 		if !testFlag
@@ -1617,7 +1620,7 @@ sUnlockPassword=-1
 		gui, 4: submit, nohide
 		if dbFlag ; debug behaviour
 			ttip(sEnteredPassword)
-		if ((sEnteredPassword=="db.unlock") && bIsDevPC)|| (sEnteredPassword==IniObj["Invisible Settings"].sUnlockPassword) ; solved pw. replace with user-defined, or obscure pw later. maybe randomly-generated.
+		if ((sEnteredPassword=="db.") && bIsDevPC)|| (sEnteredPassword==IniObj["Invisible Settings"].sUnlockPassword) ; solved pw. replace with user-defined, or obscure pw later. maybe randomly-generated.
 		{
 			gui, 4: hide
 			sEnteredPassword:=""
@@ -1676,29 +1679,29 @@ sUnlockPassword=-1
 		if Count
 		{
 			StoredArrays:=[[],[]]
-			ActiveArrays:=[[],[]]
+ActiveArrays:=[[],[]]
 			gui, 1: default
 			if (LoadedFile[1].MaxIndex()!="")
 			{
-				gui, ListView, SysListView321
+				gui, listview, SysListView321
 				f_UpdateLV(LoadedFile[1])
 				ActiveArrays[1]:=LoadedFile[1]
 			}
 			if (LoadedFile[2].MaxIndex()!="")
 			{
-				gui, ListView, SysListView323
+				gui, listview, SysListView323
 				f_UpdateLV(LoadedFile[2])
 				ActiveArrays[2]:=LoadedFile[2]
 			}
 			if (LoadedFile[3].MaxIndex()!="")
 			{
-				gui, ListView, SysListView322
+				gui, listview, SysListView322
 				f_UpdateLV(LoadedFile[3])
 				StoredArrays[1]:=LoadedFile[3]
 			}
 			if (LoadedFile[4].MaxIndex()!="")
 			{
-				gui, ListView, SysListView324
+				gui, listview, SysListView324
 				f_UpdateLV(LoadedFile[4])
 				StoredArrays[2]:=LoadedFile[4]
 			}
@@ -1707,7 +1710,7 @@ sUnlockPassword=-1
 		{
 			GuiControlGet,CurrentActiveFilterMode,,vActiveFilterMode
 			GuiControlGet,CurrentTrumpingRule,,bTrumping
-
+			
 			LastActiveFilterMode:=Trim(strsplit(LoadedFile[5].1,";").1)
 			LastTrumping:=Trim(strsplit(LoadedFile[5].2,";").1)
 			LastCheckURLsInBrowsers:=Trim(strsplit(LoadedFile[5].3,";").1)
@@ -1717,7 +1720,7 @@ sUnlockPassword=-1
 			{
 				if (IniObj["General Settings"].bWarningOnFileLoadSettingChanges || bTestThis)
 					m("The active filtermode has changed when loading the file. Please doublecheck if the chosen settings are appropriate to prevent the unwanted closing of programs and websites.`n`nTo remove these warnings when switching criteria files, change the setting 'bWarningOnFileLoadSettingChanges' in the settings.")
-				; GuiControl, Choosestring,
+				; GuiControl, Choosestring, 
 			}
 			if (CurrentTrumpingRule!=LastTrumping) ; Filter mode of loaded file is unequal to the currently active filter mode → issue warning
 			{
@@ -1748,12 +1751,12 @@ sUnlockPassword=-1
 			SB_SetText(sDiagnosticsOn,5)
 		Else
 			SB_SetText(sDiagnosticsOff,5)
-
+		
 		if bIsDevPC and bShowDebugPanelINMenuBar
 		{
 			sTestSimOn:="DoubleClick to exit testsimulation"
 			sTestSimOff:="DoubleClick to enter testsimulation"
-			if testFlag
+			if testFlag 
 				SB_SetText(sTestSimOn,8)
 			Else
 				SB_SetText(sTestSimOff,8)
@@ -1766,7 +1769,7 @@ sUnlockPassword=-1
 	}
  	return
 
-	lHotkey_ToggleTestMode:
+	lHotkey_ToggleTestmode:
 	if dbflag
 	{
 		SoundBeep, 150, 150
@@ -1809,7 +1812,7 @@ sUnlockPassword=-1
 			gosub, lUpdateStatusOnStatusBar
 			if bIsLocked
 				return
-			if !bRestoringLastSession ; normal
+			if !bRestoringLastSession ; normal 
 			{
 				if bIsBeingUnlocked
 				{
@@ -1863,7 +1866,7 @@ sUnlockPassword=-1
 				bEnableAdvancedSettings:=False
 				loop, 3
 				{
-					SoundBeep, 350,
+					SoundBeep, 350, 
 					sleep, 200
 				}
 			}
@@ -1872,10 +1875,10 @@ sUnlockPassword=-1
 				bEnableAdvancedSettings:=true
 				loop, 3
 				{
-					SoundBeep, 750,
+					SoundBeep, 750, 
 					sleep, 200
 				}
-			}
+			} 
 		}
 		else if (((A_GuiEvent="DoubleClick") && (A_EventInfo=2))) ; double left click: Edit normal settings
 			gosub, lOpenNormalSettings
@@ -1901,7 +1904,7 @@ sUnlockPassword=-1
 			bMainGuiDestroyed:=true
 			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 			if (A_ComputerName="DESKTOP-FH4RU5C")
-				m("DistractLess-Version located at A_ScriptDir\Lib\IniFileCreator_v8.ahk")
+				m("DistractLess-Version located at A_ScriptDir\Library\IniFileCreator_v8.ahk")
 			#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
 			WinWaitNotActive, IniFileCreator 8
 			gosub, lGuiCreate_1
@@ -1965,7 +1968,7 @@ sUnlockPassword=-1
 			else if (TypeSelected="Website") && (URLToCheckAgainst="")
 			{
 				GuiControl, disable, Button_AddSubsttringToActiveWhiteList
-				GuiControl, disable, Button_AddSubsttringToActiveBlackList
+				GuiControl, disable, Button_AddSubsttringToActiveBlackList	
 			}
 			Else if (TypeSelected="Program")
 			{
@@ -2037,7 +2040,7 @@ sUnlockPassword=-1
 	}
 	return
 	lLockProgram:
-	{ ;
+	{ ; 
 		; if bIsLocked ; locked → disable everything
 		if !bIsProgramOn
 			return
@@ -2054,7 +2057,7 @@ sUnlockPassword=-1
 				gosub, lUpdateStatusOnStatusBar
 				bRestartLocked:=false
 				gui,1: hide
-				return
+				return	
 			}
 
 			if (IniObj["General Settings"].LockingBehaviour=="Password-protected")
@@ -2127,7 +2130,7 @@ sUnlockPassword=-1
 	bEnterFromTrayMenu:=true
 	gosub, lCallBack_StatusBarMainWindow ; I am getting headaches. If I include the same section of code here, the IniFileCreator won't ever open - but routing through the same label works just fine. No clue why.
 	return
-
+	
 	lOpenNormalSettings:
 	gosub, lGuiHide_1
 	gosub, lClearAdditionFields
@@ -2147,9 +2150,9 @@ sUnlockPassword=-1
 
 
 
-
+	
 	lManageTestSimulation:
-	{
+	{ 
 		if testFlag
 		{
 			bActiveSetIsOriginal:=false
@@ -2157,26 +2160,26 @@ sUnlockPassword=-1
 			TestArrays:=f_ReadBackTestArraysFromFile(1)
 			ActiveArrays:=TestArrays[1]
 			StoredArrays:=TestArrays[2]
-			; ActiveArrays:=StoredArrays:=[[],[]] ; insert test simulation
-			gui, ListView, SysListView321
+			; ActiveArrays:=StoredArrays:=[[],[]] ; insert test simulation 
+			gui, listview, SysListView321
 			f_UpdateLV(ActiveArrays[1])
-			gui, ListView, SysListView323
+			gui, listview, SysListView323
 			f_UpdateLV(ActiveArrays[2])
-			gui, ListView, SysListView322
+			gui, listview, SysListView322
 			f_UpdateLV(StoredArrays[1])
-			gui, ListView, SysListView324
+			gui, listview, SysListView324
 			f_UpdateLV(StoredArrays[2])
 		}
 		else
 		{
 			bActiveSetIsOriginal:=true
-			gui, ListView, SysListView321
+			gui, listview, SysListView321
 			f_UpdateLV(TestSimStorage[1][1])
-			gui, ListView, SysListView323
+			gui, listview, SysListView323
 			f_UpdateLV(TestSimStorage[1][2])
-			gui, ListView, SysListView322
+			gui, listview, SysListView322
 			f_UpdateLV(TestSimStorage[2][1])
-			gui, ListView, SysListView324
+			gui, listview, SysListView324
 			f_UpdateLV(TestSimStorage[2][2])
 			ActiveArrays:=TestSimStorage[1]
 			StoredArrays:=TestSimStorage[2]
@@ -2188,7 +2191,7 @@ sUnlockPassword=-1
 	lLV_WhiteActive_EditSelected:
 	{
 		gui, 1: default
-		gui, ListView, SysListView321
+		gui, listview, SysListView321
 		ActiveWhiteBackup:=ActiveArrays[1].clone()
 		sEditedString:=f_EditArrayElement(ActiveArrays[1][A_EventInfo])
 		if (GuiAction="Escaped") ; If Escaped → nothing has been edited once the menu was up → just go back to guishow
@@ -2200,7 +2203,7 @@ sUnlockPassword=-1
 				ActiveWhiteBackup:=ActiveArrays[1].clone()
 				ActiveArrays[1][A_EventInfo]:=sEditedString
 				gui, 1: default
-				gui, ListView, SysListView321
+				gui, listview, SysListView321
 				f_UpdateLV(ActiveArrays[1])
 				gosub, lGUIShow_1
 			}
@@ -2213,7 +2216,7 @@ sUnlockPassword=-1
 	lLV_WhiteStorage_EditSelected:
 	{ ; A_DefaultGui
 		gui, 1: default
-		gui, ListView, SysListView322
+		gui, listview, SysListView322
 		StoredWhiteBackUp:=StoredArrays[1].clone()
 		sEditedString:=f_EditArrayElement(StoredArrays[1][A_EventInfo])
 		if (GuiAction="Escaped") ; If Escaped → nothing has been edited once the menu was up → just go back to guishow
@@ -2225,7 +2228,7 @@ sUnlockPassword=-1
 				StoredWhiteBackUp:=StoredArrays[1].clone()
 				StoredArrays[1][A_EventInfo]:=sEditedString
 				gui, 1: default
-				gui, ListView, SysListView322
+				gui, listview, SysListView322
 				f_UpdateLV(StoredArrays[1])
 				gosub, lGUIShow_1
 			}
@@ -2238,7 +2241,7 @@ sUnlockPassword=-1
 	lLV_BlackActive_EditSelected:
 	{
 		gui, 1: default
-		gui, ListView, SysListView323
+		gui, listview, SysListView323
 		ActiveBlackBackup:=ActiveArrays[2].clone()
 		sEditedString:=f_EditArrayElement(ActiveArrays[2][A_EventInfo])
 		if (GuiAction="Escaped") ; If Escaped → nothing has been edited once the menu was up → just go back to guishow
@@ -2250,7 +2253,7 @@ sUnlockPassword=-1
 				ActiveBlackBackup:=ActiveArrays[2].clone()
 				ActiveArrays[2][A_EventInfo]:=sEditedString
 				gui, 1: default
-				gui, ListView, SysListView323
+				gui, listview, SysListView323
 				f_UpdateLV(ActiveArrays[2])
 				gosub, lGUIShow_1
 			}
@@ -2264,7 +2267,7 @@ sUnlockPassword=-1
 	{
 		gui, 1: default
 		; m("rework this and LV_BlackStorage_EditSelected according to the example in 'lLV_WhiteStorage_EditSelected'")
-		gui, ListView, SysListView324
+		gui, listview, SysListView324
 		StoredBlackBackUp:=StoredArrays[2].clone()
 		sEditedString:=f_EditArrayElement(StoredArrays[2][A_EventInfo])
 		if (GuiAction="Escaped") ; If Escaped → nothing has been edited once the menu was up → just go back to guishow
@@ -2276,7 +2279,7 @@ sUnlockPassword=-1
 				StoredBlacKBackup:=StoredArrays[2].clone()
 				StoredArrays[2][A_EventInfo]:=sEditedString
 				gui, 1: default
-				gui, ListView, SysListView324
+				gui, listview, SysListView324
 				f_UpdateLV(StoredArrays[2])
 				gosub, lGUIShow_1
 			}
@@ -2293,7 +2296,7 @@ sUnlockPassword=-1
 		sel:=f_GetSelectedLVEntries()
 		gosub, lRemoveWhiteActiveFromActive
 		StoredArrays[1]:=f_CopySelectionIntoArray(sel,StoredArrays[1],"WhiteDef")
-		gui, ListView, SysListView322
+		gui, listview, SysListView322
 		StoredWhiteBackUp:=StoredArrays[1].clone()
 		f_UpdateLV(StoredArrays[1])
 	}
@@ -2305,7 +2308,7 @@ sUnlockPassword=-1
 		sel:=f_GetSelectedLVEntries()
 		gosub, lRemoveBlackActiveFromActive
 		StoredArrays[2]:=f_CopySelectionIntoArray(sel,StoredArrays[2],"BlackDef")
-		gui, ListView, SysListView324
+		gui, listview, SysListView324
 		StoredBlackBackUp:=StoredArrays[2].clone()
 		f_UpdateLV(StoredArrays[2])
 	}
@@ -2314,7 +2317,7 @@ sUnlockPassword=-1
 	lRestoreWhiteActiveFromBackup:
 	{ ; restore  version before last addition/removal of items to WhiteActive from its previous state.
 		gui, 1: default
-		gui, ListView, SysListView321
+		gui, listview, SysListView321
 		if ActiveWhiteBackup
 		{
 			ActiveArrays[1]:=ActiveWhiteBackup.Clone()  ; restore the data-array itself
@@ -2325,7 +2328,7 @@ sUnlockPassword=-1
 	lRestoreWhiteStorageFromBackup:
 	{ ; see above
 		gui, 1: default
-		gui, ListView, SysListView322
+		gui, listview, SysListView322
 		if StoredWhiteBackUp
 		{
 			StoredArrays[1]:=StoredWhiteBackUp.Clone()
@@ -2336,8 +2339,8 @@ sUnlockPassword=-1
 	lRestoreBlackActiveFromBackup:
 	{ ; see above
 		gui, 1: default
-		gui, ListView, SysListView323
-		if ActiveBlackBackup
+		gui, listview, SysListView323
+		if ActiveBlackBackup 
 		{
 			ActiveArrays[2]:=ActiveBlackBackup.Clone()
 			f_UpdateLV(ActiveBlackBackup)
@@ -2347,7 +2350,7 @@ sUnlockPassword=-1
 	lRestoreBlackStorageFromBackup:
 	{ ; see above
 		gui, 1: default
-		gui, ListView, SysListView324
+		gui, listview, SysListView324
 		if StoredBlackBackup
 		{
 			StoredArrays[2]:=StoredBlackBackUp.Clone()
@@ -2360,20 +2363,20 @@ sUnlockPassword=-1
 	lLoadWhiteStorageToActive:
 	{ ; load selected rows of white storage to White active
 		gui, 1: default
-		gui, ListView, SysListView322
+		gui, listview, SysListView322
 		sel:=f_GetSelectedLVEntries()
 		ActiveWhiteBackup:=ActiveArrays[1].clone()
 		gosub, lRemoveWhiteStorageFromStorage
 		ActiveArrays[1]:=f_CopySelectionIntoArray(sel,ActiveArrays[1],"WhiteDef")
 		; m(ActiveArrays[1])
-		gui, ListView, SysListView321
+		gui, listview, SysListView321
 		f_UpdateLV(ActiveArrays[1])
 	}
 	return
 	lLoadBlackStorageToActive:
 	{ ; see above
 		gui, 1: default
-		gui, ListView, SysListView324
+		gui, listview, SysListView324
 		sel:=f_GetSelectedLVEntries()
 		ActiveBlackBackup:=ActiveArrays[2].clone()
 		gosub, lRemoveBlackStorageFromStorage
@@ -2465,7 +2468,7 @@ sUnlockPassword=-1
 	lRemoveWhiteAll:
 	{ ; remove settings from both white active and white storage
 		gui, 1: default
-		if (StoredArrays[1].count()>0)
+		if (StoredArrays[1].count()>0) 
 		{
 			StoredWhiteBackUp:=StoredArrays[1]
 			StoredArrays[1]:=[]
@@ -2476,16 +2479,16 @@ sUnlockPassword=-1
 			ActiveArrays[1]:=[]
 		}
 		gui, 1: default
-		gui, ListView, SysListView321
+		gui, Listview, SysListView321
 		f_UpdateLV([])
-		gui, ListView, SysListView322
+		gui, Listview, SysListView322
 		f_UpdateLV([])
 	}
 	return
 	lRemoveBlackAll:
 	{ ; see above
 		gui, 1: default
-		if (StoredArrays[2].count()>0)
+		if (StoredArrays[2].count()>0) 
 		{
 			StoredBlacKBackup:=StoredArrays[2]
 			StoredArrays[2]:=[]
@@ -2496,9 +2499,9 @@ sUnlockPassword=-1
 			ActiveArrays[2]:=[]
 		}
 		gui, 1: default
-		gui, ListView, SysListView323
+		gui, Listview, SysListView323
 		f_UpdateLV([])
-		gui, ListView, SysListView324
+		gui, Listview, SysListView324
 		f_UpdateLV([])
 	}
 	return
@@ -2507,19 +2510,19 @@ sUnlockPassword=-1
 	{
 		gui, 1: default
 		gui, ListView, SysListView321
-		gui, 1: submit, nohide
+		gui, 1: submit, nohide	
 		Sel_Type:=(TypeSelected="Website") ? "w" : "p"
 		sel:=[]
 		if (sCriteria_Substring="")
 			return
 		if (Sel_Type="w")
 		{
-			if (sCriteria_Substring=".*") && (!URLToCheckAgainst) ; prohibit the user
+			if (sCriteria_Substring=".*") && (!URLToCheckAgainst) ; prohibit the user  
 				return
 			if (sCriteria_Substring=".*") && (URLToCheckAgainst=".*") ; prohibit the user  from inserting absolute wildcards
 			{
 				ttip("Input not valid. You can only set either the URL or the title substring to '.*'")
-				return
+				return 
 			}
 			sel[1]:="||" Sel_Type "||" sCriteria_Substring "||" URLToCheckAgainst  ; this string is not yet finished completely.
 		}
@@ -2545,7 +2548,7 @@ sUnlockPassword=-1
 			if (sCriteria_Substring=".*") && (URLToCheckAgainst=".*") ; prohibit the user  from inserting absolute wildcards
 			{
 				ttip("Input not valid. You can only set either the URL or the title substring to '.*'")
-				return
+				return 
 			}
 			sel[1]:="||" Sel_Type "||" sCriteria_Substring "||" URLToCheckAgainst  ; this string is not yet finished completely.
 		}
@@ -2583,7 +2586,7 @@ sUnlockPassword=-1
 	GuiEscape:
 	gui, hide
 	return
-	RemoveToolTip:
+	RemoveToolTip: 
 	Tooltip,
 	return
 	Label_AboutFile:
@@ -2592,10 +2595,10 @@ sUnlockPassword=-1
 	;}______________________________________________________________________________________
 	;{#[Functions Section]
 	f_GetSelectedLVEntries()
-	{
+	{ ;A_DefaultListView
 		vRowNum:=0
 		sel:=[]
-		loop
+		loop 
 		{
 			vRowNum:=LV_GetNext(vRowNum)
 			if not vRowNum  ; The above returned zero, so there are no more selected rows.
@@ -2608,7 +2611,7 @@ sUnlockPassword=-1
 		}
 		return sel
 	}
-
+	
 	f_CopySelectionIntoArray(sel,DestinationArray,ListType)
 	{
 		Ind:=1
@@ -2632,7 +2635,7 @@ sUnlockPassword=-1
 					Hit++
 			if (Hit=0) ; selection does not yet exist in destination array
 				DestinationArray.push(v)
-		}
+		}		
 		return DestinationArray
 	}
 
@@ -2647,13 +2650,13 @@ sUnlockPassword=-1
 			if (CurrSet[2]=="w")
 				searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
 			Else ; programs don't have url's attached, hence don't add that part of the string for comparison
-				searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:()"
+				searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:()"	
 			for a,b in Array
 			{
 				b:=f_RemoveURLsFromProgramEntries(b)
-				if (searchedstr==b)
+				if (searchedstr==b) 
 					Array[a]:=""
-			}
+			}	
 		}
 		for a,b in Array
 			if (b!="")
@@ -2668,9 +2671,9 @@ sUnlockPassword=-1
 		{
 			RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
 			if (sType="w")
-				LV_Add("-E0x200",sType,sName,sURL)
+				LV_Add("-E0x200",sType,sName,sURL)	
 			Else
-				LV_Add("-E0x200",sType,sName,"")
+				LV_Add("-E0x200",sType,sName,"")	
 		}
 		LV_ModifyCol(2,"auto")
 		return
@@ -2698,7 +2701,7 @@ sUnlockPassword=-1
 			Settimer, lEnforceRules, Off
 			gosub, lClearAdditionFields ;; this gosub clears all arrays before VN=1.2.2.4
 			gui, 2: destroy
-			Gui, 2: New, -Caption +LastFound +ToolWindow +LabeleAE_ +AlwaysOnTop
+			Gui, 2: New, -Caption +LastFound +ToolWindow +LabeleAE_ +AlwaysOnTop 
 			gui_control_options := "xm w420 " . cForeground . " -E0x200"  ; remove border around edit field
 			cBackground := "c" . "1d1f21"
 			cCurrentLine := "c" . "282a2e"
@@ -2712,10 +2715,10 @@ sUnlockPassword=-1
 			cAqua := "c" . "8abeb7"
 			cBlue := "c" . "81a2be"
 			cPurple := "c" . "b294bb"
-			Gui, Color, 1d1f21, 373b41,
-			Gui, Font, s9 cWhite, Segoe UI
+			Gui, Color, 1d1f21, 373b41, 
+			Gui, Font, s9 cWhite, Segoe UI 
 			gui, add, text,, Edit String
-			Gui, Font, s9 cWhite, Segoe UI
+			Gui, Font, s9 cWhite, Segoe UI 
 			if IniObj["Hidden Settings"].bEditDirectStringIn_f_EditArrayElement
 				gui, add, edit, %gui_control_options% -VScroll vEditedElement, % Element
 			Else
@@ -2723,9 +2726,9 @@ sUnlockPassword=-1
 				gui, add, edit, %gui_control_options% -VScroll vEditedElement, % sName
 				if (stype="w")
 				{
-					Gui, Font, s9 cWhite, Segoe UI
+					Gui, Font, s9 cWhite, Segoe UI 
 					gui, add, text,, Edit URL (remove to remove URL checking)
-					Gui, Font, s9 cWhite, Segoe UI
+					Gui, Font, s9 cWhite, Segoe UI 
 					gui, add, edit, %gui_control_options% -VScroll vEditedURL, % sURL
 				}
 			}
@@ -2758,7 +2761,7 @@ sUnlockPassword=-1
 					return str
 			}
 		}
-		Else
+		Else 
 		{
 			GuiAction:="notDoubleClick_SkippedEdit"
 			return 0
@@ -2780,7 +2783,7 @@ sUnlockPassword=-1
 		gui, 2: destroy
 		return -1
 	}
-
+	
 	f_ReadBackTestArraysFromFile(mode)
 	{
 		ActiveArrays:=[[],[]]
@@ -2818,13 +2821,13 @@ sUnlockPassword=-1
 
 	f_Confirm_Question(q,AU:="Gewerd Strauss",VN:="VNI",b:="Yes",b2:="No",Wrap:=1)
 	{
-		VNI=1.0.1.3
+		VNI=1.0.1.3	
 		; thank you u/anonymous1184 for your help in reworking the previous version of this function.
 		; https://www.reddit.com/r/AutoHotkey/comments/or8x0z/how_can_i_replace_my_labels_in_a_yesnoescapegui/h6gnlrf?utm_source=share&utm_medium=web2x&context=3
-
-		; Note: the gui is 33* letters wide at the settings set in the function.
+		
+		; Note: the gui is 33* letters wide at the settings set in the function. 
 		; Hence, the text is wrapped at that point if one chooses so to not make the proportions weird
-
+		
 		;* or the length of this piece of nonsense letters
 		;abcdefghijklmnopqrstuvwxyz1234567
 		; compared to this one, which will extend the width of the gui
@@ -2836,8 +2839,8 @@ sUnlockPassword=-1
 		{
 			Gui, cQ: New, -Caption +LastFound +ToolWindow +LabelcQ_ +AlwaysOnTop ; <- this doesn't work
 			Gui, cQ: Margin, 16, 16
-			Gui, cQ: Color, 1d1f21, 373b41,
-			Gui, cQ: Font, s11 cWhite, Segoe UI
+			Gui, cQ: Color, 1d1f21, 373b41, 
+			Gui, cQ: Font, s11 cWhite, Segoe UI 
 			if (A_Index=2)
 			{
 				if Wrap
@@ -2849,9 +2852,9 @@ sUnlockPassword=-1
 			Gui, Add, Button, xm+170 yp w30 gf_cQ_Callback, &%b2%
 			Gui, cQ: Font, s7 cWhite, Verdana
 			if (VN="VNI")
-				Gui, cQ: Add, Text,x25, Version: %VNI%	Author: %AU%
+				Gui, cQ: Add, Text,x25, Version: %VNI%	Author: %AU% 
 			else
-				Gui, cQ: Add, Text,x25, Version: %VN%	Author: %AU%
+				Gui, cQ: Add, Text,x25, Version: %VN%	Author: %AU% 
 			Gui, Show,, cQ
 		}
 		cQ_MoveOffset()
@@ -2859,7 +2862,7 @@ sUnlockPassword=-1
 		SendInput, {Left}{Right}
 		WinWaitClose
 		gui, cQ: destroy
-		return {(b):1, (b2):0, (b3):-1}[f_cQ_Callback]
+		return {(b):(b="Yes"?1:b), (b2):(b="No"?0:b2), (b3):-1}[f_cQ_Callback]
 	}
 	f_cQ_Callback()
 	{
@@ -2918,7 +2921,7 @@ sUnlockPassword=-1
 		if Instr(vDefaultTime,";")
 			StringTrimRight, vDefaultTime, vDefaultTime, 48
 		if !bActiveSetIsOriginal ; last time the lManageTestSimulation was run, we have entered test mode - and the variables ActiveArrays/StoredArrays don't contain the "original" settings
-		{ ; prevent the
+		{ ; prevent the 
 			temp_testFlag:=testFlag
 			testFlag:=false
 			SoundBeep, 1750, 150
@@ -2951,10 +2954,10 @@ sUnlockPassword=-1
 		global
 		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
 			return
-		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
-		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
+		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"	
 		Arr:=f_CreateStoredArrays()
 		Count:=0
 		loop, % Arr.MaxIndex() - 1
@@ -2972,7 +2975,7 @@ sUnlockPassword=-1
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC)
+				if (GetKeyState("CapsLock","T") and bIsDevPC) 
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
 			}
@@ -2993,8 +2996,8 @@ sUnlockPassword=-1
 		if bIsDevPC
 			ttip("OverWritten:" OverWriteRestart:=GetKeyState("CapsLock", "p"))
 		Else
-			OverWriteRestart:=GetKeyState("CapsLock", "p")
-		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+			OverWriteRestart:=GetKeyState("CapsLock", "p")		
+		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 			m(A_ThisFunc)
 		if FileExist(IniObj["General Settings"].sDefaultBundle) && (IniObj["General Settings"].sDefaultBundle!="")
 		{
@@ -3002,7 +3005,7 @@ sUnlockPassword=-1
 			if (st_count(INI_File,".ini")>0)
 			{
 				INI_File:=st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
-				if (st_count(INI_File,".ini")>0)
+				if (st_count(INI_File,".ini")>0)  
 					INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
 			}
 			tmparr:=fReadINI((A_ScriptDir "\" INI_File ".ini"))
@@ -3031,7 +3034,7 @@ sUnlockPassword=-1
 			}
 			IF dbFlag
 				m("Executing " A_ThisFunc,ExitReason,Arr)
-			if !testFlag
+			if !testFlag 
 				fWriteIni(Arr,INI_File)
 			else
 				m("No settings could be saved from the current setting, because the program was running in testsimulation-mode. Please exit this mode first before saving any settings.")
@@ -3081,13 +3084,13 @@ sUnlockPassword=-1
 		{
 			if A_IsCompiled
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
 			}
 			Else
 			{
-				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
+				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 					m("Restarting now")
 				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
 			}
@@ -3095,7 +3098,7 @@ sUnlockPassword=-1
 	}
 	return
 	f_DoNothingOnExit(ExitReason,ExitCode)
-	{ ; yes. this is a stupid function.
+	{ ; yes. this is a stupid function. 
 		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
 			return
 	}
@@ -3105,7 +3108,7 @@ sUnlockPassword=-1
 	{ ; throws an error-message, possibly with further postprocessing
 		if (ReferencePlace="D")
 			Reference:="Documentation"
-		else
+		else 
 			Reference:="Source Code: Function called on line " ReferencePlace "`nError invoked in function body on line " Exception("", -1).Line
 		if (ErrorCode!=0)
 		{
@@ -3114,7 +3117,7 @@ sUnlockPassword=-1
 	Function: %Source%
 	Errorcode: "%ErrorCode%" - Refer to %Reference%
 
-	Error:
+	Error: 
 	%Message%
 	)
 		}
@@ -3122,22 +3125,24 @@ sUnlockPassword=-1
 		{
 			str=
 	(
-	Function: %Source%
+	Function: %Source%	
 	Errorcode: Refer to %Reference%
 
-	Error:
+	Error: 
 	%Message%
 	)
 		}
 		MsgBox, % str
 		return
 	}
-
+	
 	f_CloseCurrentWindow(sCurrWindowTitle,sCurrClass,sCurrExe,sCurrURL,stype,MatchedTitleEntry,WindowID,BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 	{ ; closes the current window according to its type: webbrowser → Ctrl+W, program → WinClose
+		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
+			m(A_ThisFunc)
 		if dbFlag
 			ttip(A_ThisFunc "0" sCurrWindowTitle "||" sCurrClass "||" sCurrExe,4)
-		bActionWasClosed:=false ; give out the return value to feed back if last window has been closed or not.
+		bActionWasClosed:=false ; give out the return value to feed back if last window has been closed or not. 
 		if (sCurrWindowTitle="") || (sCurrClass="") || (sCurrExe="")
 		{
 			if dbFlag
@@ -3205,7 +3210,7 @@ sUnlockPassword=-1
 			{
 				; if dbFlag
 				; 	ttip(A_ThisFunc "12",4)
-				WinClose,
+				WinClose, 
 				sleep, 200
 				; WinWaitClose, %sCurrWindowTitle%
 				bActionWasClosed:=true
@@ -3224,8 +3229,8 @@ sUnlockPassword=-1
 					if dbFlag
 						ttip(A_ThisFunc "6")
 					; m(sCurrURL,sURL)
-
-
+					
+					
 					;; I HAVE NO IDEA WHAT THIS SECTION IS FOR... that's what you comment your code for.
 					; if !Instr(sCurrURL,sURL) and (vActiveFilterMode!="white")
 					; {
@@ -3264,14 +3269,14 @@ sUnlockPassword=-1
 				bActionWasClosed:=true
 			}
 		}
-
+		
 		if ((HasVal(BrowserExes,sCurrExe)) && (HasVal(BrowserClasses,sCurrClass)) && (WinACtive(sCurrWindowTitle) && (stype="w"))) || ((WinActive("A") && WinACtive(sCurrWindowTitle) && !((HasVal(BrowserClasses,sCurrClass)) && (HasVal(BrowserExes,sCurrExe))) && (stype="p")))
-		{
+		{	
 			if (IniObj["General Settings"].bEnableBlockingBanner)
 				hk(0,0,"Allowing User Input",0.5)
 			Else
 				hk(0,0)
-		}
+		}	
 		SetTimer, lEmergencyUnlock, off
 		;  order matters → if we open the messagebox first, the entire PC is softlocked because code cannot progress, and the code-stopping msgbox cannot be closed because the input is fully blocked.
 		if dbFlag ; debug behaviour
@@ -3293,27 +3298,27 @@ sUnlockPassword=-1
 		if dbFlag
 			ttip(A_ThisFunc "14",4)
 		return bActionWasClosed
-
-
+		
+		
 		lEmergencyUnlock:
 		hk(0,0)
 		SetTimer, lEmergencyUnlock, off
 		if dbFlag
 			ttip(A_ThisLabel "15",4)
 		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime
-		return
+		return 
 	}
-
+	
 	f_ToggleStartup(bBootSetting)
 	{
 		startUpDir:=(A_Startup "\" A_ScriptName " - Shortcut.lnk")
-		if bBootSetting
+		if bBootSetting 
 			FileCreateShortcut, %A_ScriptFullPath%, %startUpDir%
 		else
 			FileDelete, %startUpDir%
 		return
 	}
-
+	
 
 	f_CreateTrayMenu(IniObj)
 	{ ; facilitates creation of the tray menu
@@ -3323,7 +3328,7 @@ sUnlockPassword=-1
 		Menu, Misc, add, Open Settings, lOpenSettings
 		menu, Misc, Add, Reload, lReload
 		menu, Misc, Add, About, Label_AboutFile
-		if (bIsDevPC) ; toggle to add development buttons easier.
+		if (bIsDevPC and !bLockOutAdmin) ; toggle to add development buttons easier. 
 		{
 			menu, Misc, Add, DEV: Hidden Settings, lHiddenSettings
 			menu, Misc, Add, DEV: Edit Settings File, lEditSettingsOverall
@@ -3341,21 +3346,21 @@ sUnlockPassword=-1
 	OnExit("f_DoNothingOnExit",-1)
 	ExitApp
 	return
-
-	lResetSettingsForTesting: ; necessary for testing mostly.
+	
+	lResetSettingsForTesting: ; necessary for testing mostly. 
 	{ ; developer shortcut for resetting the settings.
 		OnExit("f_RestartWithLastBundle") ; when rewriting settings, we don't want to loose our currently set-up conditions.
 		FileCopy, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings.ini, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings_ResetBackup.ini, 1
 		FileDelete, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings.ini
-		sleep, 200
+		sleep, 200	
 		reload
 	}
 	return
 
-
+	
 	lEditSettingsOverall:
 	gosub, lIniFileCreator
-
+	
 	WinWaitNotActive, IniFileCreator 8
 	gosub, lGuiCreate_1
 	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window
@@ -3386,15 +3391,15 @@ sUnlockPassword=-1
 	ttip(text:="TTIP: Test",mode:=1,to:=4000,xp:="NaN",yp:="NaN",to2:=1750,currTip:=20)
 	{
 		/*
-			Date: 24 Juli 2021 19:40:56: Modes:
-			1: remove tt after "to" seconds
-			2: remove tt after "to" seconds, but show again after "to2" seconds. Then repeat
-			3: not sure anymore what the plan was lol - remove
+			Date: 24 Juli 2021 19:40:56: Modes:  
+			1: remove tt after "to" seconds 
+			2: remove tt after "to" seconds, but show again after "to2" seconds. Then repeat 
+			3: not sure anymore what the plan was lol - remove 
 			4: shows tooltip slightly offset from current mouse, does not repeat
-			5: keep that tt until the function is called again
+			5: keep that tt until the function is called again  
 			----  Function uses tooltip 20 by default, use parameter
 			"currTip" to select a tooltip between 1 and 20. Tooltips are removed and handled
-			separately from each other, hence a removal of ttip20 will not remove tt14
+			separately from each other, hence a removal of ttip20 will not remove tt14 
 		*/
 		if (text="")
 			gosub, lRemovettip
@@ -3404,12 +3409,12 @@ sUnlockPassword=-1
 		tooltip,
 		if (mode=99)
 		{
-			SetTimer, lRepeatedshow, off
+			SetTimer, lRepeatedshow, off	
 			return
 		}
 		currTip2:=currTip
 		ttip_text:=text
-		lUnevenTimers:=false
+		lUnevenTimers:=false 
 		MouseGetPos,xp1,yp1
 		if (mode=4) ; set text offset from cursor
 			yp:=yp1+15
@@ -3429,7 +3434,7 @@ sUnlockPassword=-1
 		{
 			if (to2>to)
 				SetTimer, lRepeatedshow, %  to2
-			else
+			else 
 				SetTimer, lRepeatedshow, %  to
 		}
 		else if (mode=3)
@@ -3439,7 +3444,7 @@ sUnlockPassword=-1
 		}
 		else if (mode=5) ; keep until function called again
 		{
-
+			
 		}
 		else if (mode=99)
 			SetTimer, lRepeatedshow, off
@@ -3457,7 +3462,7 @@ sUnlockPassword=-1
 		return
 	}
 
-	LogError(exception)
+	LogError(exception) 
 	{ ; write error messages to file. Log-File is deleted if greater than 30 MB
 		If Instr(exception.File,"DistractLess_WindowSpy.ahk")
 			return -1
@@ -3502,15 +3507,15 @@ sUnlockPassword=-1
 	st_removeDuplicates | s.a.
 	st_count | s.a.
 	WriteINI/ReadINI | wolf_II | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
-	hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
-	HideFocusBorder | this specific version by "just me" | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
+	* hk | this specific version by SpeedMaster, original by feiyue | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
+	* HideFocusBorder | this specific version by "just me", original by tmplinshi | adopted from https://www.autohotkey.com/boards/viewtopic.php?p=55162#p55162
 	getURL | anonymous1184 | adopted from reddit: https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
-	ACC.ahk | could not find definitive author | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=26201
+	ACC.ahk | could not find definitive author | rework retrieved from https://gist.github.com/anonymous1184/58d2b141be2608a2f7d03a982e552a71#file-acc-ahk-L55
 	CodeTimer | CodeKnight | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
 	f_TrayIconSingleClickCallBack | Lexikos, afaik | retrieved from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 	NotifyTrayClick | SKAN | retrieved from https://www.autohotkey.com/boards/viewtopic.php?t=81157
 	f_AddStartupToggleToTrayMenu | Exaskryz, modified by Gewerd Strauss | adapted from https://www.autohotkey.com/boards/viewtopic.php?p=176247#p176247
-
+	
 	TF_ReplaceInLines | forum name ahk7, github hi5 | retrieved from https://www.autohotkey.com/boards/viewtopic.php?f=6&t=576
 	TF_GetData | s.a.
 	_MakeMatchList | s.a.
@@ -3518,13 +3523,13 @@ sUnlockPassword=-1
 	; IniSettingsEditor v6 see below.
 	IniSettingsEditor v6 | Rajat, mod by toralf | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download
 	IniFileCreator_v8 |  toralf, modded by Gewerd Strauss | retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download
-	; retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download.
-
+	; retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download. 
+	
 */
 	f_AddStartupToggleToTrayMenu(ScriptName,MenuNameToInsertAt:="Tray")
 	{ ; add a toggle to create a link in startup folder for this script to the respective menu
 		VNI=1.0.0.1
-		global startUpDir
+		global startUpDir 
 		global MenuNameToInsertAt2
 		global bBootSetting
 		MenuNameToInsertAt2:=MenuNameToInsertAt
@@ -3542,7 +3547,7 @@ sUnlockPassword=-1
 		}
 		return
 		lStartUpToggle: ; I could really use a better way to know the name of the menu item that was selected
-		if !bBootSetting
+		if !bBootSetting 
 		{
 			bBootSetting:=1
 			FileCreateShortcut, %A_ScriptFullPath%, %startUpDir%
@@ -3555,17 +3560,17 @@ sUnlockPassword=-1
 			Menu, %MenuNameToInsertAt2%, UnCheck, Start at Boot
 		}
 		return
-
+		
 		/* Original from Exaskryz: https://www.autohotkey.com/boards/viewtopic.php?p=176247#p176247
 			Menu, Tray, UseErrorLevel
-
+			
 			If FileExist(startUpDir:=("C:\Users\" A_UserName "\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\" A_ScriptName " - Shortcut.lnk"))
 				Menu, Tray, Add, Remove from StartUp, StartUpToggle
 			else
 				Menu, Tray, Add, Add to StartUp, StartUpToggle
 			GoSub, SkipLabel_StartUp
 			return
-
+			
 			StartUpToggle: ; I could really use a better way to know the name of the menu item that was selected
 			; Using now errorlevel to determine if the menu item name exists
 			Menu, Tray, Rename, Remove from StartUp, Add to StartUp
@@ -3577,14 +3582,14 @@ sUnlockPassword=-1
 			else ; we successfully renamed the Remove from StartUp, which means that was selected, so we need to remove the script from startup
 				FileDelete, %startUpDir%
 			return
-
+			
 			SkipLabel_StartUp:
-
-
+			
+			
 		*/
 	}
 
-	HasVal(haystack, needle)
+	HasVal(haystack, needle) 
 	{	; code from jNizM on the ahk forums: https://www.autohotkey.com/boards/viewtopic.php?p=109173&sid=e530e129dcf21e26636fec1865e3ee30#p109173
  		if !(IsObject(haystack)) || (haystack.Length() = 0)
 			return 0
@@ -3593,8 +3598,8 @@ sUnlockPassword=-1
 				return index
 		return 0
 	}
-
-
+	
+	
 	fWriteINI(ByRef Array2D, INI_File)  ; write 2D-array to INI-file
 	{ ; writes associative, multilevel settings array to file
 		if !FileExist("INI-Files") ; check for ini-files directory
@@ -3605,20 +3610,20 @@ sUnlockPassword=-1
 		if (fWriteINI_st_count(INI_File,".ini")>0)
 		{
 			INI_File:=fWriteINI_st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
-			if (fWriteINI_st_count(INI_File,".ini")>0)
+			if (fWriteINI_st_count(INI_File,".ini")>0)  
 				INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
 
 		}
-		for SectionName, Entry in Array2D
+		for SectionName, Entry in Array2D 
 		{
 			Pairs := ""
 			for Key, Value in Entry
 				Pairs .= Key "=" Value "`n"
 			IniWrite, %Pairs%, %INI_File%.ini, %SectionName%
 		}
-
+		
 		/* Original File from https://www.autohotkey.com/boards/viewtopic.php?p=256714#p256714
-
+			
 		;-------------------------------------------------------------------------------
 			WriteINI(ByRef Array2D, INI_File) { ; write 2D-array to INI-file
 		;-------------------------------------------------------------------------------
@@ -3639,17 +3644,17 @@ sUnlockPassword=-1
 			Remove any and all consecutive lines. A "line" can be determined by
 			the delimiter parameter. Not necessarily just a `r or `n. But perhaps
 			you want a | as your "line".
-
+			
 			string = The text or symbols you want to search for and remove.
 			delim  = The string which defines a "line".
-
+			
 			example: st_removeDuplicates("aaa|bbb|||ccc||ddd", "|")
 			output:  aaa|bbb|ccc|ddd
 		*/
 		delim:=RegExReplace(delim, "([\\.*?+\[\{|\()^$])", "\$1")
 		Return RegExReplace(string, "(" delim ")+", "$1")
 	}
-
+	
 	fWriteINI_st_count(string, searchFor="`n")
 	{ ; count number of occurences of 'searchFor' in 'string'
 		; copy of the normal function to avoid conflicts.
@@ -3657,12 +3662,12 @@ sUnlockPassword=-1
 		/*
 			Count
 			Counts the number of times a tolken exists in the specified string.
-
+			
 			string    = The string which contains the content you want to count.
 			searchFor = What you want to search for and count.
-
+			
 			note: If you're counting lines, you may need to add 1 to the results.
-
+			
 			example: st_count("aaa`nbbb`nccc`nddd", "`n")+1 ; add one to count the last line
 			output:  4
 		*/
@@ -3674,7 +3679,7 @@ sUnlockPassword=-1
 
 	fReadINI(INI_File) ; return 2D-array from INI-file
 	{ ; reads associative, multilevel settings array from file
-
+		
 		Result := []
 		OrigWorkDir:=A_WorkingDir
 		SetWorkingDir, INI-Files
@@ -3703,11 +3708,11 @@ sUnlockPassword=-1
 				return Result
 		*/
 	}
-
-	hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen:=false, screencolor:="blue")
+	
+	hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen:=false, screencolor:="blue") 
 	{ ; disables the keyboard without relying on admin privileges. Can hide the screen and or show a message
 		; retrieved 20.09.2021 20:56:58 at https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
-
+		
 		;keyboard (true/false).......................... disable/enable keyboard
 		;mouse=1........................................ disable all mouse buttons
 		;mouse=2........................................ disable right mouse button only
@@ -3715,12 +3720,12 @@ sUnlockPassword=-1
 		;timeout........................................ how long to display the message in sec
 		;displayonce (true/false) ...................... display a message only once or always
 		;hide the screen (true/false)................... hide or show everything
-		;ScreenColor ................................... RGB Hex background color for the hiding GUI
-
-
+		;ScreenColor ................................... RGB Hex background color for the hiding GUI 
+		
+		
 		static AllKeys, z, d, kb, ms, sc
 		z:=message, d:=displayonce, kb:=keyboard, ms:=mouse, sc:=screen
-
+		
 		For k,v in AllKeys {
 			Hotkey, *%v%, Block_Input, off         ; initialisation
 		}
@@ -3742,7 +3747,7 @@ sUnlockPassword=-1
 			}
 		}
 		if (mouse=2)   ;disable right mouse button (but not left mouse)
-		{
+		{                
 			ExcludeKeys:="LButton"
 			For k,v in AllKeys {
 				IsMouseButton := Instr(v, "Wheel") || Instr(v, "Button")
@@ -3772,8 +3777,8 @@ sUnlockPassword=-1
 			else
 				Progress, Off
 		}
-
-
+		
+		
 		if (sc=1)
 		{
 			;SysGet,vNumCount, MonitorCount
@@ -3794,15 +3799,15 @@ sUnlockPassword=-1
 		}
 		else
 			gui screen: Hide
-
-
-		Return
+		
+		
+		Return 
 		TimeoutTimer:
 		Progress, Off
 		Return
 	}
-
-	HideFocusBorder(wParam, lParam := "", uMsg := "", hWnd := "")
+	
+	HideFocusBorder(wParam, lParam := "", uMsg := "", hWnd := "") 
 	{ ; removes the focus border from a gui control
 		;  fetched from https://www.autohotkey.com/boards/viewtopic.php?t=9684, version from "just me", adapted
 		; ==================================================================================================================================
@@ -3824,14 +3829,129 @@ sUnlockPassword=-1
 		Else If DllCall("IsWindow", "Ptr", wParam, "UInt")
 			PostMessage, 0x0128, %HideFocus%, 0, , ahk_id %wParam%
 	}
+	
+	
+	; Version: 2021.11.14.1
+	; cached version, retrieved from https://gist.github.com/anonymous1184/7cce378c9dfdaf733cb3ca6df345b140#geturl
+	fGetUrl(WinTitle*)
+	{
+		static cache := []
 
+		hWnd := WinExist(WinTitle*)
+		if (!hWnd)
+			throw Exception("No window selected.", -1)
 
+		if !cache.HasKey(hWnd)
+		{
+			oAcc := Acc_ObjectFromWindow(hWnd)
+			cache[hWnd] := GetUrl_Recurse(oAcc)
+		}
 
-	fgetUrl(hWnd)
-	{ ; obtains the url of the current browser window. works in chrome, firefox, IE and opera.
-		/*
-			retrieved from https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
-		*/
+		try
+			return cache[hWnd].accValue(0)
+		catch e
+		{
+			cache.Delete(hWnd)
+			if InStr(e.Message, "800401FD")
+				return fGetUrl(hWnd)
+
+			throw Exception(e.Message, -1, e.Extra)
+		}
+	}
+
+	GetUrl_Recurse(oAcc)
+	{
+		if InStr(oAcc.accName(0), "Address")
+			return oAcc
+		for _,accChild in Acc_Children(oAcc)
+		{
+			oAcc := GetUrl_Recurse(accChild)
+			if IsObject(oAcc)
+				return oAcc
+		}
+	}
+
+	;; Acc.ahk-excerpt
+	;; version from anonymous1184's GitHub: https://gist.github.com/anonymous1184/58d2b141be2608a2f7d03a982e552a71
+	Acc_Init(Function) ; Private
+	{
+		; Kernel32\LoadLibrary, Kernel32\GetProcAddress
+		static hModule := DllCall("LoadLibrary", "Str","oleacc.dll", "Ptr")
+		return DllCall("GetProcAddress", "Ptr",hModule, "AStr",Function, "Ptr")
+	}
+
+	Acc_ObjectFromWindow(hWnd, ObjectId := -4)
+	{
+		static address := Acc_Init("AccessibleObjectFromWindow")
+
+		if !WinExist("ahk_id" hWnd)
+			throw Exception("Window handle not found.", -1, hWnd)
+
+		ObjectId &= 0xFFFFFFFF
+		VarSetCapacity(IID, 16, 0)
+		addr := ObjectId = 0xFFFFFFF0 ? 0x0000000000020400 : 0x11CF3C3D618736E0
+		aiid := NumPut(addr, IID, "Int64")
+		addr := ObjectId = 0xFFFFFFF0 ? 0x46000000000000C0 : 0x719B3800AA000C81
+		riid := NumPut(addr, aiid + 0, "Int64") - 16
+		pAcc := 0
+		hResult := DllCall(address, "Ptr",hWnd, "UInt",ObjectId, "Ptr",riid
+			, "Ptr*",pAcc)
+		if (!hResult)
+			return ComObj(9, pAcc, 1)
+	}
+
+	Acc_Query(oAcc) ; Private
+	{
+		iid := "{618736E0-3C3D-11CF-810C-00AA00389B71}"
+		try
+		{
+			query := ComObjQuery(oAcc, iid)
+			return ComObj(9, query, 1)
+		}
+	} ; Thanks Lexikos - autohotkey.com/forum/viewtopic.php?t=81731&p=509530#509530
+
+	Acc_Children(oAcc)
+	{
+		static address := Acc_Init("AccessibleChildren")
+
+		if (ComObjType(oAcc, "Name") != "IAccessible")
+			throw Exception("Invalid IAccessible Object", -1, oAcc)
+
+		pAcc := ComObjValue(oAcc)
+		size := A_PtrSize * 2 + 8
+		VarSetCapacity(varChildren, oAcc.accChildCount * size, 0)
+		obtained := ""
+		hResult := DllCall(address
+			, "Ptr",pAcc
+			, "Int",0
+			, "Int",oAcc.accChildCount
+			, "Ptr",&varChildren
+			, "Int*",obtained)
+		if (hResult)
+			throw Exception("AccessibleChildren DllCall Failed", -1)
+
+		children := []
+		loop % obtained
+		{
+			i := (A_Index - 1) * size
+			child := NumGet(varChildren, i + 8)
+			if (NumGet(varChildren, i) = 9)
+			{
+				child := Acc_Query(child)
+				ObjRelease(child)
+			}
+			children.Push(child)
+		}
+		if children.Count()
+			return children
+	}
+	
+/*
+;; Old version. 
+
+		fgetUrl(hWnd)
+	{ ; obtains the url of the current browser window. works in chrome, firefox, IE and opera. 
+		;	retrieved from https://www.reddit.com/r/AutoHotkey/comments/mqnuql/comment/guinpck/?utm_source=share&utm_medium=web2x&context=3
 		accWindow := Acc_ObjectFromWindow(hWnd)
 		Out:=getAddressBar(accWindow).accValue(0)
 		return Out
@@ -3845,7 +3965,7 @@ sUnlockPassword=-1
 			if IsObject(accObj := %A_ThisFunc%(accChild))
 				return accObj
 	}
-
+	
 	Acc_Init()
 	{
 		static h
@@ -3874,7 +3994,10 @@ sUnlockPassword=-1
 				ErrorLevel := "AccessibleChildren DllCall Failed"
 		}
 	}
+*/
 
+	
+	
 	m(x*){
 		static List:={BTN:{OC:1,ARI:2,YNC:3,YN:4,RC:5,CTC:6},ico:{X:16,"?":32,"!":48,I:64}},Msg:=[]
 		static Title
@@ -3904,7 +4027,7 @@ sUnlockPassword=-1
 			ToolTip,% A_ScriptFullPath
 			USE THIS TO SAVE LAST POSITIONS FOR MSGBOX'S
 		*/
-		return
+		return 
 		/*
 			ActivateAfterm:
 			if(InStr(Title,"Omni-Search")||!Title){
@@ -3921,7 +4044,7 @@ sUnlockPassword=-1
 			return
 		*/
 	}
-
+	
 	Obj2String(Obj,FullPath:=1,BottomBlank:=0){
 		static String,Blank
 		if(FullPath=1)
@@ -3941,12 +4064,12 @@ sUnlockPassword=-1
 		}}
 		return String Blank
 	}
-
+	
 	lLaunchWindowSpy:
-	run, %A_ScriptDir%\Library\DistractLess_WindowSpy.exe ; explicitly choose the compiled version so we don't run into the gui-error that seems to happen when I include the script here instead of just running it. If we need to run it anyways, I can just evade this error by taking the compiled version, as there doesn't need to be any direct code-sided interaction between both scripts anyways.
+	run, %A_ScriptDir%\Library\DistractLess_WindowSpy.exe ; explicitly choose the compiled version so we don't run into the gui-error that seems to happen when I include the script here instead of just running it. If we need to run it anyways, I can just evade this error by taking the compiled version, as there doesn't need to be any direct code-sided interaction between both scripts anyways. 
 	return
-
-
+	
+	
 	f_TrayIconSingleClickCallBack(wParam, lParam)
 	{ ; taken and adapted from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 		VNI:=1.0.3.12
@@ -3958,7 +4081,7 @@ sUnlockPassword=-1
 			return 0
 		}
 	}
-	NotifyTrayClick(P*)
+	NotifyTrayClick(P*) 
 	{ ; NotifyTrayClick | SKAN | https://www.autohotkey.com/boards/viewtopic.php?t=81157
 		;  v0.41 by SKAN on D39E/D39N @ tiny.cc/notifytrayclick
 		VNI=1.0.0.17
@@ -3973,11 +4096,11 @@ sUnlockPassword=-1
 		? (-1, Clk:=2) : ( Clk=2 ? ("Off", Clk:=1) : ( IsFunc(Chk) || IsLabel(Chk) ? T : -1) )
 		Return True
 	}
-
-
+	
+	
 	CodeTimer(Description="",x:=500,y:=500,ClipboardFlag:=0)
 	{ ; adapted from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
-
+		
 		Global StartTimer
 		If (StartTimer != "")
 		{
@@ -4000,13 +4123,13 @@ sUnlockPassword=-1
 	}
 	;}_____________________________________________________________________________________
 	; Includes from StringThings-lib see below.
-
+	
 	st_wordWrap(string, column=56, indentChar="")
-	{
+	{ 
 		; taken from ST-lib at https://www.autohotkey.com/boards/viewtopic.php?t=53, published by tidbit
 		; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
 		indentLength := StrLen(indentChar)
-
+		
 		Loop, Parse, string, `n, `rff
 		{
 			If (StrLen(A_LoopField) > column)
@@ -4019,15 +4142,15 @@ sUnlockPassword=-1
 				Else
 					pos := loopLength + 1 + indentLength
 						, out .= "`n" indentChar A_LoopField
-
+				
 				out .= "`n"
 			} Else
 				out .= A_LoopField "`n"
 		}
-
+		
 		return SubStr(out, 1, -1)
 	}
-
+	
 	st_removeDuplicates(string, delim="`n")
 	{ ; remove all but the first instance of 'delim' in 'string'
 		; taken from ST-lib at https://www.autohotkey.com/boards/viewtopic.php?t=53, published by tidbit
@@ -4037,17 +4160,17 @@ sUnlockPassword=-1
 			Remove any and all consecutive lines. A "line" can be determined by
 			the delimiter parameter. Not necessarily just a `r or `n. But perhaps
 			you want a | as your "line".
-
+			
 			string = The text or symbols you want to search for and remove.
 			delim  = The string which defines a "line".
-
+			
 			example: st_removeDuplicates("aaa|bbb|||ccc||ddd", "|")
 			output:  aaa|bbb|ccc|ddd
 		*/
 		delim:=RegExReplace(delim, "([\\.*?+\[\{|\()^$])", "\$1")
 		Return RegExReplace(string, "(" delim ")+", "$1")
 	}
-
+	
 	st_count(string, searchFor="`n")
 	{ ; count number of occurences of 'searchFor' in 'string'
 		; taken from ST-lib at https://www.autohotkey.com/boards/viewtopic.php?t=53, published by tidbit
@@ -4055,12 +4178,12 @@ sUnlockPassword=-1
 		/*
 			Count
 			Counts the number of times a tolken exists in the specified string.
-
+			
 			string    = The string which contains the content you want to count.
 			searchFor = What you want to search for and count.
-
+			
 			note: If you're counting lines, you may need to add 1 to the results.
-
+			
 			example: st_count("aaa`nbbb`nccc`nddd", "`n")+1 ; add one to count the last line
 			output:  4
 		*/
@@ -4318,7 +4441,7 @@ sUnlockPassword=-1
 
 
 	; Write to file or return variable depending on input
-	DL_TF_ReturnOutPut(OW, Text, FileName, TrimTrailing = 1, CreateNewFile = 0)
+	DL_TF_ReturnOutPut(OW, Text, FileName, TrimTrailing = 1, CreateNewFile = 0) 
 	{
 		If (OW = 0) ; input was file, file_copy will be created, if it already exist file_copy will be overwritten
 			{
@@ -4371,10 +4494,10 @@ sUnlockPassword=-1
 	}
 	;}_____________________________________________________________________________________
 	; IniSettingsEditor v6 see below.
-	; retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download.
+	; retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download. 
 	; edited to alternatively also edit hidden sections/Settings by settings ShowHidden=true
 	; IniFileCreator_v8 also retrieved from the same archive.
 	; Creator-script by toralf, modded by Gewerd Strauss to preload files from variables if included
-	;
+	; 
 
 	#Include %A_ScriptDir%\Library\DL_Func_IniSettingsEditor_v6.ahk
