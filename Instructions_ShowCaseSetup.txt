@@ -1,0 +1,20 @@
+Welcome to DistractLess - an Over-The-Top solution to getting distracted at a PC.
+This program checks the active window with Instr() against a set of conditions, and closes it if the right conditions are met.
+
+Hya. These are necessary instructions to be followed to set up the program proper. The first step is absolutely vital, the rest is tailored to you so you won't have problems later on.
+This should take about five minutes. Window Spy is necessary.
+
+1. Follow the instructions and populate the setting "BrowserNewTabs" with the name(s) of the browser that windowspy gives you if you are in an empty tab of your preferred browser.
+2. The password you are asked for is not necessary unless you change the settings
+2. If you are not using either Firefox, Chrome, IE or Opera as your browser, add the respective "ahk_class" and "ahk_exe" to "BrowserClasses" and "BrowserExes" respectively
+2. Set "OnExitBehaviour" to "Nothing"
+3. Set "sDefaultBundle" to "A_ScriptDir/DistractLess_Storage\UserBackups\TAB_NationShowcase.ini"
+4. Check "EnableDiagnosticsMode". Alternatively, press Ctrl+T in the main window. Make sure to not use this script if DiagnosticsMode is off (displayed in the statusbar of the main Window). Othwhise, windows and tabs can get closed. In Diagnostics mode, the control flow is the same, but you are only greeted with a message as to which criterion has closed your current window/tab.
+
+After setting all settings, restart the script via the tray-icon →
+
+Note that while this program shuts down if you don't perform step 1, the other steps are not checked - as they are usually free for the user to decide. However, so that you won't have to sift through a somewhat long documentation we do the fast setup here.
+
+========================================================
+
+The script must remain in the same relation to all files in "A_ScriptDir\Library" and "A_ScriptDir\DistractLess_Storage".

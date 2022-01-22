@@ -1,7 +1,7 @@
 ﻿	/*
 		For all code by others, refer to the documentation. Alternatively, searching for "CODE BY OTHERS" within this script will take you to a handy overview. All functions mentioned in that table are located below said table.
 	*/
-	global bIsShowCase
+	global bIsShowCase:=true
 	Clipboard:="https://www.reddit.com/r/AutoHotkey/comments/s9o6rb/ahk_experiment_do_what_you_willdun_dun_dun/" "`n" "https://www.youtube.com/watch?v=3TqUgJfupyI"
 	ShowCaseString=
 ( LTRIM
@@ -377,9 +377,9 @@ sUnlockPassword=-1
 	if (IniOBj["General Settings"].BrowserNewTabs=-1) ; initialising for first time, notify user to edit this.
 	{
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
-		if !bIsDevPC
+		if (!bIsDevPC) || (bIsShowCase)
 			gosub, lLaunchWindowSpy	
-		else
+		if (bIsDevPC)
 			Clipboard:="Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab" ; laziness on my end, as I often need to rewrite my settings-file when testing, and don't want to search out all titles again.
 		DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
 		gosub, lLoadSettingsFromIniFile
@@ -389,13 +389,12 @@ sUnlockPassword=-1
 			ExitApp
 		}
 	}
-	
 	if (IniObj["Invisible Settings"].sUnlockPassword=-1) || (!IniObj["Invisible Settings"].sUnlockPassword)
 	{
 		InputBox, setPWstr  , Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
 		IniObj["Invisible Settings"].sUnlockPassword:=setPWstr
 		
-		DL_TF_ReplaceInLines("!D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\DistractLess_Storage\INI-Files\DistractLessSettings.ini",1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
+		DL_TF_ReplaceInLines("!" IniSettingsFilePath,1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
 		;fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
 		if (GetKeyState("CapsLock","T") and bIsDevPC) 
 			ttip("Line:" Exception("",-1).Line)
@@ -563,7 +562,7 @@ sUnlockPassword=-1
 		hk(0,0)
 	}
 	Return
-	#if (bIsDevPC && (A_ComputerName!="DESKTOP-FH4RU5C")) ;; For showcase, if someone else (e.g. TABNATION) starts it. Remove in normal version
+	; #if (bIsDevPC && (A_ComputerName!="DESKTOP-FH4RU5C")) ;; For showcase, if someone else (e.g. TABNATION) starts it. Remove in normal version
 	F2::
 	OnExit("f_DoNothingOnExit")
 	ExitApp, 	
@@ -3130,7 +3129,7 @@ sUnlockPassword=-1
 			{
 				if (GetKeyState("CapsLock","T") and bIsDevPC) 
 					m("Restarting now")
-				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
+				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk
 			}
 			Else
 			{
@@ -3199,7 +3198,7 @@ sUnlockPassword=-1
 			{
 				if (GetKeyState("CapsLock","T") and bIsDevPC)
 					m("Restarting now")
-				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
+				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk
 			}
 			Else
 			{
@@ -3241,7 +3240,7 @@ sUnlockPassword=-1
 			{
 				if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin) 
 					m("Restarting now")
-				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
+				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk
 			}
 			Else
 			{
@@ -4173,7 +4172,7 @@ sUnlockPassword=-1
 	}
 	
 	lLaunchWindowSpy:
-	run, %A_ScriptDir%\Library\DistractLess_WindowSpy.exe ; explicitly choose the compiled version so we don't run into the gui-error that seems to happen when I include the script here instead of just running it. If we need to run it anyways, I can just evade this error by taking the compiled version, as there doesn't need to be any direct code-sided interaction between both scripts anyways. 
+	run, %A_ScriptDir%\Library\DistractLess_WindowSpy.ahk ; explicitly choose the compiled version so we don't run into the gui-error that seems to happen when I include the script here instead of just running it. If we need to run it anyways, I can just evade this error by taking the compiled version, as there doesn't need to be any direct code-sided interaction between both scripts anyways. 
 	return
 	
 	
