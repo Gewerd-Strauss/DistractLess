@@ -365,6 +365,15 @@ sUnlockPassword=-1
 	NotifyTrayClick(DllCall("GetDoubleClickTime")) ; Handle double left click on tray events and prevent them to open the script history
 	OnMessage(0x404, "f_TrayIconSingleClickCallBack")
 	gosub, lLoadSettingsFromIniFile
+	if !(IniObj["General Settings"].sLocationUserBackup="")
+	{
+		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
+		{	; folder and file doesn't exist -> create
+			; create file
+			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
+			; SetWorkingDir, UserBackups
+		}
+	}
 	if (IniOBj["General Settings"].BrowserNewTabs=-1) ; initialising for first time, notify user to edit this.
 	{
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
@@ -380,15 +389,7 @@ sUnlockPassword=-1
 			ExitApp
 		}
 	}
-	if !(IniObj["General Settings"].sLocationUserBackup="")
-	{
-		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
-		{	; folder and file doesn't exist -> create
-			; create file
-			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
-			; SetWorkingDir, UserBackups
-		}
-	}
+	
 	if (IniObj["Invisible Settings"].sUnlockPassword=-1) || (!IniObj["Invisible Settings"].sUnlockPassword)
 	{
 		InputBox, setPWstr  , Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
