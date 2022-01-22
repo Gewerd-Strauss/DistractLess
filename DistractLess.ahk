@@ -276,7 +276,7 @@ sUnlockPassword=-1
 		InputBox, setPWstr  , Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
 		IniObj["Invisible Settings"].sUnlockPassword:=setPWstr
 
-		DL_TF_ReplaceInLines("!D:\DokumenteCSA\000 AAA Dokumente\000 AAA HSRW\General\AHK scripts\Projects\DistractLess\DistractLess_Storage\INI-Files\DistractLessSettings.ini",1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
+		DL_TF_ReplaceInLines("!" IniSettingsFilePath,1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
 		;fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
 		if (GetKeyState("CapsLock","T") and bIsDevPC)
 			ttip("Line:" Exception("",-1).Line)
@@ -288,7 +288,7 @@ sUnlockPassword=-1
 	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
 		OnExit("f_RestartWithSpecificBundle")
 
-	 OnError("LogError")
+	OnError("LogError")
 	cause := error
 
 	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle
