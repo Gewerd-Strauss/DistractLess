@@ -18,3 +18,8 @@ Note that while this program shuts down if you don't perform step 1, the other s
 ========================================================
 
 The script must remain in the same relation to all files in "A_ScriptDir\Library" and "A_ScriptDir\DistractLess_Storage".
+
+
+========================================================
+
+Note that while the ".*"-criterium suggests that the script uses regex to perform comparisons, it doesn't. This was solely chosen as a shorthand for "don't care about this condition, just check if the other part (url or title) match". It essentially allows you to e.g. block any youtube-pages, but whitelist a specific set of them.
