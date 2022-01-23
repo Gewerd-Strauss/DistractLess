@@ -564,7 +564,7 @@ sUnlockPassword=-1
 	Return
 	; #if (bIsDevPC && (A_ComputerName!="DESKTOP-FH4RU5C")) ;; For showcase, if someone else (e.g. TABNATION) starts it. Remove in normal version
 	F2::
-	OnExit("f_DoNothingOnExit")
+	OnExit("f_DoNothingOnExit") ; make sure we are not encountering the normally active protective restarts
 	ExitApp, 	
 	return
 
