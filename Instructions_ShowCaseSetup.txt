@@ -6,10 +6,10 @@ This should take about five minutes. Window Spy is necessary.
 
 1. Follow the instructions and populate the setting "BrowserNewTabs" with the name(s) of the browser that windowspy gives you if you are in an empty tab of your preferred browser.
 2. The password you are asked for is not necessary unless you change the settings
-2. If you are not using either Firefox, Chrome, IE or Opera as your browser, add the respective "ahk_class" and "ahk_exe" to "BrowserClasses" and "BrowserExes" respectively
-2. Set "OnExitBehaviour" to "Nothing"
-3. Set "sDefaultBundle" to "A_ScriptDir/DistractLess_Storage\UserBackups\TAB_NationShowcase.ini"
-4. Check "EnableDiagnosticsMode". Alternatively, press Ctrl+T in the main window. Make sure to not use this script if DiagnosticsMode is off (displayed in the statusbar of the main Window). Othwhise, windows and tabs can get closed. In Diagnostics mode, the control flow is the same, but you are only greeted with a message as to which criterion has closed your current window/tab.
+3. If you are not using either Firefox, Chrome, IE or Opera as your browser, add the respective "ahk_class" and "ahk_exe" to "BrowserClasses" and "BrowserExes" respectively
+4. Set "OnExitBehaviour" to "Nothing"
+5. Set "sDefaultBundle" to "A_ScriptDir/DistractLess_Storage\UserBackups\TAB_NationShowcase.ini"
+6. Check "EnableDiagnosticsMode". Alternatively, press Ctrl+T in the main window. Make sure to not use this script if DiagnosticsMode is off (displayed in the statusbar of the main Window). Othwhise, windows and tabs can get closed. In Diagnostics mode, the control flow is the same, but you are only greeted with a message as to which criterion has closed your current window/tab.
 
 After setting all settings, restart the script via the tray-icon →
 
