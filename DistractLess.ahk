@@ -1,4 +1,4 @@
-	/*
+﻿	/*
 		For all code by others, refer to the documentation. Alternatively, searching for "CODE BY OTHERS" within this script will take you to a handy overview. All functions mentioned in that table are located below said table.
 	*/
 
