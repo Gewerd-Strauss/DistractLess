@@ -1,10 +1,13 @@
-﻿	/*
+	/*
 		For all code by others, refer to the documentation. Alternatively, searching for "CODE BY OTHERS" within this script will take you to a handy overview. All functions mentioned in that table are located below said table.
 	*/
 
-
+	; Performance stuff
 	#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 	#SingleInstance,Force
+	#KeyHistory 0
+	ListLines Off
+	SetKeyDelay, -1,-1
 	;#Persistent
 	;#Warn All, Off
 	;#Warn  ; Enable warnings to assist with detecting common errors.
@@ -16,792 +19,12 @@
 	;;_____________________________________________________________________________________
 	;{#[General Information for file management]
 	SplitPath, A_ScriptName,,,, A_ScriptNameNoExt
-	VNpublic=1.5.3.4
+	VNpublic=1.5.5.4
 	VN:=VNpublic
-	VNdev=1.5.4.4
-	LE=05.05.2022 22:55:36
+	VNdev=1.5.6.4
+	LE=06.09.2022 10:47:11
 	AU=Gewerd Strauss
 	Menu, Tray, Icon, C:\WINDOWS\system32\shell32.dll,110 			;; Set custom Script icon
-	;===============================================================================================================;
-	;===========================================Script starts on line 805===========================================;
-	;===============================================================================================================;
-		; last edited by Gewerd Strauss @ 27.11.2021
-		; from RaptorX https://github.com/RaptorX/ScriptObj/blob/master/ScriptObj.ahk
-		/**
-		* ============================================================================ *
-		* @Author           : RaptorX <graptorx@gmail.com>
-		* @Script Name      : Script Object
-		* @Script Version   : 0.20.3
-		* @Homepage         :
-		*
-		* @Creation Date    : November 09, 2020
-		* @Modification Date: July 02, 2021
-		* @Modification G.S.: November 27, 2021
-		; @Description Modification G.S.: added field for GitHub-link, a Forum-link 
-										and a credits-field, as well as a template 
-										to quickly copy out into new scripts
-		* 
-		* @Description      :
-		* -------------------
-		* This is an object used to have a few common functions between scripts
-		* Those are functions and variables related to basic script information,
-		* upgrade and configuration.
-		*
-		* ============================================================================ *
-		*/
-		; scriptName   (opt) - Name of the script which will be
-		; 		                     shown as the title of the window and the main header
-		; 		version      (opt) - Script Version in SimVer format, a "v"
-		; 		                     will be added automatically to this value
-		; 		author       (opt) - Name of the author of the script
-		; 		credits 	 (opt) - Name of credited people
-		; 		creditslink  (opt) - Link to credited file, if any
-		; 		crtdate		 (opt) - Date of creation
-		; 		moddate		 (opt) - Date of modification
-		; 		homepagetext (opt) - Display text for the script website
-		; 		homepagelink (opt) - Href link to that points to the scripts
-		; 		                     website (for pretty links and utm campaing codes)
-		; 		ghlink 		 (opt) - GitHubLink
-		; 		ghtext 		 (opt) - GitHubtext
-		; 		forumlink    (opt) - forumlink to the scripts forum page
-		; 		forumtext    (opt) - forumtext 
-		; 		donateLink   (opt) - Link to a donation site
-		; 		email        (opt) - Developer email
-
-		; Template
-		; global script := {base         : script
-		;                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-		;                  ,version      : "0.1.0"
-		;                  ,author       : ""
-		;                  ,email        : ""
-		;                  ,credits      : ""
-		;                  ,creditslink  : ""
-		;                  ,crtdate      : ""
-		;                  ,moddate      : ""
-		;                  ,homepagetext : ""
-		;                  ,homepagelink : ""
-		;                  ,ghlink       : ""
-		;                  ,ghtext 		 : ""
-		;                  ,doclink      : ""
-		;                  ,doctext		 : ""
-		;                  ,forumlink    : ""
-		;                  ,forumtext	 : ""
-		;                  ,donateLink   : ""
-		;                  ,resfolder    : A_ScriptDir "\res"
-		;                  ,iconfile     : A_ScriptDir "\res\sct.ico"
-		;                  ,configfile   : A_ScriptDir "\settings.ini"
-		;                  ,configfolder : A_ScriptDir ""
-		; 				   }
-
-		class script
-		{
-			static DBG_NONE     := 0
-				,DBG_ERRORS   := 1
-				,DBG_WARNINGS := 2
-				,DBG_VERBOSE  := 3
-
-			static name         := ""
-				,version      := ""
-				,author       := ""
-				,email        := ""
-				,credits      := ""
-				,creditslink  := ""
-				,crtdate      := ""
-				,moddate      := ""
-				,homepagetext := ""
-				,homepagelink := ""
-				,ghlink		:= ""
-				,ghtext 		:= ""
-				,doclink      := ""
-				,doctext		:= ""
-				,forumlink 	:= ""
-				,forumtext 	:= ""
-				,resfolder    := ""
-				,icon         := ""
-				,config       := ""
-				,systemID     := ""
-				,dbgFile      := ""
-				,dbgLevel     := this.DBG_NONE
-
-
-			/**
-				Function: Update
-				Checks for the current script version
-				Downloads the remote version information
-				Compares and automatically downloads the new script file and reloads the script.
-
-				Parameters:
-				vfile - Version File
-						Remote version file to be validated against.
-				rfile - Remote File
-						Script file to be downloaded and installed if a new version is found.
-						Should be a zip file that will be unzipped by the function
-
-				Notes:
-				The versioning file should only contain a version string and nothing else.
-				The matching will be performed against a SemVer format and only the three
-				major components will be taken into account.
-
-				e.g. '1.0.0'
-
-				For more information about SemVer and its specs click here: <https://semver.org/>
-			*/
-			Update(vfile, rfile)
-			{
-				; Error Codes
-				static ERR_INVALIDVFILE := 1
-				,ERR_INVALIDRFILE       := 2
-				,ERR_NOCONNECT          := 3
-				,ERR_NORESPONSE         := 4
-				,ERR_INVALIDVER         := 5
-				,ERR_CURRENTVER         := 6
-				,ERR_MSGTIMEOUT         := 7
-				,ERR_USRCANCEL          := 8
-
-				; A URL is expected in this parameter, we just perform a basic check
-				; TODO make a more robust match
-				if (!regexmatch(vfile, "^((?:http(?:s)?|ftp):\/\/)?((?:[a-z0-9_\-]+\.)+.*$)"))
-					throw {code: ERR_INVALIDVFILE, msg: "Invalid URL`n`nThe version file parameter must point to a 	valid URL."}
-
-				; This function expects a ZIP file
-				if (!regexmatch(rfile, "\.zip"))
-					throw {code: ERR_INVALIDRFILE, msg: "Invalid Zip`n`nThe remote file parameter must point to a zip file."}
-
-				; Check if we are connected to the internet
-				http := comobjcreate("WinHttp.WinHttpRequest.5.1")
-				http.Open("GET", "https://www.google.com", true)
-				http.Send()
-				try
-					http.WaitForResponse(1)
-				catch e
-					throw {code: ERR_NOCONNECT, msg: e.message}
-
-				Progress, 50, 50/100, % "Checking for updates", % "Updating"
-
-				; Download remote version file
-				http.Open("GET", vfile, true)
-				http.Send(), http.WaitForResponse()
-
-				if !(http.responseText)
-				{
-					Progress, OFF
-					throw {code: ERR_NORESPONSE, msg: "There was an error trying to download the ZIP file.`n"
-													. "The server did not respond."}
-				}
-				regexmatch(this.version, "\d+\.\d+\.\d+", loVersion)
-				regexmatch(http.responseText, "\d+\.\d+\.\d+", remVersion)
-
-				Progress, 100, 100/100, % "Checking for updates", % "Updating"
-				sleep 500 	; allow progress to update
-				Progress, OFF
-
-				; Make sure SemVer is used
-				if (!loVersion || !remVersion)
-					throw {code: ERR_INVALIDVER, msg: "Invalid version.`nThis function works with SemVer. "
-													. "For more information refer to the documentation in the function"}
-
-				; Compare against current stated version
-				ver1 := strsplit(loVersion, ".")
-				ver2 := strsplit(remVersion, ".")
-
-				for i1,num1 in ver1
-				{
-					for i2,num2 in ver2
-					{
-						if (newversion)
-							break
-
-						if (i1 == i2)
-							if (num2 > num1)
-							{
-								newversion := true
-								break
-							}
-							else
-								newversion := false
-					}
-				}
-
-				if (!newversion)
-					throw {code: ERR_CURRENTVER, msg: "You are using the latest version"}
-				else
-				{
-					; If new version ask user what to do
-					; Yes/No | Icon Question | System Modal
-					msgbox % 0x4 + 0x20 + 0x1000
-						, % "New Update Available"
-						, % "There is a new update available for this application.`n"
-						. "Do you wish to upgrade to v" remVersion "?"
-						, 10	; timeout
-
-					ifmsgbox timeout
-						throw {code: ERR_MSGTIMEOUT, msg: "The Message Box timed out."}
-					ifmsgbox no
-						throw {code: ERR_USRCANCEL, msg: "The user pressed the cancel button."}
-
-					; Create temporal dirs
-					ghubname := (InStr(rfile, "github") ? regexreplace(a_scriptname, "\..*$") "-latest\" : "")
-					filecreatedir % tmpDir := a_temp "\" regexreplace(a_scriptname, "\..*$")
-					filecreatedir % zipDir := tmpDir "\uzip"
-
-					; Create lock file
-					fileappend % a_now, % lockFile := tmpDir "\lock"
-
-					; Download zip file
-					urldownloadtofile % rfile, % tmpDir "\temp.zip"
-
-					; Extract zip file to temporal folder
-					oShell := ComObjCreate("Shell.Application")
-					oDir := oShell.NameSpace(zipDir), oZip := oShell.NameSpace(tmpDir "\temp.zip")
-					oDir.CopyHere(oZip.Items), oShell := oDir := oZip := ""
-
-					filedelete % tmpDir "\temp.zip"
-
-					/*
-					******************************************************
-					* Wait for lock file to be released
-					* Copy all files to current script directory
-					* Cleanup temporal files
-					* Run main script
-					* EOF
-					*******************************************************
-					*/
-					if (a_iscompiled){
-						tmpBatch =
-						(Ltrim
-							:lock
-							if not exist "%lockFile%" goto continue
-							timeout /t 10
-							goto lock
-							:continue
-
-							xcopy "%zipDir%\%ghubname%*.*" "%a_scriptdir%\" /E /C /I /Q /R /K /Y
-							if exist "%a_scriptfullpath%" cmd /C "%a_scriptfullpath%"
-
-							cmd /C "rmdir "%tmpDir%" /S /Q"
-							exit
-						)
-						fileappend % tmpBatch, % tmpDir "\update.bat"
-						run % a_comspec " /c """ tmpDir "\update.bat""",, hide
-					}
-					else
-					{
-						tmpScript =
-						(Ltrim
-							while (fileExist("%lockFile%"))
-								sleep 10
-
-							FileCopyDir %zipDir%\%ghubname%, %a_scriptdir%, true
-							FileRemoveDir %tmpDir%, true
-
-							if (fileExist("%a_scriptfullpath%"))
-								run %a_scriptfullpath%
-							else
-								msgbox `% 0x10 + 0x1000
-									, `% "Update Error"
-									, `% "There was an error while running the updated version.``n"
-										. "Try to run the program manually."
-									,  10
-								exitapp
-						)
-						fileappend % tmpScript, % tmpDir "\update.ahk"
-						run % a_ahkpath " " tmpDir "\update.ahk"
-					}
-					filedelete % lockFile
-					exitapp
-				}
-			}
-
-			/**
-				Function: Autostart
-				This Adds the current script to the autorun section for the current
-				user.
-
-				Parameters:
-				status - Autostart status
-						It can be either true or false.
-						Setting it to true would add the registry value.
-						Setting it to false would delete an existing registry value.
-			*/
-			Autostart(status)
-			{
-				if (status)
-				{
-					RegWrite, REG_SZ
-							, HKCU\SOFTWARE\microsoft\windows\currentversion\run
-							, %a_scriptname%
-							, %a_scriptfullpath%
-				}
-				else
-					regdelete, HKCU\SOFTWARE\microsoft\windows\currentversion\run
-							, %a_scriptname%
-			}
-
-			/**
-				Function: Splash
-				Shows a custom image as a splash screen with a simple fading animation
-
-				Parameters:
-				img   (opt) - file to be displayed
-				speed (opt) - fast the fading animation will be. Higher value is faster.
-				pause (opt) - long in seconds the image will be paused after fully displayed.
-			*/
-			Splash(img:="", speed:=10, pause:=2)
-			{
-				global
-
-					gui, splash: -caption +lastfound +border +alwaysontop +owner
-				$hwnd := winexist(), alpha := 0
-				winset, transparent, 0
-
-				gui, splash: add, picture, x0 y0 vpicimage, % img
-				guicontrolget, picimage, splash:pos
-				gui, splash: show, w%picimagew% h%picimageh%
-
-				setbatchlines 3
-				loop, 255
-				{
-					if (alpha >= 255)
-						break
-					alpha += speed
-					winset, transparent, %alpha%
-				}
-
-				; pause duration in seconds
-				sleep pause * 1000
-
-				loop, 255
-				{
-					if (alpha <= 0)
-						break
-					alpha -= speed
-					winset, transparent, %alpha%
-				}
-				setbatchlines -1
-
-				gui, splash:destroy
-				return
-			}
-
-			/**
-				Funtion: Debug
-				Allows sending conditional debug messages to the debugger and a log file filtered
-				by the current debug level set on the object.
-
-				Parameters:
-				level - Debug Level, which can be:
-						* this.DBG_NONE
-						* this.DBG_ERRORS
-						* this.DBG_WARNINGS
-						* this.DBG_VERBOSE
-
-				If you set the level for a particular message to *this.DBG_VERBOSE* this message
-				wont be shown when the class debug level is set to lower than that (e.g. *this.DBG_WARNINGS*).
-
-				label - Message label, mainly used to show the name of the function or label that triggered the message
-				msg   - Arbitrary message that will be displayed on the debugger or logged to the log file
-				vars* - Aditional parameters that whill be shown as passed. Useful to show variable contents to the debugger.
-
-				Notes:
-				The point of this function is to have all your debug messages added to your script and filter them out
-				by just setting the object's dbgLevel variable once, which in turn would disable some types of messages.
-			*/
-			Debug(level:=1, label:=">", msg:="", vars*)
-			{
-				if !this.dbglevel
-					return
-
-				for i,var in vars
-					varline .= "|" var
-
-				dbgMessage := label ">" msg "`n" varline
-
-				if (level <= this.dbglevel)
-					outputdebug % dbgMessage
-				if (this.dbgFile)
-					FileAppend, % dbgMessage, % this.dbgFile
-			}
-
-			/**
-				Function: About
-				Shows a quick HTML Window based on the object's variable information
-
-				Parameters:
-				scriptName   (opt) - Name of the script which will be
-									shown as the title of the window and the main header
-				version      (opt) - Script Version in SimVer format, a "v"
-									will be added automatically to this value
-				author       (opt) - Name of the author of the script
-				credits 	 (opt) - Name of credited people
-				ghlink 		 (opt) - GitHubLink
-				ghtext 		 (opt) - GitHubtext
-				doclink 	 (opt) - DocumentationLink
-				doctext 	 (opt) - Documentationtext
-				forumlink    (opt) - forumlink
-				forumtext    (opt) - forumtext
-				homepagetext (opt) - Display text for the script website
-				homepagelink (opt) - Href link to that points to the scripts
-									website (for pretty links and utm campaing codes)
-				donateLink   (opt) - Link to a donation site
-				email        (opt) - Developer email
-
-				Notes:
-				The function will try to infer the paramters if they are blank by checking
-				the class variables if provided. This allows you to set all information once
-				when instatiating the class, and the about GUI will be filled out automatically.
-			*/
-			About(scriptName:="", version:="", author:="",credits:="", homepagetext:="", homepagelink:="", donateLink:="", email:="")
-			{
-				static doc
-
-				scriptName := scriptName ? scriptName : this.name
-				version := version ? version : this.version
-				author := author ? author : this.author
-				credits := credits ? credits : this.credits
-				creditslink := creditslink ? creditslink : RegExReplace(this.creditslink, "http(s)?:\/\/")
-				ghtext := ghtext ? ghtext : RegExReplace(this.ghtext, "http(s)?:\/\/")
-				ghlink := ghlink ? ghlink : RegExReplace(this.ghlink, "http(s)?:\/\/")
-				doctext := doctext ? doctext : RegExReplace(this.doctext, "http(s)?:\/\/")
-				doclink := doclink ? doclink : RegExReplace(this.doclink, "http(s)?:\/\/")
-				forumtext := forumtext ? forumtext : RegExReplace(this.forumtext, "http(s)?:\/\/")
-				forumlink := forumlink ? forumlink : RegExReplace(this.forumlink, "http(s)?:\/\/")
-				homepagetext := homepagetext ? homepagetext : RegExReplace(this.homepagetext, "http(s)?:\/\/")
-				homepagelink := homepagelink ? homepagelink : RegExReplace(this.homepagelink, "http(s)?:\/\/")
-				donateLink := donateLink ? donateLink : RegExReplace(this.donateLink, "http(s)?:\/\/")
-				email := email ? email : this.email
-
-				if (donateLink)
-				{
-					donateSection =
-					(
-						<div class="donate">
-							<p>If you like this tool please consider <a href="https://%donateLink%">donating</a>.</p>
-						</div>
-						<hr>
-					)
-				}
-
-				html =
-				(
-					<!DOCTYPE html>
-					<html lang="en" dir="ltr">
-						<head>
-							<meta charset="utf-8">
-							<meta http-equiv="X-UA-Compatible" content="IE=edge">
-							<style media="screen">
-								.top {
-									text-align:center;
-								}
-								.top h2 {
-									color:#2274A5;
-									margin-bottom: 5px;
-								}
-								.donate {
-									color:#E83F6F;
-									text-align:center;
-									font-weight:bold;
-									font-size:small;
-									margin: 20px;
-								}
-								p {
-									margin: 0px;
-								}
-							</style>
-						</head>
-						<body>
-							<div class="top">
-								<h2>%scriptName%</h2>
-								<p>v%version%</p>
-								<hr>
-								<p>by %author%</p>
-				)
-				if ghlink and ghtext
-				{
-					sTmp=
-					(
-
-								<p><a href="https://%ghlink%" target="_blank">%ghtext%</a></p>
-					)
-					html.=sTmp
-				}
-				if doclink and doctext
-				{
-					sTmp=
-					(
-
-								<p><a href="https://%doclink%" target="_blank">%doctext%</a></p>
-					)
-					html.=sTmp
-				}
-				if creditslink and credits
-				{
-					; Clipboard:=html
-					sTmp=
-					(
-
-								<p>credits: <a href="https://%creditslink%" target="_blank">%credits%</a></p>
-								<hr>
-					)
-					html.=sTmp
-				}
-				if forumlink and forumtext
-				{
-					sTmp=
-					(
-
-								<p><a href="https://%forumlink%" target="_blank">%forumtext%</a></p>
-					)
-					html.=sTmp
-				}
-				if homepagelink and homepagetext
-				{
-					sTmp=
-					(
-
-								<p><a href="https://%homepagelink%" target="_blank">%homepagetext%</a></p>
-
-					)
-					html.=sTmp
-				}
-				sTmp=
-				(
-
-										</div>
-							%donateSection%
-						</body>
-					</html>
-				)
-				html.=sTmp
-				; Clipboard:=html
-				; html.= "`n
-				; (
-				; 	HEllo World
-				; )"
-				; Clipboard:=html
-				btnxPos := 300/2 - 75/2
-				axHight:=12
-				donateHeight := donateLink ? 6 : 0
-				forumHeight := forumlink ? 1 : 0
-				ghHeight := ghlink ? 1 : 0
-				creditsHeight := creditslink ? 1 : 0
-				homepageHeight := homepagelink ? 1 : 0
-				docHeight := doclink ? 1 : 0
-				axHight+=donateHeight
-				axHight+=forumHeight
-				axHight+=ghHeight
-				axHight+=creditsHeight
-				axHight+=homepageHeight
-				axHight+=docHeight
-				gui aboutScript:new, +alwaysontop +toolwindow, % "About " this.name
-				gui margin, 2
-				gui color, white
-				gui add, activex, w300 r%axHight% vdoc, htmlFile
-				gui add, button, w75 x%btnxPos% gaboutClose, % "&Close"
-				doc.write(html)
-				gui show, AutoSize
-				return
-
-				aboutClose:
-					gui aboutScript:destroy
-				return
-			}
-
-			/*
-				Function: GetLicense
-				Parameters:
-				Notes:
-			*/
-			GetLicense()
-			{
-				global
-
-				this.systemID := this.GetSystemID()
-				cleanName := RegexReplace(A_ScriptName, "\..*$")
-				for i,value in ["Type", "License"]
-					RegRead, %value%, % "HKCU\SOFTWARE\" cleanName, % value
-
-				if (!License)
-				{
-					MsgBox, % 0x4 + 0x20
-						, % "No license"
-						, % "Seems like there is no license activated on this computer.`n"
-							. "Do you have a license that you want to activate now?"
-
-					IfMsgBox, Yes
-					{
-						Gui, license:new
-						Gui, add, Text, w160, % "Paste the License Code here"
-						Gui, add, Edit, w160 vLicenseNumber
-						Gui, add, Button, w75 vTest, % "Save"
-						Gui, add, Button, w75 x+10, % "Cancel"
-						Gui, show
-
-						saveFunction := Func("licenseButtonSave").bind(this)
-						GuiControl, +g, test, % saveFunction
-						Exit
-					}
-
-					MsgBox, % 0x30
-						, % "Unable to Run"
-						, % "This program cannot run without a license."
-
-					ExitApp, 1
-				}
-
-				return {"type"    : Type
-					,"number"  : License}
-			}
-
-			/*
-				Function: SaveLicense
-				Parameters:
-				Notes:
-			*/
-			SaveLicense(licenseType, licenseNumber)
-			{
-				cleanName := RegexReplace(A_ScriptName, "\..*$")
-
-				Try
-				{
-					RegWrite, % "REG_SZ"
-							, % "HKCU\SOFTWARE\" cleanName
-							, % "Type", % licenseType
-
-					RegWrite, % "REG_SZ"
-							, % "HKCU\SOFTWARE\" cleanName
-							, % "License", % licenseNumber
-
-					return true
-				}
-				catch
-					return false
-			}
-
-			/*
-				Function: IsLicenceValid
-				Parameters:
-				Notes:
-			*/
-			IsLicenceValid(licenseType, licenseNumber, URL)
-			{
-				res := this.EDDRequest(URL, "check_license", licenseType ,licenseNumber)
-
-				if InStr(res, """license"":""inactive""")
-					res := this.EDDRequest(URL, "activate_license", licenseType ,licenseNumber)
-
-				if InStr(res, """license"":""valid""")
-					return true
-				else
-					return false
-			}
-
-			GetSystemID()
-			{
-				wmi := ComObjGet("winmgmts:{impersonationLevel=impersonate}!\\" A_ComputerName "\root\cimv2")
-				(wmi.ExecQuery("Select * from Win32_BaseBoard")._newEnum)[Computer]
-				return Computer.SerialNumber
-			}
-
-			/*
-				Function: EDDRequest
-				Parameters:
-				Notes:
-			*/
-			EDDRequest(URL, Action, licenseType, licenseNumber)
-			{
-				strQuery := url "?edd_action=" Action
-						.  "&item_id=" licenseType
-						.  "&license=" licenseNumber
-						.  (this.systemID ? "&url=" this.systemID : "")
-
-				try
-				{
-					http := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-					http.Open("GET", strQuery)
-					http.SetRequestHeader("Pragma", "no-cache")
-					http.SetRequestHeader("Cache-Control", "no-cache, no-store")
-					http.SetRequestHeader("User-Agent", "Mozilla/4.0 (compatible; Win32)")
-
-					http.Send()
-					http.WaitForResponse()
-
-					return http.responseText
-				}
-				catch err
-					return err.what ":`n" err.message
-			}
-
-			; Activate()
-			; 	{
-			; 	strQuery := this.strEddRootUrl . "?edd_action=activate_license&item_id=" . this.strRequestedProductId . "&license=" . this.strEddLicense . "&url=" . this.strUniqueSystemId
-			; 	strJSON := Url2Var(strQuery)
-			; 	Diag(A_ThisFunc . " strQuery", strQuery, "")
-			; 	Diag(A_ThisFunc . " strJSON", strJSON, "")
-			; 	return JSON.parse(strJSON)
-			; 	}
-			; Deactivate()
-			; 	{
-			; 	Loop, Parse, % "/|", |
-			; 	{
-			; 	strQuery := this.strEddRootUrl . "?edd_action=deactivate_license&item_id=" . this.strRequestedProductId . "&license=" . this.strEddLicense . "&url=" . this.strUniqueSystemId . A_LoopField
-			; 	strJSON := Url2Var(strQuery)
-			; 	Diag(A_ThisFunc . " strQuery", strQuery, "")
-			; 	Diag(A_ThisFunc . " strJSON", strJSON, "")
-			; 	this.oLicense := JSON.parse(strJSON)
-			; 	if (this.oLicense.success)
-			; 	break
-			; 	}
-			; 	}
-			; GetVersion()
-			; 	{
-			; 	strQuery := this.strEddRootUrl . "?edd_action=get_version&item_id=" . this.oLicense.item_id . "&license=" . this.strEddLicense . "&url=" . this.strUniqueSystemId
-			; 	strJSON := Url2Var(strQuery)
-			; 	Diag(A_ThisFunc . " strQuery", strQuery, "")
-			; 	Diag(A_ThisFunc . " strJSON", strJSON, "")
-			; 	return JSON.parse(strJSON)
-			; 	}
-			; RenewLink()
-			; 	{
-			; 	strUrl := this.strEddRootUrl . "checkout/?edd_license_key=" . this.strEddLicense . "&download_id=" . this.oLicense.item_id
-			; 	Diag(A_ThisFunc . " strUrl", strUrl, "")
-			; 	return strUrl
-			; 	}
-		}
-
-		licenseButtonSave(this, CtrlHwnd, GuiEvent, EventInfo, ErrLevel:="")
-		{
-			GuiControlGet, LicenseNumber
-			if this.IsLicenceValid(this.eddID, licenseNumber, "https://www.the-automator.com")
-			{
-				this.SaveLicense(this.eddID, LicenseNumber)
-				MsgBox, % 0x30
-					, % "License Saved"
-					, % "The license was applied correctly!`n"
-						. "The program will start now."
-				
-				Reload
-			}
-			else
-			{
-				MsgBox, % 0x10
-					, % "Invalid License"
-					, % "The license you entered is invalid and cannot be activated."
-
-				ExitApp, 1
-			}
-		}
-
-		licenseButtonCancel(CtrlHwnd, GuiEvent, EventInfo, ErrLevel:="")
-		{
-			MsgBox, % 0x30
-				, % "Unable to Run"
-				, % "This program cannot run without a license."
-
-			ExitApp, 1
-		}
-
-	;===============================================================================================================;
-	
 	FileGetTime, ModDate,%A_ScriptFullPath%,M
 	FileGetTime, CrtDate,%A_ScriptFullPath%,C
 	CrtDate:=SubStr(CrtDate,7,  2) "." SubStr(CrtDate,5,2) "." SubStr(CrtDate,1,4)
@@ -825,8 +48,8 @@
 		,forumtext 	 : ""
 		,forumlink	 : ""
 		,donateLink : ""
-		,vAHK	 : A_AhkVersion}	
-	
+		,vAHK	 : A_AhkVersion}
+
 	;}______________________________________________________________________________________
 	;{#[Developer toggles]
 	global bLockOutAdmin:=true + 0									;; global override for disabling locked guis being actually locked if used on the developer's PC. Semi-hardcoded because the
@@ -852,13 +75,13 @@
 	;; If you are debugging this script and the notify-messages keep crashing the debugger when they are still visible and the debugger runs into a breakpoint, activate the following line:
 	;bRunNotify:=!vsdb:=true
 	bEnableAdvancedSettings:=false + 0 ; start with advanced settings being locked
-	global testFlag:=dbFlag:=false + 0
-	bLastSessionSettingsNoStringsInArrays:=false + 0
-	bIsLocked:=false + 0
-	bRestoreLastSession:=false + 0
-	bGuiHasBeenResized:=false + 0
-	bShowDebugPanelINMenuBar:=false + 0
-	bActiveSetIsOriginal:=true + 0
+	, global testFlag:=dbFlag:=false + 0
+	, bLastSessionSettingsNoStringsInArrays:=false + 0
+	, bIsLocked:=false + 0
+	, bRestoreLastSession:=false + 0
+	, bGuiHasBeenResized:=false + 0
+	, vbShowDebugPanelINMenuBar:=false + 0
+	, bActiveSetIsOriginal:=true + 0
 	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
 		CodeTimer()
 	IniSettingsFilePath:=A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.Ini"
@@ -866,190 +89,189 @@
 		FileCreateDir, % A_ScriptDir "\DistractLess_Storage"
 	if !Instr(FileExist(A_ScriptDir "\DistractLess_Storage\INI-Files"),"D") ; check if folder structure exists
 		FileCreateDir, % A_ScriptDir "\DistractLess_Storage\INI-Files"
-		DefSettings=
-	(
+	DefSettings=
+	(LTRIM
 	[General Settings]
-;General Settings General Settings for DistractLess
-RefreshTime=200
-;RefreshTime Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
-;RefreshTime Type: Integer
-;RefreshTime Default: 200
-LockingBehaviour=Time-protected
-;LockingBehaviour set wether or not to lock until
-;LockingBehaviour - time has passed
-;LockingBehaviour - or until the correct password is inputted
-;LockingBehaviour Type: DropDown Password-protected|Time-protected||
-;LockingBehaviour Default: Time-protected
-LockingDefaultOffsetHours=3
-;LockingDefaultOffsetHours Set the number of hours used when calculating the default unlocking time when locking the program for a set time.
-;LockingDefaultOffsetHours Value in hours.
-;LockingDefaultOffsetHours Type: Integer
-;LockingDefaultOffsetHours Default: 3
-bAlwaysAskPW=0
-;bAlwaysAskPW When checked, the gui is always locked (equivalent to left-clicking the padlock-icon on the main GUI window), and a password is checked.
-;bAlwaysAskPW Type: Checkbox
-;bAlwaysAskPW Default: 0
-;bAlwaysAskPW CheckboxName: Do you want to always lock the GUI?
-OnExitBehaviour=Restart with specific bundle
-;OnExitBehaviour Decide what to do when the script is manually closed by any means, except for shutting down, logging off or restarting the PC.
-;OnExitBehaviour Changes in this setting only take effect after restarting the program once.
-;OnExitBehaviour Restart with current bundle:
-;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when script is closed. This prevents the script from being closed by hand.
-;OnExitBehaviour Empty Restart:
-;OnExitBehaviour Program is restarted without reloading the current session.
-;OnExitBehaviour Nothing:
-;OnExitBehaviour Script exits normally, without restarting at all.
-;OnExitBehaviour Restart with specific bundle:
-;OnExitBehaviour Restart with a specific bundle by default. Bundle must be specified under "sDefaultBundle",
-;OnExitBehaviour Type: DropDown Nothing||Restart with current bundle|Empty Restart|Restart with specific bundle
-;OnExitBehaviour Default: Restart with specific bundle
-sDefaultBundle=
-;sDefaultBundle Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program.
-;sDefaultBundle Type: File
-EnableDiagnosticMode=0
-;EnableDiagnosticMode Enable Diagnostics-mode for the Closing-function. This results in: CLOSING WINDOWS: more information about matching criteria being displayed, instead of closing the window/tab outright.
-;EnableDiagnosticMode DoubleClick the fifth part of the statusbar of the main gui to enable and disable diagnostic mode quickly.
-;EnableDiagnosticMode Type: Checkbox
-;EnableDiagnosticMode Default: 0
-;EnableDiagnosticMode CheckboxName: Do you want to enable diagnostics mode?
-bAllowWhiteOnly=0
-;bAllowWhiteOnly Allows the script to run only allowing white-listed windows.
-;bAllowWhiteOnly Note that this is _very_ restrictive, and if not done with great care, will close just about everything you have.
-;bAllowWhiteOnly Make sure you prepare and test your whitelist in this mode using by enabling the diagnostics mode before employing it.
-;bAllowWhiteOnly Type: Checkbox
-;bAllowWhiteOnly Default: 0
-;bAllowWhiteOnly CheckboxName: Do you want to allow white-list-only mode?
-bEnableBlockingBanner=0
-;bEnableBlockingBanner If checked, the closing function will briefly flash a notification when temporarily disabling all keyboard and mouse input. Another message is sent when keyboard and mouse inputs are restored.
-;bEnableBlockingBanner If not checked, the kbm will be silently blocked and unblocked.
-;bEnableBlockingBanner Type: Checkbox
-;bEnableBlockingBanner Default: 0
-;bEnableBlockingBanner CheckboxName: Do you want to enable the banner informing you that the keyboard/mouse is locked?
-BrowserClasses=MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
-;BrowserClasses Comma-separated list of ahk_classes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
-;BrowserClasses The ahk_exe of the browser needs to be added to BrowserExes as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
-;BrowserClasses (Looking at you, Spotify)
-;BrowserClasses Type: Text
-;BrowserClasses Default: MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
-BrowserExes=firefox.exe,chrome.exe,iexplore.exe,opera.exe
-;BrowserExes Comma-separated list of ahk_exes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
-;BrowserExes The ahk_class of the browser needs to be added to BrowserClasses as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
-;BrowserExes (Looking at you, Spotify)
-;BrowserExes Type: Text
-;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe,msedge.exe
-BrowserNewTabs=-1
-;BrowserNewTabs Comma-separated list of new-tab names for each browser you are using
-;BrowserNewTabs Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user.
-;BrowserNewTabs To do so, please replace the "-1" by the names of the new tab in your respective browser(s).
-;BrowserNewTabs Type: Text
-ActiveColor_Whitelist=green
-;ActiveColor_Whitelist Color of active whitelist (if colors are enabled).
-;ActiveColor_Whitelist
-;ActiveColor_Whitelist Adding/removing/changing colors requires a restart, so make sure you save relevant settings before restarting manually.
-;ActiveColor_Whitelist Possible Words to use: Black, Silver, Gray, White, Maroon, Red, Purple, Fuchsia, Green, Lime, Olive, Yellow, Navy, Blue, Teal, Aqua
-;ActiveColor_Whitelist Type: Text
-;ActiveColor_Whitelist Default: green
-ActiveColor_Blacklist=maroon
-;ActiveColor_Blacklist Color of active blacklist (if colors are enabled). 
-;ActiveColor_Blacklist
-;ActiveColor_Blacklist Adding/removing/changing colors requires a restart, so make sure you save relevant settings before restarting manually.
-;ActiveColor_Blacklist Possible Words to use: Black, Silver, Gray, White, Maroon, Red, Purple, Fuchsia, Green, Lime, Olive, Yellow, Navy, Blue, Teal, Aqua
-;ActiveColor_Blacklist Type: Text
-;ActiveColor_Blacklist Default: maroon
-bLVColor=0
-;bLVColor If checked, color the active whitelist and active blacklist with the colors of "ActiveColor_Whitelist" and "ActiveColor_Blacklist" respectively.
-;bLVColor Type: Checkbox
-;bLVColor CheckboxName: Do you want to color the active lists?
-bLVDelete_RequireConfirmation=0
-;bLVDelete_RequireConfirmation If  checked, any action removing items from a ListView requires specific confirmation.
-;bLVDelete_RequireConfirmation If unchecked, this double-check is skipped. Items can still be restored as usual.
-;bLVDelete_RequireConfirmation Type: Checkbox
-;bLVDelete_RequireConfirmation Default: 0
-;bLVDelete_RequireConfirmation CheckboxName: Do you want an extra dialogue to confirm when removing items from listviews?
-bStartup=0
-;bStartup Create shortcut (lnk) in the startup folder for DistractLess to start automatically
-;bStartup 0=No
-;bStartup 1=Yes
-;bStartup Type: Checkbox
-;bStartup Default: 0
-;bStartup CheckboxName: Do you want to add this script to start at system bootup?
-sLocationUserBackup=DistractLess_Storage\UserBackups
-;sLocationUserBackup Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
-;sLocationUserBackup Choose the folder to store custom lists in via the "Save LV's"-button.
-;sLocationUserBackup Type: Folder
-;sLocationUserBackup Default: DistractLess_Storage\UserBackups
-sFontSize_Text=7
-;sFontSize_Text Set font-size for the following controls:
-;sFontSize_Text * Text
-;sFontSize_Text * Edit-fields
-;sFontSize_Text * Sliders
-;sFontSize_Text Type: DropDown 7||8|9|10|11|12
-;sFontSize_Text Default: 7
-;sFontSize_Text CheckboxName: Do you want to allow locking of the entire gui?
-sFontType_Text=Times New Roman
-;sFontType_Text Set Font for all texts, excluding the listviews.
-;sFontType_Text Type: DropDown Arial|Calibri|Cambria|Consolas|Comic Sans MS|Corbel|Courier|Courier New|Georgia|Lucidia Console|Lucidia Sans|MS Sans Serif|Segoe UI||Times New Roman|Tahoma|Verdana|System
-;sFontType_Text Default: Times New Roman
-sFontSize_ListView=7
-;sFontSize_ListView Set font-size for the following controls:
-;sFontSize_ListView * ListViews
-;sFontSize_ListView Type: DropDown 5|6|7||8|9|
-;sFontSize_ListView Default: 7
-sFontType_Listview=Segoe UI
-;sFontType_Listview Set Font for all listviews
-;sFontType_Listview Type: DropDown Arial|Calibri|Cambria|Consolas|Comic Sans MS|Corbel|Courier|Courier New|Georgia|Lucidia Console|Lucidia Sans|MS Sans Serif|Segoe UI||Times New Roman|Tahoma|Verdana|System
-;sFontType_Listview Default: Segoe UI
-bWarningOnFileLoadSettingChanges=1
-;bWarningOnFileLoadSettingChanges Decide wether or not you want to be warned whenever the loading of a stores set of conditions changes the active FilterMode or the active trumping rules. Recommended to be kept on for inexperienced users who are not yet fully aware of the intricacies of how conditions work together.
-;bWarningOnFileLoadSettingChanges Type: Checkbox
-;bWarningOnFileLoadSettingChanges Default: 1
-;bWarningOnFileLoadSettingChanges CheckboxName: Do you want to be warned if FilterMode/TrumpingRules changed when loading new conditions?
-bShowOnProgramStart=1
-;bShowOnProgramStart Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour)
-;bShowOnProgramStart This has no effect if no set of conditions is loaded. I.e. if "OnExitBehaviour" is set to "Empty", the GUI will never be shown.
-;bShowOnProgramStart Type: Checkbox
-;bShowOnProgramStart Default: 1
-;bShowOnProgramStart CheckboxName: Do you want to show the GUI after the program has finished its start-routine?
-[Invisible Settings]
-;Invisible Settings Type: Text
-;Invisible Settings Hidden:
-bAllowLocking=1
-;bAllowLocking Allows the gui to be locked from further access until the time specified in has passed, or the password is entered correctly (depending on the mode)
-;bAllowLocking Note that if this setting is deactivated, the GUI cannot be locked anymore.
-;bAllowLocking Type: Checkbox
-;bAllowLocking Default: 1
-;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
-;bAllowLocking
-bEditDirectStringIn_f_EditArrayElement=0
-;bEditDirectStringIn_f_EditArrayElement If checked, the entries are displayed as the strings they are saved as, and not chopped up. In that way, more finely tuned edits can be made (such as moving a condition from being program-only to website-only, or moving it to the other list)
-;bEditDirectStringIn_f_EditArrayElement Type: Checkbox
-;bEditDirectStringIn_f_EditArrayElement Default: 0
-;bEditDirectStringIn_f_EditArrayElement CheckboxName: Do you want to edit the raw information string when editing an entry?
-NoFilterClasses=TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
-;NoFilterClasses Comma-separated list of ahk_classes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
-;NoFilterClasses Type: Text
-;NoFilterClasses Default: TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
-NoFilterExes=Code.exe,Taskmgr.exe,Autohotkey.exe
-;NoFilterExes Comma-separated list of ahk_exes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
-;NoFilterExes Type: Text
-;NoFilterExes Default: Code.exe,Taskmgr.exe,Autohotkey.exe
-NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,DistracLess_2
-;NoFilterTitles Comma-separated list of window Titles which are not filtered, ever. Mostly hard-coded precautions to protect this program and its vital submenus.
-;NoFilterTitles Type: Text
-;NoFilterTitles Default: DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess_5,DistractLess Settings,IniFileCreator,DistracLess_2
-sUnlockPassword=-1
-;sUnlockPassword Password chosen by the user to unlock the gui again, if LockingBehaviour is set to "Password-protected"
-;sUnlockPassword Type: Text
-)
+	;General Settings General Settings for DistractLess
+	RefreshTime=200
+	;RefreshTime Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
+	;RefreshTime Type: Integer
+	;RefreshTime Default: 200
+	LockingBehaviour=Time-protected
+	;LockingBehaviour set wether or not to lock until
+	;LockingBehaviour - time has passed
+	;LockingBehaviour - or until the correct password is inputted
+	;LockingBehaviour Type: DropDown Password-protected|Time-protected||
+	;LockingBehaviour Default: Time-protected
+	LockingDefaultOffsetHours=3
+	;LockingDefaultOffsetHours Set the number of hours used when calculating the default unlocking time when locking the program for a set time.
+	;LockingDefaultOffsetHours Value in hours.
+	;LockingDefaultOffsetHours Type: Integer
+	;LockingDefaultOffsetHours Default: 3
+	bAlwaysAskPW=0
+	;bAlwaysAskPW When checked, the gui is always locked (equivalent to left-clicking the padlock-icon on the main GUI window), and a password is checked.
+	;bAlwaysAskPW Type: Checkbox
+	;bAlwaysAskPW Default: 0
+	;bAlwaysAskPW CheckboxName: Do you want to always lock the GUI?
+	OnExitBehaviour=Restart with specific bundle
+	;OnExitBehaviour Decide what to do when the script is manually closed by any means, except for shutting down, logging off or restarting the PC.
+	;OnExitBehaviour Changes in this setting only take effect after restarting the program once.
+	;OnExitBehaviour Restart with current bundle:
+	;OnExitBehaviour the currently active and stored Blacklists and Whitelists, as well as the currently active Filter-mode and Trumping-rule are stored and reloaded when script is closed. This prevents the script from being closed by hand.
+	;OnExitBehaviour Empty Restart:
+	;OnExitBehaviour Program is restarted without reloading the current session.
+	;OnExitBehaviour Nothing:
+	;OnExitBehaviour Script exits normally, without restarting at all.
+	;OnExitBehaviour Restart with specific bundle:
+	;OnExitBehaviour Restart with a specific bundle by default. Bundle must be specified under "sDefaultBundle",
+	;OnExitBehaviour Type: DropDown Nothing||Restart with current bundle|Empty Restart|Restart with specific bundle
+	;OnExitBehaviour Default: Restart with specific bundle
+	sDefaultBundle=
+	;sDefaultBundle Only takes effect if OnExitBehaviour is set to "Restart with specific bundle". Select a bundle to be always loaded on startup. Note that this setting also applies to indirect restarts - and hence this bundle will be loaded even if another one was active before the user attempted to close the program.
+	;sDefaultBundle Type: File
+	EnableDiagnosticMode=0
+	;EnableDiagnosticMode Enable Diagnostics-mode for the Closing-function. This results in: CLOSING WINDOWS: more information about matching criteria being displayed, instead of closing the window/tab outright.
+	;EnableDiagnosticMode DoubleClick the fifth part of the statusbar of the main gui to enable and disable diagnostic mode quickly.
+	;EnableDiagnosticMode Type: Checkbox
+	;EnableDiagnosticMode Default: 0
+	;EnableDiagnosticMode CheckboxName: Do you want to enable diagnostics mode?
+	bAllowWhiteOnly=0
+	;bAllowWhiteOnly Allows the script to run only allowing white-listed windows.
+	;bAllowWhiteOnly Note that this is _very_ restrictive, and if not done with great care, will close just about everything you have.
+	;bAllowWhiteOnly Make sure you prepare and test your whitelist in this mode using by enabling the diagnostics mode before employing it.
+	;bAllowWhiteOnly Type: Checkbox
+	;bAllowWhiteOnly Default: 0
+	;bAllowWhiteOnly CheckboxName: Do you want to allow white-list-only mode?
+	bEnableBlockingBanner=0
+	;bEnableBlockingBanner If checked, the closing function will briefly flash a notification when temporarily disabling all keyboard and mouse input. Another message is sent when keyboard and mouse inputs are restored.
+	;bEnableBlockingBanner If not checked, the kbm will be silently blocked and unblocked.
+	;bEnableBlockingBanner Type: Checkbox
+	;bEnableBlockingBanner Default: 0
+	;bEnableBlockingBanner CheckboxName: Do you want to enable the banner informing you that the keyboard/mouse is locked?
+	BrowserClasses=MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
+	;BrowserClasses Comma-separated list of ahk_classes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
+	;BrowserClasses The ahk_exe of the browser needs to be added to BrowserExes as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
+	;BrowserClasses (Looking at you, Spotify)
+	;BrowserClasses Type: Text
+	;BrowserClasses Default: MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame
+	BrowserExes=firefox.exe,chrome.exe,iexplore.exe,opera.exe
+	;BrowserExes Comma-separated list of ahk_exes which are considered to represent web browsers for the sake of closing only the active tab via Ctrl-W, as opposed to Alt+F4.
+	;BrowserExes The ahk_class of the browser needs to be added to BrowserClasses as well for DistractLess to identify the browser correctly. This is necessary as there are _way_ too many programs built on chrome's framework, but we don't want those to count as browsers.
+	;BrowserExes (Looking at you, Spotify)
+	;BrowserExes Type: Text
+	;BrowserExes Default: firefox.exe,chrome.exe,iexplore.exe,opera.exe,msedge.exe
+	BrowserNewTabs=-1
+	;BrowserNewTabs Comma-separated list of new-tab names for each browser you are using
+	;BrowserNewTabs Because this is different depending on language, and it is more or less impossible for me to provide a full-coverage list here now, this must be manually created by the user.
+	;BrowserNewTabs To do so, please replace the "-1" by the names of the new tab in your respective browser(s).
+	;BrowserNewTabs Type: Text
+	ActiveColor_Whitelist=green
+	;ActiveColor_Whitelist Color of active whitelist (if colors are enabled).
+	;ActiveColor_Whitelist
+	;ActiveColor_Whitelist Adding/removing/changing colors requires a restart, so make sure you save relevant settings before restarting manually.
+	;ActiveColor_Whitelist Possible Words to use: Black, Silver, Gray, White, Maroon, Red, Purple, Fuchsia, Green, Lime, Olive, Yellow, Navy, Blue, Teal, Aqua
+	;ActiveColor_Whitelist Type: Text
+	;ActiveColor_Whitelist Default: green
+	ActiveColor_Blacklist=maroon
+	;ActiveColor_Blacklist Color of active blacklist (if colors are enabled).
+	;ActiveColor_Blacklist
+	;ActiveColor_Blacklist Adding/removing/changing colors requires a restart, so make sure you save relevant settings before restarting manually.
+	;ActiveColor_Blacklist Possible Words to use: Black, Silver, Gray, White, Maroon, Red, Purple, Fuchsia, Green, Lime, Olive, Yellow, Navy, Blue, Teal, Aqua
+	;ActiveColor_Blacklist Type: Text
+	;ActiveColor_Blacklist Default: maroon
+	bLVColor=0
+	;bLVColor If checked, color the active whitelist and active blacklist with the colors of "ActiveColor_Whitelist" and "ActiveColor_Blacklist" respectively.
+	;bLVColor Type: Checkbox
+	;bLVColor CheckboxName: Do you want to color the active lists?
+	bLVDelete_RequireConfirmation=0
+	;bLVDelete_RequireConfirmation If  checked, any action removing items from a ListView requires specific confirmation.
+	;bLVDelete_RequireConfirmation If unchecked, this double-check is skipped. Items can still be restored as usual.
+	;bLVDelete_RequireConfirmation Type: Checkbox
+	;bLVDelete_RequireConfirmation Default: 0
+	;bLVDelete_RequireConfirmation CheckboxName: Do you want an extra dialogue to confirm when removing items from listviews?
+	bStartup=0
+	;bStartup Create shortcut (lnk) in the startup folder for DistractLess to start automatically
+	;bStartup 0=No
+	;bStartup 1=Yes
+	;bStartup Type: Checkbox
+	;bStartup Default: 0
+	;bStartup CheckboxName: Do you want to add this script to start at system bootup?
+	sLocationUserBackup=DistractLess_Storage\UserBackups
+	;sLocationUserBackup Set time in milliseconds until the current window is matched against the set whitelist and/or blacklist. Lower values mean more immediate closing of blocked windows, higher values reduce the frequency of checks.
+	;sLocationUserBackup Choose the folder to store custom lists in via the "Save LV's"-button.
+	;sLocationUserBackup Type: Folder
+	;sLocationUserBackup Default: DistractLess_Storage\UserBackups
+	sFontSize_Text=7
+	;sFontSize_Text Set font-size for the following controls:
+	;sFontSize_Text * Text
+	;sFontSize_Text * Edit-fields
+	;sFontSize_Text * Sliders
+	;sFontSize_Text Type: DropDown 7||8|9|10|11|12
+	;sFontSize_Text Default: 7
+	;sFontSize_Text CheckboxName: Do you want to allow locking of the entire gui?
+	sFontType_Text=Times New Roman
+	;sFontType_Text Set Font for all texts, excluding the listviews.
+	;sFontType_Text Type: DropDown Arial|Calibri|Cambria|Consolas|Comic Sans MS|Corbel|Courier|Courier New|Georgia|Lucidia Console|Lucidia Sans|MS Sans Serif|Segoe UI||Times New Roman|Tahoma|Verdana|System
+	;sFontType_Text Default: Times New Roman
+	sFontSize_ListView=7
+	;sFontSize_ListView Set font-size for the following controls:
+	;sFontSize_ListView * ListViews
+	;sFontSize_ListView Type: DropDown 5|6|7||8|9|
+	;sFontSize_ListView Default: 7
+	sFontType_Listview=Segoe UI
+	;sFontType_Listview Set Font for all listviews
+	;sFontType_Listview Type: DropDown Arial|Calibri|Cambria|Consolas|Comic Sans MS|Corbel|Courier|Courier New|Georgia|Lucidia Console|Lucidia Sans|MS Sans Serif|Segoe UI||Times New Roman|Tahoma|Verdana|System
+	;sFontType_Listview Default: Segoe UI
+	bWarningOnFileLoadSettingChanges=1
+	;bWarningOnFileLoadSettingChanges Decide wether or not you want to be warned whenever the loading of a stores set of conditions changes the active FilterMode or the active trumping rules. Recommended to be kept on for inexperienced users who are not yet fully aware of the intricacies of how conditions work together.
+	;bWarningOnFileLoadSettingChanges Type: Checkbox
+	;bWarningOnFileLoadSettingChanges Default: 1
+	;bWarningOnFileLoadSettingChanges CheckboxName: Do you want to be warned if FilterMode/TrumpingRules changed when loading new conditions?
+	bShowOnProgramStart=1
+	;bShowOnProgramStart Decide wether or not to show the GUI when the program has finished its start-routine. Does not affect silent restarts if closed prematurely (cf. OnExitBehaviour)
+	;bShowOnProgramStart This has no effect if no set of conditions is loaded. I.e. if "OnExitBehaviour" is set to "Empty", the GUI will never be shown.
+	;bShowOnProgramStart Type: Checkbox
+	;bShowOnProgramStart Default: 1
+	;bShowOnProgramStart CheckboxName: Do you want to show the GUI after the program has finished its start-routine?
+	[Invisible Settings]
+	;Invisible Settings Type: Text
+	;Invisible Settings Hidden:
+	bAllowLocking=1
+	;bAllowLocking Allows the gui to be locked from further access until the time specified in has passed, or the password is entered correctly (depending on the mode)
+	;bAllowLocking Note that if this setting is deactivated, the GUI cannot be locked anymore.
+	;bAllowLocking Type: Checkbox
+	;bAllowLocking Default: 1
+	;bAllowLocking CheckboxName: Do you want to allow locking of the entire gui?
+	;bAllowLocking
+	bEditDirectStringIn_f_EditArrayElement=0
+	;bEditDirectStringIn_f_EditArrayElement If checked, the entries are displayed as the strings they are saved as, and not chopped up. In that way, more finely tuned edits can be made (such as moving a condition from being program-only to website-only, or moving it to the other list)
+	;bEditDirectStringIn_f_EditArrayElement Type: Checkbox
+	;bEditDirectStringIn_f_EditArrayElement Default: 0
+	;bEditDirectStringIn_f_EditArrayElement CheckboxName: Do you want to edit the raw information string when editing an entry?
+	NoFilterClasses=TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
+	;NoFilterClasses Comma-separated list of ahk_classes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
+	;NoFilterClasses Type: Text
+	;NoFilterClasses Default: TaskManagerWindow,#32770,AutoHotkeyGui,MultitaskingViewFrame,CabinetWClass,
+	NoFilterExes=Code.exe,Taskmgr.exe,Autohotkey.exe
+	;NoFilterExes Comma-separated list of ahk_exes which are not filtered, ever. Mostly hard-coded precautions to protect important programs/windows
+	;NoFilterExes Type: Text
+	;NoFilterExes Default: Code.exe,Taskmgr.exe,Autohotkey.exe
+	NoFilterTitles=DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess Settings,IniFileCreator,DistractLess_2
+	;NoFilterTitles Comma-separated list of window Titles which are not filtered, ever. Mostly hard-coded precautions to protect this program and its vital submenus.
+	;NoFilterTitles Type: Text
+	;NoFilterTitles Default: DistractLess_1,DistractLess_2,DistractLess_3,DistractLess_4,DistractLess_5,DistractLess Settings,IniFileCreator,DistractLess_2
+	sUnlockPassword=-1
+	;sUnlockPassword Password chosen by the user to unlock the gui again, if LockingBehaviour is set to "Password-protected"
+	;sUnlockPassword Type: Text
+	)
 	if FileExist("errorlog.txt") ; make sure the errorlog doesn't grow exponentially on someones system. Realistically, as it is a plain text file, and only the newest errors should be tracked anyways, resetting at 30
 	{
 		FileGetSize, vErrorlogSize,errorlog.txt, M
-		if vErrorlogSize>30
+		if (vErrorlogSize>30)
 			FileDelete, errorlog.txt
 	}
 	if !FileExist(IniSettingsFilePath)
 	{
-		; m("figure out how to write a continuation section to file successfully")
 		f_ThrowError("Main Code Body","Settings file does not exist, initiating from default settings. ", A_ScriptNameNoExt . "_"0, Exception("",-1).Line)
 		FileAppend, %DefSettings%, %A_ScriptDir%\DistractLess_Storage\INI-Files\DistractLessSettings.ini
 	}
@@ -1059,23 +281,21 @@ sUnlockPassword=-1
 		str:=""
 		for k,v in FixedDescriptionFile[1]
 		{
-			if v!=""
+			if (v!="")
 				str.=v "`n"
 		}
 		FixedIniFile:=FileOpen(IniSettingsFilePath,"w")
 		FixedIniFile.write(str)
 		FixedIniFile.close() ; all part of precaution to prevent faulty setting descriptions being saved between restarts. This is a hotfix that has, as far as I can tell, resolved the issue for my instance of IniSettingsEditor, because necessary edits might have added some, for me unfixable bugs. I just don't understand the source-code to the level of detail necessary to resolve it. This section resolves that issue with a once/run rewrite of the settings-file.
 	}
-	NotifyTrayClick(DllCall("GetDoubleClickTime")) ; Handle double left click on tray events and prevent them to open the script history
+	; NotifyTrayClick(DllCall("GetDoubleClickTime")) ; Handle double left click on tray events and prevent them to open the script history
 	OnMessage(0x404, "f_TrayIconSingleClickCallBack")
 	gosub, lLoadSettingsFromIniFile
 	if (IniOBj["General Settings"].BrowserNewTabs=-1) ; initialising for first time, notify user to edit this.
 	{
 		m("First initialisation.`n`nPlease choose the setting 'BrowserNewTabs' in the upcoming  settings-window and follow the instructions.")
 		if !bIsDevPC
-		{
 			gosub, lLaunchWindowSpy
-		}
 		if bIsDevPC
 			Clipboard:="BrowserNewTabs: Mozilla Firefox,Neuer Tab - Google Chrome,Neue Registerkarte - Internet Explorer,Neuer Tab`nBrowserClasses: MozillaWindowClass,Chrome_WidgetWin_1,Chrome_WidgetWin_2,OpWindow,IEFrame`nBrowserExes:firefox.exe,chrome.exe,iexplore.exe,opera.exe" ; laziness on my end, as I often need to rewrite my settings-file when testing, and don't want to search out all titles again.
 		DL_IniSettingsEditor("DistractLess",IniSettingsFilePath,0,0,0)
@@ -1097,11 +317,9 @@ sUnlockPassword=-1
 	}
 	if (IniObj["Invisible Settings"].sUnlockPassword=-1) || (!IniObj["Invisible Settings"].sUnlockPassword)
 	{
-		InputBox, setPWstr  , Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
+		InputBox, setPWstr, Setup DistractLess, Please set password to be used when unlocking the GUI.`nNote that this cannot be changed within the program in a simple way afterwards.`nFor more information on how to change the password afterwards please check the documentation on GitHub.
 		IniObj["Invisible Settings"].sUnlockPassword:=setPWstr
-
 		DL_TF_ReplaceInLines("!" IniSettingsFilePath,1,"","sUnlockPassword=-1","sUnlockPassword="setPWstr)
-		;fWriteIni(IniObj,A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings")
 		if (GetKeyState("CapsLock","T") and bIsDevPC)
 			ttip("Line:" Exception("",-1).Line)
 	}
@@ -1110,31 +328,29 @@ sUnlockPassword=-1
 	else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
 		OnExit("f_RestartEmpty")
 	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
-		OnExit("f_RestartWithSpecificBundle")
+		OnExit("f_RestartWithDefaultBundle")
 
 	OnError("LogError")
 	cause := error
-
-	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLasetBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithSpecificBundle
+	
+	;; as the bundle "CurrentSettings" is contains either the settings of last session (cf. f_RestartWithLastBundle), or the contents of the file specified under sDefaultBundle (cf. f_RestartWithDefaultBundle, it will always contain the right bundle.
 	if (IniObj["General Settings"].OnExitBehaviour!="Nothing") && (IniObj["General Settings"].OnExitBehaviour!="Empty Restart")
 	{
 		if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle") && (IniObj["General Settings"].sDefaultBundle!="") ; take the simpler version because the use is _starting_, not _restarting_. In this case, we don't assume to lock the gui anymore because it is the first startup of the day - due to the safety restarts in place, as soon as this program _is_ running, the safety-restart functions take responsibility to start with specifics.
 		{
 			LastSessionSettings:=fReadINI(A_ScriptDir "\" IniObj["General Settings"].sDefaultBundle)
-
+			SplitPath, % IniObj["General Settings"].sDefaultBundle,,,,BundleName
 		}
-		if FileExist(A_ScriptDir "\DistractLess_Storage\CurrentSettings.ini")  ;; only generated when OnExitBehaviour==Restart with current bundle, _or_ we have tried to end the program while it is running. As the file only exists in restart-scenarios or if we choose to "restart with last bundle", we have to check this _after_ we load the possible settings.
-		{
-			LastSessionSettings:=fReadIni(A_ScriptDir . "\DistractLess_Storage\CurrentSettings.ini")
-		}
-		for k,v in LastSessionSettings[5]
-			LastSessionSettings[5][k]:=StrSplit(v,A_Space ";").1
+		if FileExist((d:=A_ScriptDir "\" INIObj["General Settings"].sLocationUserBackup "\CurrentSettings.ini")) && IniObj["General Settings"].OnExitBehaviour="Restart with current bundle"  ;; only generated when OnExitBehaviour==Restart with current bundle, _or_ we have tried to end the program while it is running. As the file only exists in restart-scenarios or if we choose to "restart with last bundle", we have to check this _after_ we load the possible settings.
+			LastSessionSettings:=fReadIni(A_ScriptDir . "\" INIObj["General Settings"].sLocationUserBackup  "\CurrentSettings.ini")
+		for k,v in LastSessionSettings[6]
+			LastSessionSettings[6][k]:=StrSplit(v,A_Space ";").1
 		bRestoreLastSession:=true
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
-			m("Rstored LastSessionSettings")
-		FileDelete, %A_ScriptDir%\DistractLess_Storage\CurrentSettings.ini
+			m("Restored LastSessionSettings")
+		FileDelete, % A_ScriptDir "\" INIObj["General Settings"].sLocationUserBackup  "\CurrentSettings.ini"
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
-			m(LastSessionSettings[5])
+			m(LastSessionSettings[6])
 	}
 	f_CreateTrayMenu(IniObj)
 	gui, font, %FONT_LV1% , %FONT_LV2%
@@ -1150,7 +366,6 @@ sUnlockPassword=-1
 	sLastWindowTitle:="" ; init old window title
 	vLastSliderPos_Slider_FilterMode:=2
 
-
 	gosub, lGuiCreate_1
 	; gosub, lGuiCreate_2 ; function gui
 	gosub, lGuiCreate_3
@@ -1160,7 +375,7 @@ sUnlockPassword=-1
 	if bRestartLocked
 	{
 		bIsLocked:=true
-		DefaultTime:=LastSessionSettings[5].5
+		DefaultTime:=trim(strsplit(LastSessionSettings[5][LastSessionSettings[5].MaxIndex()],";").1)
 		gosub, lLockProgram
 	}
 	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime
@@ -1182,16 +397,17 @@ sUnlockPassword=-1
 	else if !bRestoreLastSession and !vsdbdddd
 		Notify().AddWindow("Finished initialising.",{Title:"DistractLess",TitleColor:"0xFFFFFF",Time:1300,Color:"0xFFFFFF",Background:"0x000000",TitleSize:10,Size:10,ShowDelay:0,Radius:15, Flash:1000,FlashColor:0x5555})
 	if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
-		m("bRestoreLastSession: " bRestoreLastSession,"vsdb: " vsdb , "I need to embed another setting into LastSessionSettings[5] to figure out in which case to display the startup notification, and in which we don't want to display it.","The logic is the following: because right now the current settings are always stored → there is always gonna be a lastSessionrestored now. " )
+		m("bRestoreLastSession: " bRestoreLastSession,"vsdb: " vsdb , "I need to embed another setting into LastSessionSettings[6] to figure out in which case to display the startup notification, and in which we don't want to display it.","The logic is the following: because right now the current settings are always stored → there is always gonna be a lastSessionrestored now. " )
 
 	SetWorkingDir, %A_ScriptDir%
-	if ((StartTimer) and bIsDevPC and !bLockOutAdmin)
+	if (StartTimer and bIsDevPC and !bLockOutAdmin)
 		CodeTimer()
+	if (BundleName!="")
+		SB_SetText("Current File: " strsplit(BundleName,".ini").1,8)
 	return
 
 	;}______________________________________________________________________________________
 	;{#[Hotkeys Section]
-
 
 	!-:: ;; global || open Gui
 	Gui1_ShowLogic:
@@ -1263,17 +479,18 @@ sUnlockPassword=-1
 	}
 	Return
 
-
 	#IfWinActive DistractLess_1
 	Sc029:: 									;; Gui1 || toggle Program On/Off
-	; if bIsLocked ; block the user trying to disable the program when it is locked, can't believe this has still been active.
-	; 	return
-	GuiControlGet,CurrentState,, bIsProgramOn
-	CurrentState:=CurrentState+0
-	CurrentState:=!CurrentState
-	GuiControl,,bIsProgramOn, %CurrentState%
-	;GuiControl, Focus,
+	if !bIsLocked
+	{
+
+		GuiControlGet,CurrentState,, bIsProgramOn
+		CurrentState:=CurrentState+0
+		CurrentState:=!CurrentState
+		GuiControl,,bIsProgramOn, %CurrentState%
+	}
 	gosub, lCallBack_EnableProgram
+	Settimer, lEnforceRules, % (bIsProgramOn?"On":"Off")
 	return
 	!-:: 										;; Gui1 || open Gui
 	gosub, Gui1_ShowLogic
@@ -1297,7 +514,7 @@ sUnlockPassword=-1
 	return
 	^L::										;; Gui1 || open locking prompt
 	if (GetKeyState("CapsLock","T") and bIsDevPC)
-		ttip("line 451:`nbefore going into 'lLockProgram'-routine")
+		ttip("line " Exception("", -1).Line ":`nbefore going into 'lLockProgram'-routine")
 	if IniObj["Invisible Settings"].bAllowLocking && !dbflag
 		gosub, lLockProgram
 	else if IniObj["Invisible Settings"].bAllowLocking && dbflag
@@ -1308,6 +525,10 @@ sUnlockPassword=-1
 	^T:: gosub, lHotkey_ToggleTestMode 			;; Gui1 || enter/exit TestMode
 	^O:: gosub, lOpenNormalSettings				;; Gui1 || open Settings
 	^+O:: gosub, lOpenHiddenSettings			;; Gui1 || open Hidden Settings ← not sure if I want this to be a hotkey-able thing
+
+	#IfWinActive, DistractLess_2
+	^Enter::eAE_Submit()  	;; Gui2 || submit changes
+
 	#If (bDistractLess_3IsVisible) || WinActive("DistractLess_3")
 	Esc:: ;; Gui3 || close Gui3
 	{
@@ -1368,9 +589,7 @@ sUnlockPassword=-1
 	+Tab::SendInput,{Left} 	;; Gui5 || go to previous digit of time edit
 	^Enter::GC5_Submit() 	;; Gui5 || submit time
 
-	#IfWinActive, DistracLess_2
-	^Enter::GC2_Submit()  	;; Gui4 || submit changes
-
+	
 
 	#IF
 	;}______________________________________________________________________________________
@@ -1396,7 +615,7 @@ sUnlockPassword=-1
 		if (LastSessionSettings[5].MaxIndex()!="")
 		{
 			Count:=Count+ LastSessionSettings[5].MaxIndex()
-			bRestartLocked:=(LastSessionSettings[5].MaxIndex()=5?1:0)
+			bRestartLocked:=(LastSessionSettings[5].MaxIndex()=6?1:0)
 		}
 		ActiveArrays:=[[],[]]
 		StoredArrays:=[[],[]]
@@ -1430,22 +649,18 @@ sUnlockPassword=-1
 			ActiveArrays:=[[],[]]
 		if (LastSessionSettings[3].MaxIndex()="") && (LastSessionSettings[4].MaxIndex()="") ;; we are initialising with empty arrays →
 			StoredArrays:=[[],[]]
-		if (LastSessionSettings[5].MaxIndex()!="")
+		if (LastSessionSettings[6].MaxIndex()!="")
 		{
-			vActiveFilterMode:=LastActiveFilterMode:=LastSessionSettings[5].1
-			bTrumping:=LastTrumping:=LastSessionSettings[5].2
-			bCheckURLsInBrowsers:=LastCheckURLsInBrowsers:=LastSessionSettings[5].3
-			LastIsProgramOn:=LastSessionSettings[5].4
+			vActiveFilterMode:=LastActiveFilterMode:=LastSessionSettings[6].1
+			bTrumping:=LastTrumping:=LastSessionSettings[6].2
+			bCheckURLsInBrowsers:=LastCheckURLsInBrowsers:=LastSessionSettings[6].3
+			LastIsProgramOn:=LastSessionSettings[6].4
 			guicontrol,ChooseString,vActiveFilterMode, %LastActiveFilterMode%
 			guicontrol,ChooseString, bTrumping, %LastTrumping%
 			guicontrol,ChooseString, bCheckURLsInBrowsers, %LastCheckURLsInBrowsers%
 			guicontrol,, bIsProgramOn, %LastIsProgramOn%
 			bIsProgramOn:=bIsProgramOn + 0
 		}
-		; if !bRestoreLastSession
-
-
-
 		gosub, lCallBack_DDL_FilterMode
 
 		gosub, lCallBack_EnableProgram
@@ -1469,7 +684,6 @@ sUnlockPassword=-1
 	{
 		global IniObj:=fReadIni(A_ScriptDir . "\DistractLess_Storage\INI-Files\DistractLessSettings.ini")
 		global dbflag:=IniObj["General Settings"].EnableDiagnosticMode
-
 		f_ToggleStartup(IniOBj["General Settings"].bStartup)
 		BrowserClasses:=StrSplit(IniObj["General Settings"].BrowserClasses, ",")
 		BrowserExes:=StrSplit(IniObj["General Settings"].BrowserExes, ",")
@@ -1520,8 +734,7 @@ sUnlockPassword=-1
 		if !bIsProgramOn ; don't continue if program is turned off.
 			return
 		bCloseThis:=bWhiteContainsThisTitle:=bBlackContainsThisTitle:=bCurrentIsBrowser:=bMatchAnyName:=bCurrWindowIsBrowser:=false ; reset flags for each call.
-		sCurrentURL:=""
-		sCurrTitle:=""
+		sCurrentURL:=sCurrTitle:=""
 		WinGetActiveTitle, sCurrTitle
 		WinGetClass, sCurrClass, A
 		WinGet, sCurrExe, ProcessName,A
@@ -1535,7 +748,6 @@ sUnlockPassword=-1
 			if Instr(sCurrTitle, " || "sCurrentURL) ;; fallback safety for the authors own convenience, as the browser tab names all contain the url as well due to a browser plugin. This ensures my testing works on "normal" tab-names.
 				sCurrTitle:=StrSplit(sCurrTitle," || ").1
 		}
-
 		; prelim exception handling, safety returns
 		if dbFlag ; debug behaviour
 			ttip(A_ThisLabel sCurrTitle,4)
@@ -1568,11 +780,8 @@ sUnlockPassword=-1
 				ttip(A_ThisLabel " `nThis window is exempted because VS Studio is used by the dev.",6)
 			return
 		}
-
 		if (sCurrTitle!="")
 		{
-			; if (sCurrTitle==sLastWindowTitle)
-			; 	return
 			bLastWindowWasClosed:=false
 			sLastWindowTitle:=sCurrTitle
 			switch vActiveFilterMode
@@ -1606,10 +815,7 @@ sUnlockPassword=-1
 							if HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)
 								if (stype="w") ; website
 									if !Instr(sCurrentURL,sURL) and (sURL!=".*") ; while the title matches, the url specified doesn't → still not a whitelisted page → close || if sURL=".*", it matches every url, so it will not be closed in that case, because we have already established that the title matches.
-									{
-										MatchedType:=stype
-										bWhiteContainsThisTitle:=false
-									}
+										MatchedType:=stype,bWhiteContainsThisTitle:=false
 							if bWhiteContainsThisTitle
 								return ; we have a match in whitelist -> donÄt close the current window, and no need to continue the search.
 						}
@@ -1617,8 +823,7 @@ sUnlockPassword=-1
 						{
 							if ((stype=="w") && bCurrWindowIsBrowser) || ((stype=="p") && !bCurrWindowIsBrowser)
 							{
-								MatchedTitleEntry:=sName
-								MatchedType:=stype
+								MatchedTitleEntry:=sName, MatchedType:=stype
 								bWhiteContainsThisTitle:=false ; we are not matching the title, hence we don't have to continue to search, and just close it now.
 							}
 						}
@@ -1644,8 +849,7 @@ sUnlockPassword=-1
 
 						for k,v in ActiveArrays[2]
 						{
-							bWhiteContainsThisTitle:=true
-							bMatchAnyName:=false
+							bWhiteContainsThisTitle:=true, bMatchAnyName:=false
 							RegExMatch(v, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
 							if (sName==".*")
 							{
@@ -1657,7 +861,6 @@ sUnlockPassword=-1
 							if Instr(sCurrTitle,sName) || (bMatchAnyName) ; blacklist matches: check if whitelist does NOT match
 							{
 								; current window is matching black now
-
 								MatchedTitleEntry:=sName
 								bMatchAnyName:=false
 								; 1. Check if we need to compare urls
@@ -1672,7 +875,7 @@ sUnlockPassword=-1
 										;; check if White title matches
 										for s,w in ActiveArrays[1]
 										{
-												bMatchAnyName:=false
+											bMatchAnyName:=false
 											RegExMatch(w, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",t)
 											if (tname==".*")
 											{
@@ -1693,7 +896,6 @@ sUnlockPassword=-1
 												;; Hence don't close anything in these conditionals. But because this also allows the website to exist,
 												;; we don't ever need to check the other conditions either, because this hit explicitly allows it to exist
 
-
 												;; if we want to match an entire website, we actually must have a url match. In this case, if it matches, it is not closed
 												if bMatchAnyName and Instr(sCurrentURL,tURL)
 													return
@@ -1701,10 +903,7 @@ sUnlockPassword=-1
 												{
 													;; a specific title is matching website type and title, so make sure we check the url
 													if (tURL="")
-													{
-														;; URL is not given for this whitelisted title → assume a global match, and return out of the check
-														return
-													}
+														return ;; URL is not given for this whitelisted title → assume a global match, and return out of the check
 													else
 													{
 														;; we have a URL to check.
@@ -1738,10 +937,7 @@ sUnlockPassword=-1
 											}
 											;; if we get to here, we have a match that is:
 											;; matching a black Title
-
 										}
-
-
 										;; none of the previous checks set this website window to _not_ close, so it is closed now
 										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
 									}
@@ -1777,10 +973,9 @@ sUnlockPassword=-1
 											;; as a result, whitelist has no match, and the program is closed if no other condition overrules before the array has been fully looked through
 										}
 
-
 									}
 									;; none of the previous checks set this window to _not_ close, so it is closed now
-										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
+									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,sname,Winactive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sUrl,vActiveFilterMode,bWhiteTrumpedThisTitle)
 								}
 
 							}
@@ -1819,9 +1014,7 @@ sUnlockPassword=-1
 										bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
 								}
 								else if (sType="p") and !(HasVal(BrowserClasses,sCurrClass) && HasVal(BrowserExes,sCurrExe)) ; we don't want to check a website, and the current window is not a browser
-								{
 									bLastWindowWasClosed:=f_CloseCurrentWindow(sCurrTitle,sCurrClass,sCurrExe,sCurrentURL,stype,MatchedTitleEntry,WinActive("A"),BrowserClasses,BrowserExes,bCheckURLsInBrowsers,sURL,vActiveFilterMode,bWhiteTrumpedThisTitle)
-								}
 							}
 						}
 					}
@@ -1915,7 +1108,7 @@ sUnlockPassword=-1
 		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if gui is hidden again. Because this gui is always the last gui to be visible whenever you close any submenu, it is also the last one to be active when "closing" the GUI altogether - Hence if it is hidden, reenable.
 	}
 	; Main-
-	
+
 	return
 
 	lGUIShow_1:
@@ -1991,6 +1184,8 @@ sUnlockPassword=-1
 		gui, font, s9 cWhite, Segoe UI
 		vLastCreationScreenHeight:=vGuiHeight
 		vLastCreationScreenWidth:=vGuiWidth
+		if (A_ScreenWidth<1366)
+			f_ThrowError(A_ThisFunc,"Screen Width is smaller than 1366 pixels. As a result, the gui cannot be properly shown.`nIf this error is shown on a resolution above 1366 pixel after opening the IniSettingsCreator, ignore it and open the gui again. It should not persist to normal usage in that case.",A_ScriptNameNoExt . "_"3, Exception("",-1).Line)
 		if (!vGUIWidth and !vGuiHeight) || (vGUIWidth!=(A_ScreenWidth-20)) || (vGuiHeight!=(A_ScreenHeight)) ; assign outer gui dimensions either if they don't exist or if the resolution of the active screen has changed - f.e. when undocking or docking to a higher resolution display. The lGuiCreate_1-subroutine is also invoked in total if the resolution changes, but this is the necessary inner check to reassign dimensions.
 		{
 			vGUIWidth:=A_ScreenWidth - 20  ;-910
@@ -2005,19 +1200,14 @@ sUnlockPassword=-1
 			vGUIHeight:=vGUIHeight-vGuiHeight_Reduction
 		}
 
-		if vGUIWidth<1000
-			f_ThrowError(A_ThisFunc,"Screen Width is smaller than 1000 pixels. As a result, the gui cannot be properly shown.`nIf this error is shown after opening the IniSettingsCreator, ignore it and open the gui again.",A_ScriptNameNoExt . "_"3, Exception("",-1).Line)
-
-
 		vGUITabWidth:=vGUIWidth-30
 		vGUITabHeight:=vGUIHeight-40
 
 		vGroupBoxHeight:=vGUITabHeight-(2*20)
 		vOuterGroupBoxWidth:=(vGUIWidth/2)-2*200 ; Finetune this value to scale in x direction to ratio of screen used for each section
-		;
+
 		if (vOuterGroupBoxWidth<226) ;; don't allow too small groupbox widths, otherwhise buttons glitch outside their groupboxes
 			vOuterGroupBoxWidth:=240
-
 		vLV_Width:=vOuterGroupBoxWidth-2*15
 		;vLV_Heigth	:= (vGroupBoxHeight - Buttons+Text "stored/active lists" - margin top/bottom) / number of LVs
 		vLV_Heigth:=((vGroupBoxHeight-88-32)-40)/2
@@ -2045,9 +1235,9 @@ sUnlockPassword=-1
 		vPositionCenteredButtonLeft:=vMiddleOfCentralGroupBox_EditFields - vCentralGroupBoxButtonWidth-30
 		vPositionCenteredButtonRight:=vMiddleOfCentralGroupBox_EditFields +30
 
-		vCentralGroupSliderWidth:=150
-		vPositionCenteredSlider:=vMiddleOfCentralGroupBox_EditFields - (vCentralGroupSliderWidth/2)
-		vPositionCenteredSliderText:=vPositionCenteredSlider+30
+		vCentralGroupDDLWidth:=150
+		vPositionCenteredDDL:=vMiddleOfCentralGroupBox_EditFields - (vCentralGroupDDLWidth/2)
+		vPositionCenteredDDLText:=vPositionCenteredDDL+30
 
 		Gui, Add, Text,x25 y0 w0 h0,  AnchorTab3
 		gui, add, checkbox, xp+50 yp+20 vbIsProgramOn glCallBack_EnableProgram Checked, Enable DistractLess?
@@ -2066,26 +1256,24 @@ sUnlockPassword=-1
 		}
 		f_UpdateLV(ActiveArrays[1]) ; SysListView321
 
-		gui, add, button, vbtn1 glSaveWhiteActiveToStorage, ↓ Save
-		gui, add, button, yp+35 xp vbtn2 glLoadWhiteStorageToActive, ↑ Load
-		gui, add, button, yp-35 xp+50 vbtn3 glRemoveWhiteActiveFromActive w115, x Remove from active
+		gui, add, button, vbtn1 w40 glSaveWhiteActiveToStorage, Store
+		gui, add, button, yp+35 xp w40 vbtn2 glLoadWhiteStorageToActive, Load
+		gui, add, button, yp-35 xp+44 vbtn3 glRemoveWhiteActiveFromActive w115, x Remove from active
 		gui, add, button, yp+35 xp vbtn4 glRemoveWhiteStorageFromStorage w115, x Remove from stored
-		gui, add, button, yp-35 xp+123 w103 vbtn5 glRestoreWhiteActiveFromBackup, Reverse last action
+		gui, add, button, yp-35 xp+119 w103 vbtn5 glRestoreWhiteActiveFromBackup, Reverse last action
 		gui, add, button, yp+35 xp w103 vbtn6 glRestoreWhiteStorageFromBackup, Reverse last action
-		gui, add, button, yp-17.5 xp+123 w103 vbtn7 glRemoveWhiteAll, x Clear All
-		gui, add, text, xp-296 yp+42.5 vText_StoredWhiteList, Inactive WhiteList
+		gui, add, button, yp-17.5 xp+109 w103 vbtn7 glRemoveWhiteAll, x Clear All
+		gui, add, text, xp-270 yp+42.5 vText_StoredWhiteList, Inactive WhiteList
 		gui, add, ListView, xm+25 yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV2 glLV_WhiteStorage_EditSelected , Type|Name|URL
 		f_UpdateLV(StoredArrays[1]) ; SysListView322
 		;}
 
-		; A_DefaultGui
 		;{ Blacklist
 		xStartRightThird:=xMax_TabWidth-25
 		Gui, Font, s7 cWhite, Verdana
-		gui, add, text,ym+14 xm cRed x%xMax_TabWidth% vHiD w20 h20, AnchorBlackList ; create anchor text for the right side
-
+		gui, add, text,ym+14 xm cRed x%xMax_TabWidth% vHiD w20 h19, AnchorBlackList ; create anchor text for the right side
 		gui, add, groupbox, xp-%OffsetFromRightEdge% yp+010 w%vOuterGroupBoxWidth% h%vGroupBoxHeight2%  Section
-		gui, add, text, yp+21 xp+15 yp+12 vText_ActiveBlackList, Active Blacklist ;-550
+		gui, add, text, yp+21 xp+15 yp+11 vText_ActiveBlackList, Active Blacklist ;-550
 		gui, add, ListView, yp+25 xp+vOuterGroupBoxWidth +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV3 glLV_BlackActive_EditSelected, Type|Name|URL ; replace the xp-1550 by xp-OffSetTopLeftCornerFromTopRightCornerOfTab3
 		if IniObj["General Settings"].bLVColor
 		{
@@ -2093,62 +1281,42 @@ sUnlockPassword=-1
 			guicontrol, +Background%vLV3_Color%,vLV3
 		}
 		f_UpdateLV(ActiveArrays[2]) ; SysListView323
-		gui, add, button, vbtn8 glSaveBlackActiveToStorage, ↓ Save
-		gui, add, button, yp+35 xp vbtn9 glLoadBlackStorageToActive, ↑ Load
-		gui, add, button, yp-35 xp+50 vbtn10 glRemoveBlackActiveFromActive w115, x Remove from active
+		gui, add, button, vbtn8 w40 glSaveBlackActiveToStorage, Store
+		gui, add, button, yp+35 xp w40 vbtn9 glLoadBlackStorageToActive, Load
+		gui, add, button, yp-35 xp+44 vbtn10 glRemoveBlackActiveFromActive w115, x Remove from active
 		gui, add, button, yp+35 xp vbtn11 glRemoveBlackStorageFromStorage w115, x Remove from stored
-		gui, add, button, yp-35 xp+123 w103 vbtn12 glRestoreBlackActiveFromBackup, Reverse last action
+		gui, add, button, yp-35 xp+119 w103 vbtn12 glRestoreBlackActiveFromBackup, Reverse last action
 		gui, add, button, yp+35 xp w103 vbtn13 glRestoreBlackStorageFromBackup, Reverse last action
-		gui, add, button, yp-17.5 xp+123 w103 vbtn14 glRemoveBlackAll, x Clear All
-		gui, add, text, xp-296 yp+42.5 vText_StoredBlackList, Inactive BlackList
+		gui, add, button, yp-17.5 xp+109 w103 vbtn14 glRemoveBlackAll, x Clear All
+		gui, add, text, xp-270 yp+42.5 vText_StoredBlackList, Inactive BlackList
 		gui, add, ListView, xp yp+25 +Report +NoSortHdr r23 h%vLV_Heigth% w%vLV_Width% vvLV4 glLV_BlackStorage_EditSelected, Type|Name|URL
 		f_UpdateLV(StoredArrays[2]) ; SysListView324
 		gui, add, GroupBox, x%vCentralGroupBoxTLCx% ym+24 Section  w%vWidthCentralGroupBox% h%vGroupBoxHeight2%
 		gui, add, text, ys+20 xs+145 w190 vTextEnterSubstringCriteriaToAdd,Enter substring &criteria to add
 		gui, add, edit, yp+20 xs+145 w%vWidthCentralGroupBox_Editfields% glCallBack_EnableAssortmentButtons %gui_control_options2% -VScroll vsCriteria_Substring
 
-		if (0>1)
-		{
-			gui, add, text, yp+33 xs+145 vTextSelectType, Select T&ype:
-			gui, add, DropDownList, yp+20 xs+145 vTypeSelected  glCallBack_EnableAssortmentButtons, Website|Program
-			; gui, add, Checkbox, yp+3 xp+120 vbFetchBrowserURL glCallBack_EnableAssortmentButtons, &Check URL's
-			gui, add, text, yp+30 xs+145 vTextURLAddition, Add &URL:
-			gui, add, edit, yp-3 xp+50 w165 %gui_control_options2% glCallBack_EnableAssortmentButtons -VScroll vURLToCheckAgainst
-			; gui, add, text, yp+30 xs+145, Add URL to check against:
-			gui, add, button, yp+30 xs+%vPositionCenteredButtonLeft% w150 h20 vButton_AddSubsttringToActiveWhiteList glAddSubstringToActiveWhiteList, Add criteria to &WhiteList
-			gui, add, button, yp xs+%vPositionCenteredButtonRight% w150 h20 vButton_AddSubsttringToActiveBlackList glAddSubstringToActiveBlackList, Add criteria to &BlackList
-			gui, add, button, yp-55 xs+%vPositionCenteredButtonRight% w150 h20  vButton_AddFromExistingWindows glGUIShow_3, Add from &existing windows
-			gui, add, button, yp+27 xs+%vPositionCenteredButtonRight% w60 h21  vButton_SaveSelectedListViews glSaveLVs, &Save LV's
-			gui, add, button, yp xp+90 w60 h21 vButton_RestoreFromSave glLoadFileIntoArrays, &Load File
-			;gui, add, button, yp+50 xs+%vPositionCenteredButtonRight% w150 %gui_control_options% h20 vButton_AddFromExistingWindows glGUIShow_3, Add from existing windows
-		}
-		else ;; new, more compact version
-		{
-			; GuiControlGet,
-			vWidthURLEDitField:=vWidthCentralGroupBox_Editfields-90
-			gui, add, text, yp+33 xs+145 vTextSelectType, Select T&ype:
-			gui, add, DropDownList, w80 yp+20 xs+145 vTypeSelected  glCallBack_EnableAssortmentButtons, Website|Program
-			gui, add, text, yp-20 xp+90 vTextURLAddition, Add &URL:
-			gui, add, edit, yp+20 xp w%vWidthURLEDitField% %gui_control_options2% glCallBack_EnableAssortmentButtons -VScroll vURLToCheckAgainst
-			gui, add, button, yp+30 xs+%vPositionCenteredButtonLeft% w150 h20 vButton_AddSubsttringToActiveWhiteList glAddSubstringToActiveWhiteList, Add criteria to &WhiteList
-			gui, add, button, yp xs+%vPositionCenteredButtonRight% w150 h20 vButton_AddSubsttringToActiveBlackList glAddSubstringToActiveBlackList, Add criteria to &BlackList
-			gui, add, button, yp+30 xs+%vPositionCenteredButtonRight% w150 h20  vButton_AddFromExistingWindows glGUIShow_3, Add from &existing windows
-			vPositionLeftButtonBelow_AddToWhiteList:=vPositionCenteredButtonLeft+31
-			vPositionRightButtonBelow_AddToWhiteList:=vPositionLeftButtonBelow_AddToWhiteList-40
-			gui, add, button, yp xp-%vPositionLeftButtonBelow_AddToWhiteList% w60 h21  vButton_SaveSelectedListViews glSaveLVs, &Save LV's
-			gui, add, button, yp xp+90 w60 h21 vButton_RestoreFromSave glLoadFileIntoArrays, &Load File
-			; gui, add, edit, yp xp+5 w165 %gui_control_options2% -VScroll vURLToCheckAgainst2
-		}
+		vWidthURLEDitField:=vWidthCentralGroupBox_Editfields-90
+		gui, add, text, yp+33 xs+145 vTextSelectType, Select T&ype:
+		gui, add, DropDownList, w80 yp+20 xs+145 vTypeSelected  glCallBack_EnableAssortmentButtons, Website|Program
+		gui, add, text, yp-20 xp+90 vTextURLAddition, Add &URL:
+		gui, add, edit, yp+20 xp w%vWidthURLEDitField% %gui_control_options2% glCallBack_EnableAssortmentButtons -VScroll vURLToCheckAgainst
+		gui, add, button, yp+30 xs+%vPositionCenteredButtonLeft% w150 h20 vButton_AddSubsttringToActiveWhiteList glAddSubstringToActiveWhiteList, Add criteria to &WhiteList
+		gui, add, button, yp xs+%vPositionCenteredButtonRight% w150 h20 vButton_AddSubsttringToActiveBlackList glAddSubstringToActiveBlackList, Add criteria to &BlackList
+		gui, add, button, yp+30 xs+%vPositionCenteredButtonRight% w150 h20  vButton_AddFromExistingWindows glGUIShow_3, Add from &existing windows
+		vPositionLeftButtonBelow_AddToWhiteList:=vPositionCenteredButtonLeft+31
+		vPositionRightButtonBelow_AddToWhiteList:=vPositionLeftButtonBelow_AddToWhiteList-40
+		gui, add, button, yp xp-%vPositionLeftButtonBelow_AddToWhiteList% w60 h21  vButton_SaveSelectedListViews glSaveLVs, &Save LV's
+		gui, add, button, yp xp+90 w60 h21 vButton_RestoreFromSave glLoadFileIntoArrays, &Load File
+
 		gui, add, text, yp+90 xs  vTextHorizontalLine w%vWidthCentralGroupBox% 0x10  ;Horizontal Line > Etched Gray
-		gui, add, text, yp+30 xs+%vPositionCenteredSliderText% vTextSelectFilterMode, Select &Filter Mode
+		gui, add, text, yp+30 xs+%vPositionCenteredDDLText% vTextSelectFilterMode, Select &Filter Mode
 		if IniObj["General Settings"].bAllowWhiteOnly
-			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, White|Both||Black
+			gui, add, DropDownList, yp+15 xs+%vPositionCenteredDDL% w%vCentralGroupDDLWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, White|Both||Black
 		Else
-			gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, Both||Black
+			gui, add, DropDownList, yp+15 xs+%vPositionCenteredDDL% w%vCentralGroupDDLWidth%  glCallBack_DDL_FilterMode vvActiveFilterMode, Both||Black
 
-		gui, add, text, yp+30 xs+%vPositionCenteredSliderText% vText_SelectTrumpingRule, Select &Trumping Rule
-		gui, add, DropDownList, yp+15 xs+%vPositionCenteredSlider% w%vCentralGroupSliderWidth% glCallBack_DDL_Trumping vbTrumping, White > Black||Black > White
-
+		gui, add, text, yp+30 xs+%vPositionCenteredDDLText% vText_SelectTrumpingRule, Select &Trumping Rule
+		gui, add, DropDownList, yp+15 xs+%vPositionCenteredDDL% w%vCentralGroupDDLWidth% glCallBack_DDL_Trumping vbTrumping, White > Black||Black > White
 
 		GuiControl, disable, Button_AddSubsttringToActiveWhiteList
 		GuiControl, disable, Button_AddSubsttringToActiveBlackList
@@ -2167,6 +1335,7 @@ sUnlockPassword=-1
 		guicontrol, font, vLV3
 		guicontrol, font, vLV4
 		GUI, FONT
+		
 		;; Middle gui groupbox: Active windows (top)
 		/*
 			Edit-field - enter criteria here
@@ -2180,11 +1349,10 @@ sUnlockPassword=-1
 
 			checkbox - check URL's :: if checking websites, make checks more consistent by only checking if the url is equal. ← figure out how to do partial string comparisons properly here
 		*/
-		XPositionTitleString:=vPositionCenteredSliderText+vOuterGroupBoxWidth
-		gui, add, text,x%vPositionCenteredSliderText% ym, DistractLess v.%VN% - by %AU%
+		XPositionTitleString:=vPositionCenteredDDLText+vOuterGroupBoxWidth
+		gui, add, text,x%vPositionCenteredDDLText% ym, DistractLess v.%VN% - by %AU%
 		gui, tab
 		gui, add, statusbar, -Theme vStatusBarMainWindow BackGround373b41 glCallBack_StatusBarMainWindow
-
 		if ((bShowDebugPanelINMenuBar) && bIsDevPC)
 			SB_SetParts(23,120,100,175,95,70,80,170)
 		Else
@@ -2200,7 +1368,6 @@ sUnlockPassword=-1
 		HideFocusBorder(MainGUI)
 	}
 	return
-
 
 	lClearAdditionFields:
 	{ ; clear out edit fields when closing the window.
@@ -2327,26 +1494,19 @@ sUnlockPassword=-1
 
 	GC3Escape()
 	{
-		; gui, 3
 		Gui, 3: hide
 		Settimer, lEnforceRules, Off
 		SetTimer, UpdateCriteriaPickerURL,off
-		; gui, 1: default
-		; gui, 1: show
 		ttip(,99)
 		ttip("")
 		global GuiAction:="Escaped"
 	}
 
-
 	; Locking GUI
 	lGUIShow_4:
 	{
-		; Settimer, lEnforceRules, Off
-		; gosub, lGuiHide_1
 		gui, 1: hide
 		bGui1IsVisible:=false
-		;menu, tray, rename, Hide Gui, Show Gui
 		gosub, lClearAdditionFields
 		gui, 2: hide
 		gui, 3: hide
@@ -2380,7 +1540,6 @@ sUnlockPassword=-1
 		gui, 4: hide
 	}
 	return
-
 
 	; Lock till Time
 	lGuiShow_5:
@@ -2428,11 +1587,9 @@ sUnlockPassword=-1
 	}
 	return
 
-
 	lSaveLVs:
 	{
 		gosub, lGuiHide_1
-		; Settimer, lEnforceRules, Off
 		gui, 2: hide
 		gui, 3: hide
 		gui, 4: hide
@@ -2441,13 +1598,11 @@ sUnlockPassword=-1
 			return
 		PreLoadingUserBackupWorkingDir:=A_WorkingDir
 		SetWorkingDir, %A_ScriptDir%
-
 		if !Instr(FileExist(IniObj["General Settings"].sLocationUserBackup),"D") ; check if folder exists
-		{	; folder and file doesn't exist -> create
-			; create folder
-			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup
-		}
+			FileCreateDir, % IniObj["General Settings"].sLocationUserBackup ; folder and file doesn't exist -> create folder
 		FileSelectFile, sSavedFilePath, S24, % IniObj["General Settings"].sLocationUserBackup
+		SplitPath, sSavedFilePath,,,,SavedFile_Name
+		Arr[5,5]:=SavedFile_Name
 		if (sSavedFilePath="")
 			return
 		if (st_count(sSavedFilePath,".ini")>0)
@@ -2478,8 +1633,6 @@ sUnlockPassword=-1
 			gosub, lLockProgram
 			bIsLocked:=false
 			bIsBeingUnlocked:=false
-			; f_EnableDisableGuiElements(aAllControlsGui1_VisibleDefault,1,1)
-			; f_EnableDisableGuiElements([bIsProgramOn],1,1)
 			gosub, lUpdateStatusOnStatusBar
 			gosub, lGUIShow_1
 		}
@@ -2489,7 +1642,6 @@ sUnlockPassword=-1
 			global dbFlag:=false
 	}
 	Return
-
 
 	lLoadFileIntoArrays:
 	{
@@ -2501,9 +1653,11 @@ sUnlockPassword=-1
 			; create file
 			FileCreateDir,% IniObj["General Settings"].sLocationUserBackup
 			f_ThrowError("Main Code Body","The Folder specified under 'sLocationUserBackup' in settings does not exist in and no backups could be found therefore. The folder is now created. Please save a set of lists/settings via the 'Load LV's'-button into this folder first before trying to read load them.",A_ScriptNameNoExt . "_"5,Exception("",-1).Line)
-			; SetWorkingDir, UserBackups
 		}
 		FileSelectFile, vSelectedFile,1, % IniObj["General Settings"]["sLocationUserBackup"] ,Select File
+		SplitPath, vSelectedFile,,,, BundleName
+		if (BundleName!="")
+			SB_SetText("Current File: " strsplit(BundleName,".ini").1,8)
 		if (vSelectedFile="")
 		{
 			gui, 1: show, w%vGUIWidth% h%vGUIHeight%, DistractLess_1
@@ -2572,7 +1726,6 @@ sUnlockPassword=-1
 			{
 				if (IniObj["General Settings"].bWarningOnFileLoadSettingChanges || bTestThis)
 					m("The active filtermode has changed when loading the file. Please doublecheck if the chosen settings are appropriate to prevent the unwanted closing of programs and websites.`n`nTo remove these warnings when switching criteria files, change the setting 'bWarningOnFileLoadSettingChanges' in the settings.")
-				; GuiControl, Choosestring,
 			}
 			if (CurrentTrumpingRule!=LastTrumping) ; Filter mode of loaded file is unequal to the currently active filter mode → issue warning
 			{
@@ -2592,7 +1745,6 @@ sUnlockPassword=-1
 	}
 	return
 
-
 	lUpdateStatusOnStatusBar:
 	{
 		gui, 1: default
@@ -2604,7 +1756,6 @@ sUnlockPassword=-1
 			SB_SetText(sDiagnosticsOn,5)
 		Else
 			SB_SetText(sDiagnosticsOff,5)
-
 		if bIsDevPC and bShowDebugPanelINMenuBar
 		{
 			sTestSimOn:="DoubleClick to exit testsimulation"
@@ -2614,7 +1765,7 @@ sUnlockPassword=-1
 			Else
 				SB_SetText(sTestSimOff,8)
 		}
-		if (A_EventInfo=8) && (A_ThisFunc!="f_EditArrayElement") && (bManageTestSimTrue)
+		if (A_EventInfo=8) && (A_ThisFunc!="f_EditArrayElement") && bShowDebugPanelINMenuBar ;; make this only usable when working on it.
 			if (A_EventInfo=8)
 				if (A_ThisFunc!="f_EditArrayElement")
 					if (bManageTestSimTrue) ;; welp, this tracks straight through from editing an entry. weird bug. This is a hotfix, because I have not found the actual reason.
@@ -2623,27 +1774,26 @@ sUnlockPassword=-1
  	return
 
 	lHotkey_ToggleTestMode:
-	if dbflag
-	{
-		SoundBeep, 150, 150
-		sleep, 300
-		SoundBeep, 150, 150
-		sleep, 300
-		; SoundBeep, 150, 150
-		; sleep, 300
-		dbFlag:=False
+	if !bIsLocked
+	{	;; prevent reload → GUI opens → engage Testmode to circumvent locking
+		if dbflag
+		{
+			SoundBeep, 150, 150
+			sleep, 300
+			SoundBeep, 150, 150
+			sleep, 300
+			dbFlag:=False
+		}
+		Else
+		{
+			SoundBeep, 1750, 150
+			sleep, 300
+			SoundBeep, 1750, 150
+			sleep, 300
+			dbFlag:=True
+		}
+		gosub, lUpdateStatusOnStatusBar
 	}
-	Else
-	{
-		SoundBeep, 1750, 150
-		sleep, 300
-		SoundBeep, 1750, 150
-		sleep, 300
-		; SoundBeep, 1750, 150
-		; sleep, 300
-		dbFlag:=True
-	}
-	gosub, lUpdateStatusOnStatusBar
 	Return
 	lCallBack_EnableProgram:
 	{
@@ -2657,7 +1807,7 @@ sUnlockPassword=-1
 			if !bRestoringLastSession
 				f_EnableDisableGuiElements(aAllControlsGui1,0,1)
 			f_EnableDisableGuiElements([bIsProgramOn],1,1)
-			SetTimer, lEnforceRules,Off
+			Settimer, lEnforceRules, % (bIsProgramOn?"On":"Off")
 		}
 		Else ; enable them again
 		{
@@ -2724,8 +1874,8 @@ sUnlockPassword=-1
 				}
 			}
 			Else
-				bEnableAdvancedSettings:=true
 			{
+				bEnableAdvancedSettings:=true
 				loop, 3
 				{
 					SoundBeep, 750,
@@ -2758,35 +1908,13 @@ sUnlockPassword=-1
 			Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
 			if (bIsDevPC)
 				m("DistractLess-Version located at A_ScriptDir\Lib\IniFileCreator_v8.ahk")
-			#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
+			#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk
 			WinWaitNotActive, IniFileCreator 8
 			gosub, lGuiCreate_1
 			Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window
 		}
 		else if ((A_GuiEvent="DoubleClick") && (A_EventInfo=5))
-		{
-			if dbflag
-			{
-				SoundBeep, 150, 150
-				sleep, 300
-				SoundBeep, 150, 150
-				sleep, 300
-				; SoundBeep, 150, 150
-				; sleep, 300
-				dbFlag:=False
-			}
-			Else
-			{
-				SoundBeep, 1750, 150
-				sleep, 300
-				SoundBeep, 1750, 150
-				sleep, 300
-				; SoundBeep, 1750, 150
-				; sleep, 300
-				dbFlag:=True
-			}
-			gosub, lUpdateStatusOnStatusBar
-		}
+			gosub, lHotkey_ToggleTestMode
 		else  if ((A_GuiEvent="DoubleClick") && (A_EventInfo=6)) ; double left Click: Toggle advanced settings availability
 		{
 			gui, 1: hide
@@ -2899,7 +2027,7 @@ sUnlockPassword=-1
 			return
 		if bIsLocked ; this is invoked when UNLOCKING
 		{
-			if bRestartLocked and (A_Now<LastSessionSettings[5].5)
+			if bRestartLocked and (A_Now<DefaultTime)
 			{
 				{ ; locking now → hide controls
 					f_EnableDisableGuiElements(aAllControlsGui1_VisibleDefault,0,1,1)
@@ -2977,7 +2105,7 @@ sUnlockPassword=-1
 			}
 		}
 		gosub, lUpdateStatusOnStatusBar
-		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window - in this label, we always end up 
+		Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window - in this label, we always end up
 	}
 	return
 	lIniFileCreator:
@@ -3001,9 +2129,6 @@ sUnlockPassword=-1
 		gosub, lLoadSettingsFromIniFile
 	; Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer if program is switched on again.
 	return
-
-
-
 
 	lManageTestSimulation:
 	{
@@ -3213,7 +2338,6 @@ sUnlockPassword=-1
 	}
 	return
 
-
 	lLoadWhiteStorageToActive:
 	{ ; load selected rows of white storage to White active
 		gui, 1: default
@@ -3240,13 +2364,13 @@ sUnlockPassword=-1
 	}
 	return
 
-
 	lRemoveWhiteActiveFromActive:
 	{ ; remove to be selected white entries from white active
 		gui, 1: default
 		gui, ListView, SysListView321
 		sel:=f_GetSelectedLVEntries()
-		; MsgBox,4,%A_ScriptNameNoExt%, Do you want to remove the selected entries?
+		if ObjCount(sel)=0
+			ttip("Nothing selected to be removed.")
 		if IniObj["General Settings"].bLVDelete_RequireConfirmation
 			bCQOut:=f_Confirm_Question("Do you want to remove the selected entries?",AU,VN)
 		if (bCQOut and (bCQOut!=-1)) || !IniObj["General Settings"].bLVDelete_RequireConfirmation
@@ -3256,7 +2380,6 @@ sUnlockPassword=-1
 			StoredActiveWhiteArrays:=f_RemoveSelectionFromArray(sel,ActiveArrays[1],"WhiteDef") ; rebuild the active array by removing selected entries
 			ActiveArrays[1]:=StoredActiveWhiteArrays[1]
 			ActiveWhiteBackup:=StoredActiveWhiteArrays[2]
-			; m(ActiveArrays[1],ActiveWhiteBackup)
 			gui, ListView, SysListView321
 			f_UpdateLV(ActiveArrays[1])
 		}
@@ -3267,6 +2390,8 @@ sUnlockPassword=-1
 		gui, 1: default
 		gui, ListView, SysListView323
 		sel:=f_GetSelectedLVEntries()
+		if ObjCount(sel)=0
+			ttip("Nothing selected to be removed.")
 		if IniObj["General Settings"].bLVDelete_RequireConfirmation
 			bCQOut:=f_Confirm_Question("Do you want to remove the selected entries?",AU,VN)
 		if (bCQOut and (bCQOut!=-1)) || !IniObj["General Settings"].bLVDelete_RequireConfirmation
@@ -3285,6 +2410,8 @@ sUnlockPassword=-1
 		gui, 1: default
 		gui, ListView, SysListView322
 		sel:=f_GetSelectedLVEntries()
+		if ObjCount(sel)=0
+			ttip("Nothing selected to be removed.")
 		if IniObj["General Settings"].bLVDelete_RequireConfirmation
 			bCQOut:=f_Confirm_Question("Do you want to remove the selected entries?",AU,VN)
 		if (bCQOut and (bCQOut!=-1)) || !IniObj["General Settings"].bLVDelete_RequireConfirmation
@@ -3304,6 +2431,8 @@ sUnlockPassword=-1
 		gui, 1: default
 		gui, ListView, SysListView324
 		sel:=f_GetSelectedLVEntries()
+		if ObjCount(sel)=0
+			ttip("Nothing selected to be removed.")
 		if IniObj["General Settings"].bLVDelete_RequireConfirmation
 			bCQOut:=f_Confirm_Question("Do you want to remove the selected entries?",AU,VN)
 		if (bCQOut and (bCQOut!=-1)) || !IniObj["General Settings"].bLVDelete_RequireConfirmation
@@ -3401,7 +2530,7 @@ sUnlockPassword=-1
 				return
 			if (sCriteria_Substring=".*") && (URLToCheckAgainst=".*") ; prohibit the user  from inserting absolute wildcards
 			{
-				ttip("Input not valid. You can only set either the URL or the title substring to '.*'")
+				ttip("Input not valid. You can only set either the URL or the title substring to '.*'.")
 				return
 			}
 			sel[1]:="||" Sel_Type "||" sCriteria_Substring "||" URLToCheckAgainst  ; this string is not yet finished completely.
@@ -3410,7 +2539,7 @@ sUnlockPassword=-1
 		{
 			if (sCriteria_Substring=".*") ; this would force-close any and all windows matching, i.e. all that are not explicitly whitelisted. Be careful. Do I even want to enable this? Would be better to restrict .* -  usage to websites only.
 			{
-				ttip("Input not valid. You cannot set '.*'-name-wildcards for blacklisted programs, or you risk closing every program, always")
+				ttip("Input not valid. You cannot set '.*'-name-wildcards for blacklisted programs, or you risk always closing every program.")
 				return
 			}
 			sel[1]:="||" Sel_Type "||" sCriteria_Substring "||" ; this string is not yet finished completely.
@@ -3430,7 +2559,7 @@ sUnlockPassword=-1
 	FedFile:=IniSettingsFilePath ; my version of IniFileCreator requires a variable called "FedFile" to hold the path to the ini-file to create. The ini-file must exist initially, but can be completely blank.
 	bMainGuiDestroyed:=true
 	Settimer, lEnforceRules, off ; disable the timer to save performance while editing the settings
-	#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk ; can't continue on this cuz of restricted file access
+	#Include %A_ScriptDir%\Library\IniFileCreator_v8.ahk
 	WinWaitNotActive, IniFileCreator 8
 	return
 	;_________________ common labels
@@ -3444,7 +2573,10 @@ sUnlockPassword=-1
 	Tooltip,
 	return
 	Label_AboutFile:
+	Settimer, lEnforceRules, Off
 	script.about()
+	WinWaitNotActive, About DistractLess
+	Settimer, lEnforceRules, % IniObj["General Settings"].RefreshTime ; reactivate the timer once we've closed the window - in this label, we always end up
 	return
 	;}______________________________________________________________________________________
 	;{#[Functions Section]
@@ -3460,7 +2592,6 @@ sUnlockPassword=-1
 			LV_GetText(sCurrText1,vRowNum,1)
 			LV_GetText(sCurrText2,vRowNum,2)
 			LV_GetText(sCurrText3,vRowNum,3)
-			LV_GetText(sCurrText4,vRowNum,4)
 			sel[A_Index]:="||" sCurrText1 "||" sCurrText2 "||" sCurrText3
 		}
 		return sel
@@ -3475,8 +2606,7 @@ sUnlockPassword=-1
 		{
 			CurrSet:=StrSplit(v,"||")
 			type:= (CurrSet[2]="w") ? "WhiteDef" : "BlackDef"
-			searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
-			InsArr[Ind]:=searchedstr
+			InsArr[Ind]:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
 			Ind++
 		}
 		; InsArr contains all selected values rows that are to be inserted into the other array
@@ -3500,17 +2630,13 @@ sUnlockPassword=-1
 		for k,v in sel
 		{ ; assemble search string, then remove hits from array
 			CurrSet:=StrSplit(v,"||")
-			; type:= (CurrSet[2]="w") ? "WhiteDef" : "BlackDef"
 			if (CurrSet[2]=="w")
 				searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:(" CurrSet[4] ")"
 			Else ; programs don't have url's attached, hence don't add that part of the string for comparison
 				searchedstr:="list:(" ListType ")|type:(" Currset[2] ")|name:(" CurrSet[3] ")|URL:()"
 			for a,b in Array
-			{
-				b:=f_RemoveURLsFromProgramEntries(b)
-				if (searchedstr==b)
+				if (searchedstr==f_RemoveURLsFromProgramEntries(b))
 					Array[a]:=""
-			}
 		}
 		for a,b in Array
 			if (b!="")
@@ -3547,7 +2673,7 @@ sUnlockPassword=-1
 		global
 		Sel:=f_GetSelectedLVEntries()
 		LastGuiEvent_f_EditArrayElement:=A_GuiEvent
-		if % (A_GuiEvent="DoubleClick") and Sel.Length()
+		if % ((A_GuiEvent="DoubleClick") && Sel.Length())
 		{
 			static EditedURL
 			RegExMatch(Element, "list:\((?<List>WhiteDef|BlackDef)\)\|type:\((?<Type>p|w)\)\|name:\((?<Name>.*)\)\|URL:\((?<URL>.*)\)",s)
@@ -3587,8 +2713,8 @@ sUnlockPassword=-1
 				}
 			}
 			hk(0,0) ; safety in case you somehow manage to open a gui while locking the keyboard.
-			gui, show,,DistracLess_2
-			WinWaitNotActive,  DistracLess_2
+			gui, show,,DistractLess_2
+			WinWaitNotActive,  DistractLess_2
 			str:="list:(" sList ")|type:(" sType ")|name:(" EditedElement ")|URL:(" EditedURL ")"
 			if ((EditedElement=".*") && (EditedURL=".*"))
 			{
@@ -3621,7 +2747,7 @@ sUnlockPassword=-1
 			return 0
 		}
 	}
-	GC2_Submit()
+	eAE_Submit()
 	{
 		global EditedElement
 		global EditedURL
@@ -3737,7 +2863,7 @@ sUnlockPassword=-1
 		NewYGui:=A_ScreenHeight-Height
 		Gui, cQ: show,autosize  x%NewXGui% y%NewYGui%, CQ%A_ThisLabel%
 		Gui, cQ: show,autosize, CQ%A_ThisLabel%
-		winactivate, CQ
+		WinActivate, CQ
 		return answer
 	}
 
@@ -3759,10 +2885,10 @@ sUnlockPassword=-1
 			if bIsLocked && (IniObj["General Settings"].LockingBehaviour="Time-protected") && (DefaultTime!="")
 			{
 				vDefaultTime:= DefaultTime A_Space "; program is again unlocked after this timestamp"
-				CurrentSettings:=[vActiveFilterMode,bTrumping,bCheckURLsInBrowsers,bIsProgramOn,vDefaultTime]
+				CurrentSettings:=[vActiveFilterMode,bTrumping,bCheckURLsInBrowsers,bIsProgramOn,BundleName,vDefaultTime]
 			}
 			else
-				CurrentSettings:=[vActiveFilterMode,bTrumping,bCheckURLsInBrowsers,bIsProgramOn]
+				CurrentSettings:=[vActiveFilterMode,bTrumping,bCheckURLsInBrowsers,bIsProgramOn,BundleName]
 		}
 		if Instr(vActiveFilterMode,";")
 			StringTrimRight, vActiveFilterMode, vActiveFilterMode, 19
@@ -3811,14 +2937,13 @@ sUnlockPassword=-1
 		if (GetKeyState("CapsLock","T") and bIsDevPC and !bLockOutAdmin)
 			m(A_ThisFunc)
 		Splitpath, A_ScriptFullPath,,ScriptPath
-		INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
+		INI_File:=IniOBj["General Settings"].sLocationUserBackup "\CurrentSettings"
+		; INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
 		Arr:=f_CreateStoredArrays()
 		Count:=0
 		loop, % Arr.MaxIndex() - 1
-		{
 			if (Arr[A_Index].MaxIndex()!="")
 				Count+=Arr[A_Index].MaxIndex()
-		}
 		if (GetKeyState("CapsLock","T") and bIsDevPC)  && dbFlag
 				m("Executing " A_ThisFunc,ExitReason,Arr)
 		if !testFlag
@@ -3842,7 +2967,7 @@ sUnlockPassword=-1
 		}
 	}
 	return
-	f_RestartWithSpecificBundle(ExitReason,ExitCode)
+	f_RestartWithDefaultBundle(ExitReason,ExitCode)
 	{ 	; restarts the script with a default, specified bundle
 		global
 		if bIsExitWOSaving ; cf bIsExitWOSaving/lExitWOSaving
@@ -3863,13 +2988,31 @@ sUnlockPassword=-1
 					INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
 			}
 			tmparr:=fReadINI((A_ScriptDir "\" INI_File ".ini"))
+			tmparr[5]:=tmparr[5]
+			tmparr[5,5]:=BundleName
 			if bIsLocked && (IniObj["General Settings"].LockingBehaviour="Time-protected") && (DefaultTime!="")
 			{
+				; m("before pushing dtime:",tmparr)
 				vDefaultTime:=DefaultTime A_Space "; program is again unlocked after this timestamp"
-				tmparr[5].push(vDefaultTime)
+				for k,v in tmparr[5]
+					if !Instr(v,"program is again unlocked after this timestamp")
+						continue
+					Else
+					{
+						if !Instr(v,"program is again unlocked after this timestamp")
+							Continue
+						Else
+							break
+						tmparr[5].push(vDefaultTime)
+						break
+					}
+				if !Instr(g:=tmparr[5][k],"program is again unlocked after this timestamp")
+					tmparr[5].push(vDefaultTime)
+				Else if Instr(g:=tmparr[5][k],"program is again unlocked after this timestamp")
+					tmparr[5][k]:=vDefaultTime
 			}
 			Splitpath, A_ScriptFullPath,,ScriptPath
-			INI_File:=ScriptPath "\DistractLess_Storage\CurrentSettings"
+			INI_File:=IniOBj["General Settings"].sLocationUserBackup "\" (tmparr[5,5]!=""?tmparr[5,5]:"CurrentSettings")
 			if (SubStr(INI_File,-4,4)==".ini")
 				INI_File:=SubStr(INI_File,1, (StrLen(INI_File)-4))
 			if !testFlag
@@ -3899,13 +3042,15 @@ sUnlockPassword=-1
 			{
 				if (GetKeyState("CapsLock","T") and bIsDevPC)
 					m("Restarting now")
-				run, %A_ScriptDir%\Library\DistractLess_Restart.exe
+				Reloaded:=1
+				run, %A_ScriptDir%\Library\DistractLess_Restart.exe Reloaded
 			}
 			Else
 			{
 				if (GetKeyState("CapsLock","T") and bIsDevPC)
 					m("Restarting now")
-				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk
+				Reloaded:=1
+				run, %A_ScriptDir%\Library\DistractLess_Restart.ahk Reloaded
 			}
 		}
 	}
@@ -4009,62 +3154,36 @@ sUnlockPassword=-1
 		if ((HasVal(BrowserExes,sCurrExe)) && (HasVal(BrowserClasses,sCurrClass)) && (WinACtive(sCurrWindowTitle) && (stype="w"))) || ((WinActive("A") && WinACtive(sCurrWindowTitle) && !((HasVal(BrowserClasses,sCurrClass)) && (HasVal(BrowserExes,sCurrExe))) && (stype="p")))
 		{
 			if (IniObj["General Settings"].bEnableBlockingBanner)
-				hk(1,1,"Blocking User Input")
+				bKBState:=hk(1,0,"Blocking User Input")
 			Else
-				hk(1,1)
+				bKBState:=hk(1,0)
 		}
 		;____________
 		if dbFlag
 			ttip(A_ThisFunc "3")
-		;SetTimer, lEmergencyUnlock, -12000 ; set an emergency label to restore kbm functionality in case this locks up (which it absolutely shouldn't)
-		if !(dbFlag) ; normal behaviour
+		if (!dbFlag) ; normal behaviour
 		{
-			; if dbFlag
-			; 	ttip(A_ThisFunc "4")
 			if (HasVal(BrowserExes,sCurrExe)) && (HasVal(BrowserClasses,sCurrClass)) && (WinACtive(sCurrWindowTitle) && (stype="w")) ; fallback check to ensure the window we are closing is still active, and we are not closing another one because the user has moved on already
 			{
-				; if dbFlag
-				; 	ttip(A_ThisFunc "5")
-				; if (bCheckURLsInBrowsers="Yes")
-				; {
-					; if dbFlag
-					; 	ttip(A_ThisFunc "6")
-					; m(sCurrURL,sURL)
-					if (!Instr(sCurrURL,sURL) and (vActiveFilterMode!="white")) && (sURL!=".*")
-					{
-						; if dbFlag
-						; 	ttip(A_ThisFunc "7")
-						BlockInput, Off
-						bInputIsLocked:=true
-						if (IniObj["General Settings"].bEnableBlockingBanner)
-							hk(0,0,"Allowing User Input",0.5)
-						Else
-							hk(0,0)
-						SetTimer, lEmergencyUnlock, off
-						; if dbFlag
-						; 	ttip(A_ThisFunc "8",4)
-						return bActionWasClosed:=false ; we are returning early, so we need to reenable user input again, as we are not following through to the end of the function.
-					}
-				; }
-				; if dbFlag
-				; 	ttip(A_ThisFunc "9",4)
+				if (!Instr(sCurrURL,sURL) and (vActiveFilterMode!="white")) && (sURL!=".*")
+				{
+					BlockInput, Off
+					bInputIsLocked:=true
+					if (IniObj["General Settings"].bEnableBlockingBanner)
+						hk(0,0,"Allowing User Input",0.5)
+					Else
+						hk(0,0)
+					SetTimer, lEmergencyUnlock, off
+					return bActionWasClosed:=false ; we are returning early, so we need to reenable user input again, as we are not following through to the end of the function.
+				}
 				if WinActive(sCurrWindowTitle)
 					SendInput, ^w
 				sleep, 200
-				; if dbFlag
-				; 	ttip(A_ThisFunc "10",4)
-				; WinWaitClose, %sCurrWindowTitle%
-				; if dbFlag
-				; 	ttip(A_ThisFunc "11",4)
-				; sleep, 120
 			}
 			Else if WinActive("A") && WinActive(sCurrWindowTitle) && !((HasVal(BrowserClasses,sCurrClass)) && (HasVal(BrowserExes,sCurrExe))) && (stype="p") ; Window is not a browser → use winclose. Both checks are necessary to sort out the many windows that share a class with BrowserClasses, while not being a browser for the sake of this.
 			{
-				; if dbFlag
-				; 	ttip(A_ThisFunc "12",4)
 				WinClose,
 				sleep, 200
-				; WinWaitClose, %sCurrWindowTitle%
 				bActionWasClosed:=true
 			}
 		}
@@ -4076,42 +3195,12 @@ sUnlockPassword=-1
 			{
 				if dbFlag
 					ttip(A_ThisFunc "5")
-				; if (bCheckURLsInBrowsers="Yes")
-				; {
-					if dbFlag
-						ttip(A_ThisFunc "6")
-					; m(sCurrURL,sURL)
-
-
-					;; I HAVE NO IDEA WHAT THIS SECTION IS FOR... that's what you comment your code for.
-					; if !Instr(sCurrURL,sURL) and (vActiveFilterMode!="white")
-					; {
-					; 	if dbFlag
-					; 		ttip(A_ThisFunc "7")
-					; 	BlockInput, Off
-					; 	bInputIsLocked:=true
-					; 	if (IniObj["General Settings"].bEnableBlockingBanner)
-					; 		hk(0,0,"Allowing User Input",0.5)
-					; 	Else
-					; 		hk(0,0)
-					; 	SetTimer, lEmergencyUnlock, off
-					; 	if dbFlag
-					; 		ttip(A_ThisFunc "8",4)
-					; 	return bActionWasClosed:=false ; we are returning early, so we need to reenable user input again, as we are not following through to the end of the function.
-					; }
-				; }
-				if dbFlag
-					ttip(A_ThisFunc "9",4)
 				if (vActiveFilterMode="White")
-				{
 					str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[ / ]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[none]]" (MatchedTitleEntry=".*"?" - See Current URL and Matched URL for more Info":"")"`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
-				}
 				else
 					str:="Browser Match:`n`nFilterMode: [[" vActiveFilterMode "]]`nTrumping Rule: [[" (bWhiteTrumpedThisTitle? "white > black":"black > white") "]]`nWindow Title [[" sCurrWindowTitle "]]`nhas been chosen to close.`nMatchedTitleEntry: [[" MatchedTitleEntry "]]" (MatchedTitleEntry=".*"?" - See Current URL and Matched URL for more Info":"")"`n________`nCurrent URL: [["sCurrURL "]]`nMatched URL: [[" (sURL? sURL:"no URL given") "]]`n________`nCurrent Class: [[" sCurrClass "]]`nCurrent Exe: [[" sCurrExe "]]`nWindow ID: [[" WindowID "]]`n"
 				if dbFlag
 					ttip(A_ThisFunc "10",4)
-				if IniObj["General Settings"].EnableDiagnosticMode
-					ttip(A_ThisFunc "11",4)
 			}
 			Else if WinActive("A") && WinACtive(sCurrWindowTitle) && !((HasVal(BrowserClasses,sCurrClass)) && (HasVal(BrowserExes,sCurrExe))) && (stype="p") ; Window is not a browser → use winclose. Both checks are necessary to sort out the many windows that share a class with BrowserClasses, while not being a browser for the sake of this.
 			{
@@ -4133,9 +3222,7 @@ sUnlockPassword=-1
 		;  order matters → if we open the messagebox first, the entire PC is softlocked because code cannot progress, and the code-stopping msgbox cannot be closed because the input is fully blocked.
 		if dbFlag ; debug behaviour
 		{
-			hk(0,0)
-			if (IniObj["General Settings"].bEnableBlockingBanner) ; make sure we are not softlocking the program
-				hk(0,0)
+			hk(0,0) ; make sure we are not softlocking the program
 			if (str!="")
 			{
 				ttip(A_ThisFunc "13: Closing " sCurrWindowTitle " with Class " sCurrClass)
@@ -4150,7 +3237,6 @@ sUnlockPassword=-1
 		if dbFlag
 			ttip(A_ThisFunc "14",4)
 		return bActionWasClosed
-
 
 		lEmergencyUnlock:
 		hk(0,0)
@@ -4170,7 +3256,6 @@ sUnlockPassword=-1
 			FileDelete, %startUpDir%
 		return
 	}
-
 
 	f_CreateTrayMenu(IniObj)
 	{ ; facilitates creation of the tray menu
@@ -4209,7 +3294,6 @@ sUnlockPassword=-1
 	}
 	return
 
-
 	lEditSettingsOverall:
 	gosub, lIniFileCreator
 
@@ -4236,85 +3320,156 @@ sUnlockPassword=-1
 	else if (IniObj["General Settings"].OnExitBehaviour="Empty Restart")
 		OnExit("f_RestartEmpty")
 	else if (IniObj["General Settings"].OnExitBehaviour="Restart with specific bundle")
-		OnExit("f_RestartWithSpecificBundle")
+		OnExit("f_RestartWithDefaultBundle")
 	reload
 	return
 
-	ttip(text:="TTIP: Test",mode:=1,to:=4000,xp:="NaN",yp:="NaN",to2:=1750,currTip:=20)
-	{
-		/*
-			Date: 24 Juli 2021 19:40:56: Modes:
-			1: remove tt after "to" seconds
-			2: remove tt after "to" seconds, but show again after "to2" seconds. Then repeat
-			3: not sure anymore what the plan was lol - remove
-			4: shows tooltip slightly offset from current mouse, does not repeat.
-			5: keep that tt until the function is called again
-			6: equal to 4, but disappears after "to" seconds
-			----  Function uses tooltip 20 by default, use parameter
-			"currTip" to select a tooltip between 1 and 20. Tooltips are removed and handled
-			separately from each other, hence a removal of ttip20 will not remove tt14
-		*/
-		if (text="")
-			gosub, lRemovettip
-		static ttip_text
-		static lastcall_tip
-		static CurrTip2
-		tooltip,
-		if (mode=99)
-		{
-			SetTimer, lRepeatedshow, off
-			return
-		}
-		currTip2:=currTip
-		ttip_text:=text
-		lUnevenTimers:=false
-		MouseGetPos,xp1,yp1
-		if (mode=4) || (mode=6) ; set text offset from cursor
-			yp:=yp1+15
-		else
-		{
-			if (xp="NaN")
-				xp:=xp1
-			if (yp="NaN")
-				yp:=yp1
-		}
-		tooltip, % ttip_text,xp,yp,% currTip
-		if (mode=1) ; remove after given time
-		{
-			SetTimer, lRemovettip, % "-" to
-		}
-		else if (mode=2) ; remove, but repeatedly show every "to"
-		{
-			if (to2>to)
-				SetTimer, lRepeatedshow, %  to2
-			else
-				SetTimer, lRepeatedshow, %  to
-		}
-		else if (mode=3)
-		{
-			lUnevenTimers:=true
-			SetTimer, lRepeatedshow, %  to
-		}
-		else if (mode=5) ; keep until function called again
-		{
+	ttip(text:="TTIP: Test",mode:=1,to:=4000,xp:="NaN",yp:="NaN",CoordMode:=-1,to2:=1750,Times:=20,currTip:=20)
+{
+	/*
+		v.0.2.1
+		Date: 24 Juli 2021 19:40:56: 
+		
+		Modes:  
+		1: remove tt after "to" milliseconds 
+		2: remove tt after "to" milliseconds, but show again after "to2" milliseconds. Then repeat 
+		3: not sure anymore what the plan was lol - remove 
+		4: shows tooltip slightly offset from current mouse, does not repeat
+		5: keep that tt until the function is called again  
 
-		}
-		else if (mode=6) ; cf. 4, but disappears after "to" seconds
-			SetTimer, lRemovettip, % "-" to
-		else if (mode=99)
-			SetTimer, lRepeatedshow, off
-		return
-		lRepeatedshow:
-		tooltip, % ttip_text,,,20
-		if lUnevenTimers
-			sleep, % to2
-		Else
-			sleep, % to
-		return
-		lRemovettip:
-		Tooltip,,,,currTip2
+		CoordMode:
+		-1: Default: currently set behaviour
+		1: Screen
+		2: Window
+
+		to: 
+		Timeout in milliseconds
+		
+		xp/yp: 
+		xPosition and yPosition of tooltip. 
+		"NaN": offset by +50/+50 relative to mouse
+		IF mode=4, 
+		----  Function uses tooltip 20 by default, use parameter
+		"currTip" to select a tooltip between 1 and 20. Tooltips are removed and handled
+		separately from each other, hence a removal of ttip20 will not remove tt14 
+
+		---
+		v.0.2.1
+		- added Obj2Str-Conversion via "ttip_Obj2Str()"
+		v.0.1.1 
+		- Initial build, 	no changelog yet
+	
+	*/
+	
+	;if (text="TTIP: Test")
+		;m(to)
+		cCoordModeTT:=A_CoordModeToolTip
+	if (text="") || (text=-1)
+		gosub, lRemovettip
+	if IsObject(text)
+		text:=ttip_Obj2Str(text)
+	static ttip_text
+	static lastcall_tip
+	static currTip2
+	global ttOnOff
+	currTip2:=currTip
+	cMode:=(CoordMode=1?"Screen":(CoordMode=2?"Window":cCoordModeTT))
+	CoordMode, % cMode
+	tooltip,
+
+	
+	ttip_text:=text
+	lUnevenTimers:=false 
+	MouseGetPos,xp1,yp1
+	if (mode=4) ; set text offset from cursor
+	{
+		yp:=yp1+15
+		xp:=xp1
+	}	
+	else
+	{
+		if (xp="NaN")
+			xp:=xp1 + 50
+		if (yp="NaN")
+			yp:=yp1 + 50
+	}
+	tooltip, % ttip_text,xp,yp,% currTip
+	if (mode=1) ; remove after given time
+	{
+		SetTimer, lRemovettip, % "-" to
+	}
+	else if (mode=2) ; remove, but repeatedly show every "to"
+	{
+		; gosub,  A
+		global to_1:=to
+		global to2_1:=to2
+		global tTimes:=Times
+		Settimer,lSwitchOnOff,-100
+	}
+	else if (mode=3)
+	{
+		lUnevenTimers:=true
+		SetTimer, lRepeatedshow, %  to
+	}
+	else if (mode=5) ; keep until function called again
+	{
+		
+	}
+	CoordMode, % cCoordModeTT
+	return text
+	lSwitchOnOff:
+	ttOnOff++
+	if mod(ttOnOff,2)	
+	{
+		gosub, lRemovettip
+		sleep, % to_1
+	}
+	else
+	{
+		tooltip, % ttip_text,xp,yp,% currTip
+		sleep, % to2_1
+	}
+	if (ttOnOff>=ttimes)
+	{
+		Settimer, lSwitchOnOff, off
+		gosub, lRemovettip
 		return
 	}
+	Settimer, lSwitchOnOff, -100
+	return
+
+	lRepeatedshow:
+	ToolTip, % ttip_text,,, % currTip2
+	if lUnevenTimers
+		sleep, % to2
+	Else
+		sleep, % to
+	return
+	lRemovettip:
+	ToolTip,,,,% currTip2
+	return
+}
+
+ttip_Obj2Str(Obj,FullPath:=1,BottomBlank:=0){
+	static String,Blank
+	if(FullPath=1)
+		String:=FullPath:=Blank:=""
+	if(IsObject(Obj)){
+		for a,b in Obj{
+			if(IsObject(b))
+				ttip_Obj2Str(b,FullPath "." a,BottomBlank)
+			else{
+				if(BottomBlank=0)
+					String.=FullPath "." a " = " b "`n"
+				else if(b!="")
+					String.=FullPath "." a " = " b "`n"
+				else
+					Blank.=FullPath "." a " =`n"
+			}
+	}}
+	return String Blank
+}
+
 
 	LogError(exception)
 	{ ; write error messages to file. Log-File is deleted if greater than 30 MB
@@ -4323,6 +3478,7 @@ sUnlockPassword=-1
 		FileAppend % "Error on line " exception.Line ": " exception.Message "`n", errorlog.txt
 		return true
 	}
+
 	f_FixInfoTextLinesInIniFile(DefSettings,IniSettingsFilePath)
 	{ ; a maybe successful attempt at resolving the Description-Lines of the Ini-file being muddied when using the IniSettingsEditor
 		FileRead, StoredFile, %IniSettingsFilePath%
@@ -4439,7 +3595,6 @@ sUnlockPassword=-1
 
 			SkipLabel_StartUp:
 
-
 		*/
 	}
 
@@ -4452,7 +3607,6 @@ sUnlockPassword=-1
 				return index
 		return 0
 	}
-
 
 	fWriteINI(ByRef Array2D, INI_File)  ; write 2D-array to INI-file
 	{ ; writes associative, multilevel settings array to file
@@ -4508,7 +3662,6 @@ sUnlockPassword=-1
 		delim:=RegExReplace(delim, "([\\.*?+\[\{|\()^$])", "\$1")
 		Return RegExReplace(string, "(" delim ")+", "$1")
 	}
-
 	fWriteINI_st_count(string, searchFor="`n")
 	{ ; count number of occurences of 'searchFor' in 'string'
 		; copy of the normal function to avoid conflicts.
@@ -4529,11 +3682,8 @@ sUnlockPassword=-1
 		return ErrorLevel
 	}
 
-
-
 	fReadINI(INI_File) ; return 2D-array from INI-file
 	{ ; reads associative, multilevel settings array from file
-
 		Result := []
 		OrigWorkDir:=A_WorkingDir
 		SetWorkingDir, INI-Files
@@ -4563,10 +3713,10 @@ sUnlockPassword=-1
 		*/
 	}
 
-	hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen:=false, screencolor:="blue")
-	{ ; disables the keyboard without relying on admin privileges. Can hide the screen and or show a message
-		; retrieved 20.09.2021 20:56:58 at https://www.autohotkey.com/boards/viewtopic.php?p=283777#p283777
-
+	hk(keyboard:=false, mouse:=0, message:="", timeout:=3, displayonce:=false,screen:=false, screencolor:="blue") 
+	{ 
+		; retrieved 20.09.2021 20:56:58 at https://www.autohotkey.com/boards/viewtopic.php?t=33925
+		
 		;keyboard (true/false).......................... disable/enable keyboard
 		;mouse=1........................................ disable all mouse buttons
 		;mouse=2........................................ disable right mouse button only
@@ -4574,12 +3724,20 @@ sUnlockPassword=-1
 		;timeout........................................ how long to display the message in sec
 		;displayonce (true/false) ...................... display a message only once or always
 		;hide the screen (true/false)................... hide or show everything
-		;ScreenColor ................................... RGB Hex background color for the hiding GUI
-
-
+		;ScreenColor ................................... RGB Hex background color for the hiding GUI 
+		
+		
 		static AllKeys, z, d, kb, ms, sc
+		if keyboard
+			bIsKeyboardBlocked:=true
+		else
+			bIsKeyboardBlocked:=false
+		if (mouse!=0)
+			bIsMouseBlocked:=true
+		else
+			bIsMouseBlocked:=false
 		z:=message, d:=displayonce, kb:=keyboard, ms:=mouse, sc:=screen
-
+		
 		For k,v in AllKeys {
 			Hotkey, *%v%, Block_Input, off         ; initialisation
 		}
@@ -4593,15 +3751,19 @@ sUnlockPassword=-1
 			AllKeys := StrSplit(Trim(AllKeys, "|"), "|")
 		}
 		;------------------
+		lMouseBlocked:=false
 		if (mouse!=2)  ; if mouse=1 disable right and left mouse buttons  if mouse=0 don't disable mouse buttons
 		{
+			ExcludeKeys:="LWin"
 			For k,v in AllKeys {
 				IsMouseButton := Instr(v, "Wheel") || Instr(v, "Button")
-				Hotkey, *%v%, Block_Input, % (keyboard && !IsMouseButton) || (mouse && IsMouseButton) ? "On" : "Off"
+				if v not in %ExcludeKeys%
+					Hotkey, *%v%, Block_Input, % (keyboard && !IsMouseButton) || (mouse && IsMouseButton) ? "On" : "Off"
+				;m((mouse && iSMouseButton),(keyboard && !IsMouseButton))
 			}
 		}
 		if (mouse=2)   ;disable right mouse button (but not left mouse)
-		{
+		{                
 			ExcludeKeys:="LButton"
 			For k,v in AllKeys {
 				IsMouseButton := Instr(v, "Wheel") || Instr(v, "Button")
@@ -4631,31 +3793,19 @@ sUnlockPassword=-1
 			else
 				Progress, Off
 		}
-
-
+		
+		
 		if (sc=1)
-		{
-			;SysGet,vNumCount, MonitorCount
-			;for k,v in % vNumCount
-			;{
-				;SysGet, vMonC, Monitor, %v%
-				;m(vMonCLeft,vMonCTop,vMonCRight,vMonCBottom)
-				;vWidthC:=vMonCRight-vMonCLeft
-				;vHeightC:=vMonCTop-vMonCBottom
-				v:="Screen"
-				Gui %v%:  -Caption
-				Gui %v%: Color,  % screencolor
-				Gui %v%: Show, x0 y0 h74 w%a_screenwidth% h%a_screenheight%, New GUI Window
-				Gui screen:  -Caption
-				Gui screen: Color,  % screencolor
-				Gui screen: Show, x0 y0 h74 w%a_screenwidth% h%a_screenheight%, New GUI Window
-			;}
+		{ 
+			Gui screen:  -Caption
+			Gui screen: Color,  % screencolor
+			Gui screen: Show, x0 y0 h74 w%a_screenwidth% h%a_screenheight%, New GUI Window
 		}
 		else
 			gui screen: Hide
-
-
-		Return
+		
+		
+		return [bIsKeyboardBlocked,bIsMouseBlocked]
 		TimeoutTimer:
 		Progress, Off
 		Return
@@ -4683,8 +3833,6 @@ sUnlockPassword=-1
 		Else If DllCall("IsWindow", "Ptr", wParam, "UInt")
 			PostMessage, 0x0128, %HideFocus%, 0, , ahk_id %wParam%
 	}
-
-
 
 	fgetUrl(hWnd)
 	{ ; obtains the url of the current browser window. works in chrome, firefox, IE and opera.
@@ -4805,7 +3953,6 @@ sUnlockPassword=-1
 	run, %A_ScriptDir%\Library\DistractLess_WindowSpy.exe ; explicitly choose the compiled version so we don't run into the gui-error that seems to happen when I include the script here instead of just running it. If we need to run it anyways, I can just evade this error by taking the compiled version, as there doesn't need to be any direct code-sided interaction between both scripts anyways.
 	return
 
-
 	f_TrayIconSingleClickCallBack(wParam, lParam)
 	{ ; taken and adapted from https://www.autohotkey.com/board/topic/26639-tray-menu-show-gui/?p=171954
 		VNI:=1.0.3.12
@@ -4832,7 +3979,6 @@ sUnlockPassword=-1
 		? (-1, Clk:=2) : ( Clk=2 ? ("Off", Clk:=1) : ( IsFunc(Chk) || IsLabel(Chk) ? T : -1) )
 		Return True
 	}
-
 
 	CodeTimer(Description="",x:=500,y:=500,ClipboardFlag:=0)
 	{ ; adapted from https://www.autohotkey.com/boards/viewtopic.php?p=316296#p316296
@@ -4976,66 +4122,65 @@ sUnlockPassword=-1
 	*/
 	DL_TF_ReplaceInLines(Text, StartLine = 1, EndLine = 0, SearchText = "", ReplaceText = "")
 	{
-	 DL_TF_GetData(OW, Text, FileName)
-	 IfNotInString, Text, %SearchText%
-		Return Text ; SearchText not in TextFile so return and do nothing, we have to return Text in case of a variable otherwise it would empty the variable contents bug fix 3.3
-	 TF_MatchList:=DL__MakeMatchList(Text, StartLine, EndLine, 0, A_ThisFunc) ; create MatchList
-	 Loop, Parse, Text, `n, `r
+		DL_TF_GetData(OW, Text, FileName)
+		IfNotInString, Text, %SearchText%
+			Return Text ; SearchText not in TextFile so return and do nothing, we have to return Text in case of a variable otherwise it would empty the variable contents bug fix 3.3
+	 	TF_MatchList:=DL__MakeMatchList(Text, StartLine, EndLine, 0, A_ThisFunc) ; create MatchList
+	 	Loop, Parse, Text, `n, `r
 		{
-		 If A_Index in %TF_MatchList%
+			If A_Index in %TF_MatchList%
 			{
-			 StringReplace, LoopField, A_LoopField, %SearchText%, %ReplaceText%, All
-			 OutPut .= LoopField "`n"
+			 	StringReplace, LoopField, A_LoopField, %SearchText%, %ReplaceText%, All
+			 	OutPut .= LoopField "`n"
 			}
-		 Else
-			OutPut .= A_LoopField "`n"
+		 	Else
+				OutPut .= A_LoopField "`n"
 		}
-	 Return DL_TF_ReturnOutPut(OW, OutPut, FileName)
+	 	Return DL_TF_ReturnOutPut(OW, OutPut, FileName)
 	}
 
 	DL_TF_GetData(byref OW, byref Text, byref FileName)
 	{
-	 If (text = 0 "") ; v3.6 -> v3.7 https://github.com/hi5/TF/issues/4 and https://autohotkey.com/boards/viewtopic.php?p=142166#p142166 in case user passes on zero/zeros ("0000") as text - will error out when passing on one 0 and there is no file with that name
+		 If (text = 0 "") ; v3.6 -> v3.7 https://github.com/hi5/TF/issues/4 and https://autohotkey.com/boards/viewtopic.php?p=142166#p142166 in case user passes on zero/zeros ("0000") as text - will error out when passing on one 0 and there is no file with that name
 		{
-		 IfNotExist, %Text% ; additional check to see if a file 0 exists
+		 	IfNotExist, %Text% ; additional check to see if a file 0 exists
 			{
-			 MsgBox, 48, TF Lib Error, % "Read Error - possible reasons (see documentation):`n- Perhaps you used !""file.txt"" vs ""!file.txt""`n- A single zero (0) was passed on to a TF function as text"
-			 ExitApp
+				MsgBox, 48, TF Lib Error, % "Read Error - possible reasons (see documentation):`n- Perhaps you used !""file.txt"" vs ""!file.txt""`n- A single zero (0) was passed on to a TF function as text"
+				ExitApp
 			}
 		}
-	 OW=0 ; default setting: asume it is a file and create file_copy
-	 IfNotInString, Text, `n ; it can be a file as the Text doesn't contact a newline character
+		 OW=0 ; default setting: asume it is a file and create file_copy
+		IfNotInString, Text, `n ; it can be a file as the Text doesn't contact a newline character
 		{
-		 If (SubStr(Text,1,1)="!") ; first we check for "overwrite"
+			If (SubStr(Text,1,1)="!") ; first we check for "overwrite"
 			{
-			 Text:=SubStr(Text,2)
-			 OW=1 ; overwrite file (if it is a file)
+				Text:=SubStr(Text,2)
+				OW=1 ; overwrite file (if it is a file)
 			}
-		 IfNotExist, %Text% ; now we can check if the file exists, it doesn't so it is a var
+			IfNotExist, %Text% ; now we can check if the file exists, it doesn't so it is a var
 			{
-			 If (OW=1) ; the variable started with a ! so we need to put it back because it is variable/text not a file
-				Text:= "!" . Text
-			 OW=2 ; no file, so it is a var or Text passed on directly to TF
-			}
-		}
-	 Else ; there is a newline character in Text so it has to be a variable
-		{
-		 OW=2
-		}
-	 If (OW = 0) or (OW = 1) ; it is a file, so we have to read into var Text
-		{
-		 Text := (SubStr(Text,1,1)="!") ? (SubStr(Text,2)) : Text
-		 FileName=%Text% ; Store FileName
-		 FileRead, Text, %Text% ; Read file and return as var Text
-		 If (ErrorLevel > 0)
-			{
-			 MsgBox, 48, TF Lib Error, % "Can not read " FileName
-			 ExitApp
+				If (OW=1) ; the variable started with a ! so we need to put it back because it is variable/text not a file
+					Text:= "!" . Text
+				OW=2 ; no file, so it is a var or Text passed on directly to TF
 			}
 		}
-	 Return
+		Else ; there is a newline character in Text so it has to be a variable
+		{
+			OW=2
+		}
+		If (OW = 0) or (OW = 1) ; it is a file, so we have to read into var Text
+		{
+			Text := (SubStr(Text,1,1)="!") ? (SubStr(Text,2)) : Text
+			FileName=%Text% ; Store FileName
+			FileRead, Text, %Text% ; Read file and return as var Text
+			If (ErrorLevel > 0)
+			{
+				MsgBox, 48, TF Lib Error, % "Can not read " FileName
+				ExitApp
+			}
+		}
+		Return
 	}
-
 
 	; DL__MakeMatchList()
 	; Purpose:
@@ -5045,7 +4190,7 @@ sUnlockPassword=-1
 	; For TF 3.4 added COL = 0/1 option (for TF_Col* functions) and CallFunc for
 	; all TF_* functions to facilitate bug tracking
 	DL__MakeMatchList(Text, Start = 1, End = 0, Col = 0, CallFunc = "Not available")
-		{
+	{
 		ErrorList=
 		(join|
 	Error 01: Invalid StartLine parameter (non numerical character)`nFunction used: %CallFunc%
@@ -5056,11 +4201,11 @@ sUnlockPassword=-1
 		Error = 0
 
 		If (Col = 1)
-			{
+		{
 			LongestLine:=TF_Stat(Text)
 			If (End > LongestLine) or (End = 1) ; FIXITHERE BUG
 				End:=LongestLine
-			}
+		}
 
 		TF_MatchList= ; just to be sure
 		If (Start = 0 or Start = "")
@@ -5071,29 +4216,27 @@ sUnlockPassword=-1
 		; error: only digits - and + allowed
 		If (RegExReplace(Start, "[ 0-9+\-\,]", "") <> "")
 			Error = 1
-
 		If (RegExReplace(End, "[0-9 ]", "") <> "")
 			Error = 2
-
 		; error: only one + allowed
 		If (TF_Count(Start,"+") > 1)
 			Error = 3
 
 		If (Error > 0 )
-			{
+		{
 			MsgBox, 48, TF Lib Error, % ErrorMessage%Error%
 			ExitApp
-			}
+		}
 
 		; Option #0 [ added 30-Oct-2010 ]
 		; Startline has negative value so process X last lines of file
 		; endline parameter ignored
 
 		If (Start < 0) ; remove last X lines from file, endline parameter ignored
-			{
+		{
 			Start:=TF_CountLines(Text) + Start + 1
 			End=0 ; now continue
-			}
+		}
 
 		; Option #1
 		; StartLine has + character indicating startline + incremental processing.
@@ -5101,32 +4244,32 @@ sUnlockPassword=-1
 		; Make TF_MatchList
 
 		IfInString, Start, `+
-			{
+		{
 			If (End = 0 or End = "") ; determine number of lines
 				End:= TF_Count(Text, "`n") + 1
 			StringSplit, Section, Start, `, ; we need to create a new "TF_MatchList" so we split by ,
 			Loop, %Section0%
-				{
+			{
 				StringSplit, SectionLines, Section%A_Index%, `+
 				LoopSection:=End + 1 - SectionLines1
 				Counter=0
 					TF_MatchList .= SectionLines1 ","
 				Loop, %LoopSection%
-					{
+				{
 					If (A_Index >= End) ;
 						Break
 					If (Counter = (SectionLines2-1)) ; counter is smaller than the incremental value so skip
-						{
+					{
 						TF_MatchList .= (SectionLines1 + A_Index) ","
 						Counter=0
-						}
+					}
 					Else
 						Counter++
-					}
 				}
+			}
 			StringTrimRight, TF_MatchList, TF_MatchList, 1 ; remove trailing ,
 			Return TF_MatchList
-			}
+		}
 
 		; Option #2
 		; StartLine has - character indicating from-to, COULD be multiple sections.
@@ -5134,30 +4277,30 @@ sUnlockPassword=-1
 		; Make TF_MatchList
 
 		IfInString, Start, `-
-			{
+		{
 			StringSplit, Section, Start, `, ; we need to create a new "TF_MatchList" so we split by ,
 			Loop, %Section0%
-				{
+			{
 				StringSplit, SectionLines, Section%A_Index%, `-
 				LoopSection:=SectionLines2 + 1 - SectionLines1
 				Loop, %LoopSection%
-					{
+				{
 					TF_MatchList .= (SectionLines1 - 1 + A_Index) ","
-					}
 				}
+			}
 			StringTrimRight, TF_MatchList, TF_MatchList, 1 ; remove trailing ,
 			Return TF_MatchList
-			}
+		}
 
 		; Option #3
 		; StartLine has comma indicating multiple lines.
 		; EndLine will be ignored
 
 		IfInString, Start, `,
-			{
+		{
 			TF_MatchList:=Start
 			Return TF_MatchList
-			}
+		}
 
 		; Option #4
 		; parameters passed on as StartLine, EndLine.
@@ -5167,20 +4310,19 @@ sUnlockPassword=-1
 				End:= TF_Count(Text, "`n") + 1
 		LoopTimes:=End-Start
 		Loop, %LoopTimes%
-			{
+		{
 			TF_MatchList .= (Start - 1 + A_Index) ","
-			}
+		}
 		TF_MatchList .= End ","
 		StringTrimRight, TF_MatchList, TF_MatchList, 1 ; remove trailing ,
 		Return TF_MatchList
-		}
-
+	}
 
 	; Write to file or return variable depending on input
 	DL_TF_ReturnOutPut(OW, Text, FileName, TrimTrailing = 1, CreateNewFile = 0)
 	{
 		If (OW = 0) ; input was file, file_copy will be created, if it already exist file_copy will be overwritten
-			{
+		{
 			IfNotExist, % FileName ; check if file Exist, if not return otherwise it would create an empty file. Thanks for the idea Murp|e
 			{
 				If (CreateNewFile = 1) ; CreateNewFile used for TF_SplitFileBy* and others
@@ -5201,7 +4343,7 @@ sUnlockPassword=-1
 			FileDelete, % Dir "\" Name "_copy." Ext
 			FileAppend, %Text%, % Dir "\" Name "_copy." Ext
 			Return Errorlevel ? False : True
-			}
+		}
 		lCreateNewFile:
 		If (OW = 1) ; input was file, will be overwritten by output
 		{
@@ -5228,6 +4370,1056 @@ sUnlockPassword=-1
 			Return Text
 		}
 	}
+	;]_____________________________________________________________________________________
+;===============================================================================================================;
+; from RaptorX https://github.com/RaptorX/ScriptObj/blob/master/ScriptObj.ahk
+/**
+ * ============================================================================ *
+ * @Author           : RaptorX <graptorx@gmail.com>
+ * @Script Name      : Script Object
+ * @Script Version   : 0.21.3
+ * @Homepage         :
+ *
+ * @Creation Date    : November 09, 2020
+ * @Modification Date: July 02, 2021
+ * @Modification G.S.: 08.2022
+ ; @Description Modification G.S.:
+	- added field for GitHub-link, a Forum-link 
+	  and a credits-field, as well as a template 
+	  to quickly copy out into new scripts
+	  Contains methods for saving and loading 
+	  config-files containing an array - 
+	  basically an integration of Wolf_II's
+	  WriteIni/ReadIni with some adjustments
+	  added Update()-functionality for non-zipped
+	  remote files so that one can update a 
+	  A_ScriptFullPath-contained script from 
+	  f.e. GH.
+	- Reworked the Update()-Method with help of 
+	  u/anonymous1184.
+	- Added filter to not engange Update-method 
+	  if vfile contains the words "REPOSITORY_NAME" 
+	  or "BRANCH_NAME", indicating a template has
+	  not been adjusted yet - or is not intended to
+								
+ * 
+ * @Description      :
+ * -------------------
+ * This is an object used to have a few common functions between scripts
+ * Those are functions and variables related to basic script information,
+ * upgrade and configuration.
+ *
+ * ============================================================================ *
+ */
+; scriptName   (opt) - Name of the script which will be
+; 		                     shown as the title of the window and the main header
+; 		version      (opt) - Script Version in SimVer format, a "v"
+; 		                     will be added automatically to this value
+; 		author       (opt) - Name of the author of the script
+; 		credits 	 (opt) - Name of credited people
+; 		creditslink  (opt) - Link to credited file, if any
+; 		crtdate		 (opt) - Date of creation
+; 		moddate		 (opt) - Date of modification
+; 		homepagetext (opt) - Display text for the script website
+; 		homepagelink (opt) - Href link to that points to the scripts
+; 		                     website (for pretty links and utm campaing codes)
+; 		ghlink 		 (opt) - GitHubLink
+; 		ghtext 		 (opt) - GitHubtext
+; 		forumlink    (opt) - forumlink to the scripts forum page
+; 		forumtext    (opt) - forumtext 
+; 		donateLink   (opt) - Link to a donation site
+; 		email        (opt) - Developer email
+
+; /Template_Start
+/*
+for creditsRaw, use "/" in the "URL"-field when the snippet is not published yet (e.g. for code you've written yourself and not published yet)
+space author, SnippetNameX and URLX out by spaces or tabs, and remember to include "-" inbetween both fields
+when 2+ snippets are located at the same url, concatenate them with "|" and treat them as a single one when putting together the URL's descriptor string
+finally, make sure toingest 'CreditsRaw' into the 'credits'-field of the template below.
+*/
+; CreditsRaw=
+; (LTRIM
+; author1   -		 snippetName1		   		  			-	URL1
+; Gewerd Strauss		- snippetName2|SnippetName3 (both at the same URL)								-	/
+; )
+; FileGetTime, ModDate,%A_ScriptFullPath%,M
+; FileGetTime, CrtDate,%A_ScriptFullPath%,C
+; CrtDate:=SubStr(CrtDate,7,  2) "." SubStr(CrtDate,5,2) "." SubStr(CrtDate,1,4)
+; ModDate:=SubStr(ModDate,7,  2) "." SubStr(ModDate,5,2) "." SubStr(ModDate,1,4)
+; global script := {   base         : script
+;                     ,name         : regexreplace(A_ScriptName, "\.\w+")
+;                     ,version      : FileOpen(A_ScriptDir "\version.ini","r").Read()
+;                     ,author       : "Gewerd Strauss"
+; 					,authorID	  : "Laptop-C"
+; 					,authorlink   : ""
+;                     ,email        : ""
+;                     ,credits      : CreditsRaw
+; 					,creditslink  : ""
+;                     ,crtdate      : CrtDate
+;                     ,moddate      : ModDate
+;                     ,homepagetext : ""
+;                     ,homepagelink : ""
+;                     ,ghtext 	  : "GH-Repo"
+;                     ,ghlink       : "httaps://github.com/Gewerd-Strauss/REPOSITORY_NAME"
+;                     ,doctext	  : ""
+;                     ,doclink	  : ""
+;                     ,forumtext	  : ""
+;                     ,forumlink	  : ""
+;                     ,donateLink	  : ""
+;                     ,resfolder    : A_ScriptDir "\res"
+;                     ,iconfile	  : ""
+; 					,rfile  	  : "https://github.com/Gewerd-Strauss/REPOSITORY_NAME/archive/refs/heads/BRANCH_NAME.zip"
+; 					,vfile_raw	  : "https://raw.githubusercontent.com/Gewerd-Strauss/REPOSITORY_NAME/BRANCH_NAME/version.ini" 
+; 					,vfile 		  : "https://raw.githubusercontent.com/Gewerd-Strauss/REPOSITORY_NAME/BRANCH_NAME/version.ini" 
+; 					,vfile_local  : A_ScriptDir "\version.ini" 
+;                     ,config:		[]
+; 					,configfile   : A_ScriptDir "\INI-Files\" regexreplace(A_ScriptName, "\.\w+") ".ini"
+;                     ,configfolder : A_ScriptDir "\INI-Files"}
+/*	
+	; For throwing errors via script.debug
+	script.Error:={	 Level		:""
+					,Label		:""
+					,Message	:""	
+					,Error		:""		
+					,Vars:		:[]
+					,AddInfo:	:""}
+	if script.error
+		script.Debug(script.error.Level,script.error.Label,script.error.Message,script.error.AddInfo,script.error.Vars)
+*/
+; script.Load()
+; , script.Update(,,) ;; DO NOT ACTIVATE THISLINE UNTIL YOU DUMBO HAS FIXED THE DAMN METHOD. God damn it.
+; /Template_End
+class script
+{
+	static DBG_NONE     := 0
+	      ,DBG_ERRORS   := 1
+	      ,DBG_WARNINGS := 2
+	      ,DBG_VERBOSE  := 3
+
+	static name       := ""
+        ,version      := ""
+        ,author       := ""
+		,authorID	  := ""
+        ,authorlink   := ""
+        ,email        := ""
+        ,credits      := ""
+        ,creditslink  := ""
+        ,crtdate      := ""
+        ,moddate      := ""
+        ,homepagetext := ""
+        ,homepagelink := ""
+        ,ghtext 	  := ""
+        ,ghlink       := ""
+        ,doctext	  := ""
+        ,doclink	  := ""
+        ,forumtext	  := ""
+        ,forumlink	  := ""
+        ,donateLink   := ""
+        ,resfolder    := ""
+        ,iconfile     := ""
+		,vfile_local  := ""
+		,vfile_remote := ""
+        ,config       := ""
+        ,configfile   := ""
+        ,configfolder := ""
+		,icon         := ""
+		,systemID     := ""
+		,dbgFile      := ""
+		,rfile		  := ""
+		,vfile		  := ""
+		,dbgLevel     := this.DBG_NONE
+		,versionScObj := "0.21.3"
+
+
+	/**
+		Function: Update
+		Checks for the current script version
+		Downloads the remote version information
+		Compares and automatically downloads the new script file and reloads the script.
+
+		Parameters:
+		vfile - Version File
+		        Remote version file to be validated against.
+		rfile - Remote File
+		        Script file to be downloaded and installed if a new version is found.
+		        Should be a zip file that will be unzipped by the function
+
+		Notes:
+		The versioning file should only contain a version string and nothing else.
+		The matching will be performed against a SemVer format and only the three
+		major components will be taken into account.
+
+		e.g. '1.0.0'
+
+		For more information about SemVer and its specs click here: <https://semver.org/>
+	*/
+	Update(vfile:="", rfile:="",bSilentCheck:=false,Backup:=true)
+	{
+		; Error Codes
+		static ERR_INVALIDVFILE := 1
+			,ERR_INVALIDRFILE       := 2
+			,ERR_NOCONNECT          := 3
+			,ERR_NORESPONSE         := 4
+			,ERR_INVALIDVER         := 5
+			,ERR_CURRENTVER         := 6
+			,ERR_MSGTIMEOUT         := 7
+			,ERR_USRCANCEL          := 8
+		vfile:=(vfile=="")?this.vfile:vfile
+		,rfile:=(rfile=="")?this.rfile:rfile
+		{
+			if RegexMatch(vfile,"\d+") || RegexMatch(rfile,"\d+")	 ;; allow skipping of the routine by simply returning here
+				return
+			; Error Codes
+			if  (regexmatch(vfile, "(REPOSITORY_NAME|BRANCH_NAME)"))
+				return
+			if (!regexmatch(vfile, "^((?:http(?:s)?|ftp):\/\/)?((?:[a-z0-9_\-]+\.)+.*$)"))
+				exception({code: ERR_INVALIDVFILE, msg: "Invalid URL`n`nThe version file parameter must point to a 	valid URL."})
+
+			; This function expects a ZIP file
+			if (!regexmatch(rfile, "\.zip"))
+				exception({code: ERR_INVALIDRFILE, msg: "Invalid Zip`n`nThe remote file parameter must point to a zip file."})
+
+			; Check if we are connected to the internet
+			http := comobjcreate("WinHttp.WinHttpRequest.5.1")
+			, http.Open("GET", "https://www.google.com", true)
+			, http.Send()
+			try
+				http.WaitForResponse(1)
+			catch e
+				throw {code: ERR_NOCONNECT, msg: e.message}
+			if (!bSilentCheck)
+					Progress, 50, 50/100, % "Checking for updates", % "Updating"
+
+			; Download remote version file
+			http.Open("GET", vfile, true)
+			http.Send(), http.WaitForResponse()
+
+			if !(http.responseText)
+			{
+				Progress, OFF
+				try
+					throw exception("There was an error trying to download the ZIP file for the update.`n","script.Update()","The server did not respond.")
+				Catch, e
+					msgbox, 8240,% this.Name " -  No response from server", % e.Message "`n`nCheck again later`, or contact the author/provider. Script will resume normal operation."
+			}
+			regexmatch(this.version, "\d+\.\d+\.\d+", loVersion)		;; as this.version is not updated automatically, instead read the local version file
+			
+			; FileRead, loVersion,% A_ScriptDir "\version.ini"
+			d:=http.responseText
+			regexmatch(http.responseText, "\d+\.\d+\.\d+", remVersion)
+			if (!bSilentCheck)
+			{
+				Progress, 100, 100/100, % "Checking for updates", % "Updating"
+				sleep 500 	; allow progress to update
+			}
+			Progress, OFF
+
+			; Make sure SemVer is used
+ 			if (!loVersion || !remVersion)
+			{
+				try
+					throw exception("Invalid version.`n The update-routine of this script works with SemVer.","script.Update()","For more information refer to the documentation in the file`n" )
+				catch, e
+					msgbox, 8240,% "Invalid Version", % e.What ":" e.Message "`n`n" e.Extra "'" e.File "'."
+			}
+			; Compare against current stated version
+			ver1 := strsplit(loVersion, ".")
+			, ver2 := strsplit(remVersion, ".")
+			, bRemoteIsGreater:=[0,0,0]
+			, newversion:=false
+			for i1,num1 in ver1
+			{
+				for i2,num2 in ver2
+				{
+					if (i1 == i2)
+					{
+						if (num2 > num1)
+						{
+							bRemoteIsGreater[i1]:=true
+							break
+						}
+						else if (num2 = num1)
+							bRemoteIsGreater[i1]:=false
+						else if (num2 < num1)
+							bRemoteIsGreater[i1]:=-1
+					}
+				}
+			}
+			if (!bRemoteIsGreater[1] && !bRemoteIsGreater[2]) ;; denotes in which position (remVersion>loVersion) → 1, (remVersion=loVersion) → 0, (remVersion<loVersion) → -1 
+				if (bRemoteIsGreater[3] && bRemoteIsGreater[3]!=-1)
+					newversion:=true
+			if (bRemoteIsGreater[1] || bRemoteIsGreater[2])
+				newversion:=true
+			if (bRemoteIsGreater[1]=-1)
+				newversion:=false
+			if (bRemoteIsGreater[2]=-1) && (bRemoteIsGreater[1]!=1)
+				newversion:=false
+			if (!newversion)
+			{
+				if (!bSilentCheck)
+					msgbox, 8256, No new version available, You are using the latest version.`n`nScript will continue running.
+				return
+			}
+			else
+			{
+				; If new version ask user what to do				"C:\Users\CLAUDI~1\AppData\Local\Temp\AHK_LibraryGUI
+				; Yes/No | Icon Question | System Modal
+				msgbox % 0x4 + 0x20 + 0x1000
+					, % "New Update Available"
+					, % "There is a new update available for this application.`n"
+					. "Do you wish to upgrade to v" remVersion "?"
+					, 10	; timeout
+
+				ifmsgbox timeout
+				{
+					try
+						throw exception("The message box timed out.","script.Update()","Script will not be updated.")
+					Catch, e
+						msgbox, 4144,% this.Name " - " "New Update Available" ,   % e.Message "`nNo user-input received.`n`n" e.Extra "`nResuming normal operation now.`n"
+					return
+				}
+				ifmsgbox no
+				{		;; decide if you want to have this or not. 
+					; try
+					; 	throw exception("The user pressed the cancel button.","script.Update()","Script will not be updated.") ;{code: ERR_USRCANCEL, msg: "The user pressed the cancel button."}
+					; catch, e
+					; 	msgbox, 4144,% this.Name " - " "New Update Available" ,   % e.Message "`n`n" e.Extra "`nResuming normal operation now.`n"
+					return
+				}
+
+				; Create temporal dirs
+				ghubname := (InStr(rfile, "github") ? regexreplace(a_scriptname, "\..*$") "-latest\" : "")
+				filecreatedir % Update_Temp := a_temp "\" regexreplace(a_scriptname, "\..*$")
+				filecreatedir % zipDir := Update_Temp "\uzip"
+
+				; ; Create lock file
+				; fileappend % a_now, % lockFile := Update_Temp "\lock"
+
+				; Download zip file
+				urldownloadtofile % rfile, % file:=Update_Temp "\temp.zip"
+
+				; Extract zip file to temporal folder
+				shell := ComObjCreate("Shell.Application")
+
+				; Make backup of current folder
+				if !Instr(FileExist(Backup_Temp:= A_Temp "\Backup " regexreplace(a_scriptname, "\..*$") " - " StrReplace(loVersion,".","_")),"D")
+					FileCreateDir, % Backup_Temp
+				else
+				{
+					FileDelete, % Backup_Temp
+					FileCreateDir, % Backup_Temp
+				}
+				; Gui +OwnDialogs
+				MsgBox 0x34, `% this.Name " - " "New Update Available", Last Chance to abort Update.`n`n(also remove this once you're done debugging the updater)`nDo you want to continue the Update?
+				IfMsgBox Yes 
+				{
+					Err:=CopyFilesAndFolders(A_ScriptDir, Backup_Temp,1)
+					, Err2:=CopyFilesAndFolders(Backup_Temp ,A_ScriptDir  ,0)
+					, items1 := shell.Namespace(file).Items
+					for item_ in items1
+					{
+						root := item_.Path
+						, items:=shell.Namespace(root).Items
+						for item in items
+							shell.NameSpace(A_ScriptDir).CopyHere(item, 0x14)
+					}
+					MsgBox, 0x40040,,Update Finished
+					FileRemoveDir, % Backup_Temp,1
+					FileRemoveDir, % Update_Temp,1
+					reload
+				}
+				Else IfMsgBox No
+				{	; no update, cleanup the previously downloaded files from the tmp
+					MsgBox, 0x40040,,Update Aborted
+					FileRemoveDir, % Backup_Temp,1
+					FileRemoveDir, % Update_Temp,1
+
+				}
+			}
+		}
+	}
+
+	
+	Autostart(status,UseRegistry:=0)
+	{
+		/**
+		Function: Autostart
+		This Adds the current script to the autorun section for the current
+		user.
+
+		Parameters:
+		status - Autostart status
+		         It can be either true or false.
+		         Setting it to true would add the registry value.
+		         Setting it to false would delete an existing registry value.
+		*/
+		if (UseRegistry)
+		{
+			if (status)
+			{
+				RegWrite, REG_SZ
+						, HKCU\SOFTWARE\microsoft\windows\currentversion\run
+						, %a_scriptname%
+						, %a_scriptfullpath%
+			}
+			else
+				regdelete, HKCU\SOFTWARE\microsoft\windows\currentversion\run
+						, %a_scriptname%
+		}
+		else
+		{
+			startUpDir:=(A_Startup "\" A_ScriptName " - Shortcut.lnk")
+			if (status) ; add to startup
+				FileCreateShortcut, % A_ScriptFullPath, % startUpDir
+			else
+				FileDelete, % startUpDir
+		}
+
+		
+	}
+
+	
+	Splash(img:="", speed:=10, pause:=2)
+	{
+		/**
+		Function: Splash
+		Shows a custom image as a splash screen with a simple fading animation
+
+		Parameters:
+		img   (opt) - file to be displayed
+		speed (opt) - fast the fading animation will be. Higher value is faster.
+		pause (opt) - long in seconds the image will be paused after fully displayed.
+		*/
+		global
+
+			gui, splash: -caption +lastfound +border +alwaysontop +owner
+		$hwnd := winexist(), alpha := 0
+		winset, transparent, 0
+
+		gui, splash: add, picture, x0 y0 vpicimage, % img
+		guicontrolget, picimage, splash:pos
+		gui, splash: show, w%picimagew% h%picimageh%
+
+		setbatchlines 3
+		loop, 255
+		{
+			if (alpha >= 255)
+				break
+			alpha += speed
+			winset, transparent, %alpha%
+		}
+
+		; pause duration in seconds
+		sleep pause * 1000
+
+		loop, 255
+		{
+			if (alpha <= 0)
+				break
+			alpha -= speed
+			winset, transparent, %alpha%
+		}
+		setbatchlines -1
+
+		gui, splash:destroy
+		return
+	}
+
+	
+	Debug(level:=1, label:=">", msg:="", AddInfo:="",InvocationLine:="", vars*)
+	{
+		/**
+		Funtion: Debug
+		Allows sending conditional debug messages to the debugger and a log file filtered
+		by the current debug level set on the object.
+
+		Parameters:
+		level - Debug Level, which can be:
+		        * this.DBG_NONE
+		        * this.DBG_ERRORS
+		        * this.DBG_WARNINGS
+		        * this.DBG_VERBOSE
+
+		If you set the level for a particular message to *this.DBG_VERBOSE* this message
+		wont be shown when the class debug level is set to lower than that (e.g. *this.DBG_WARNINGS*).
+
+		label - Message label, mainly used to show the name of the function or label that triggered the message
+		msg   - Arbitrary message that will be displayed on the debugger or logged to the log file
+		vars* - Aditional parameters that whill be shown as passed. Useful to show variable contents to the debugger.
+
+		Notes:
+		The point of this function is to have all your debug messages added to your script and filter them out
+		by just setting the object's dbgLevel variable once, which in turn would disable some types of messages.
+		*/
+
+		if !this.dbglevel
+			return
+		if (InvocationLine!="")
+			DebugInvokedOn:="Source Code: Function invoked on line " RegexReplace(InvocationLine,"\D") "`nError invoked in function body of " " on line " Exception("",-1).Line
+		for i,var in vars
+		{
+			if IsObject(var)
+				var:=RegExReplace(Obj2Str(var),"\.\d* = ","")
+			varline .= "`n" var
+		}
+		dbgMessage := label " [invoked on " RegexReplace(InvocationLine,"\D") "]" "`n" DebugInvokedOn "`n>" msg "`n" varline
+
+ 		if (level <= this.dbglevel)
+			outputdebug % dbgMessage
+		else if this.dbgFile
+			FileAppend, % dbgMessage, % this.dbgFile
+		else
+			MsgBox 0x10, % this.Name " - " "Error encountered: " this.Error.Error , % Clipboard:=dbgmessage
+			; script.Error:={	 Level		:""
+            ;     ,Label		:""
+            ;     ,Message	:""	
+            ;     ,Error		:""		
+            ;     ,Vars		:[]
+            ;     ,AddInfo	:""}
+		script.ErrorCache[A_Now]:=script.Error
+	}
+
+	
+	About(scriptName:="", version:="", author:="",credits:="", homepagetext:="", homepagelink:="", donateLink:="", email:="")
+	{
+		/**
+		Function: About
+		Shows a quick HTML Window based on the object's variable information
+
+		Parameters:
+		scriptName   (opt) - Name of the script which will be
+		                     shown as the title of the window and the main header
+		version      (opt) - Script Version in SimVer format, a "v"
+		                     will be added automatically to this value
+		author       (opt) - Name of the author of the script
+		credits 	 (opt) - Name of credited people
+		ghlink 		 (opt) - GitHubLink
+		ghtext 		 (opt) - GitHubtext
+		doclink 	 (opt) - DocumentationLink
+		doctext 	 (opt) - Documentationtext
+		forumlink    (opt) - forumlink
+		forumtext    (opt) - forumtext
+		homepagetext (opt) - Display text for the script website
+		homepagelink (opt) - Href link to that points to the scripts
+		                     website (for pretty links and utm campaing codes)
+		donateLink   (opt) - Link to a donation site
+		email        (opt) - Developer email
+
+		Notes:
+		The function will try to infer the paramters if they are blank by checking
+		the class variables if provided. This allows you to set all information once
+		when instatiating the class, and the about GUI will be filled out automatically.
+		*/
+		static doc
+		scriptName := scriptName ? scriptName : this.name
+		, version := version ? version : this.version
+		, author := author ? author : this.author
+		, credits := credits ? credits : this.credits
+		, creditslink := creditslink ? creditslink : RegExReplace(this.creditslink, "http(s)?:\/\/")
+		, ghtext := ghtext ? ghtext : RegExReplace(this.ghtext, "http(s)?:\/\/")
+		, ghlink := ghlink ? ghlink : RegExReplace(this.ghlink, "http(s)?:\/\/")
+		, doctext := doctext ? doctext : RegExReplace(this.doctext, "http(s)?:\/\/")
+		, doclink := doclink ? doclink : RegExReplace(this.doclink, "http(s)?:\/\/")
+		, forumtext := forumtext ? forumtext : RegExReplace(this.forumtext, "http(s)?:\/\/")
+		, forumlink := forumlink ? forumlink : RegExReplace(this.forumlink, "http(s)?:\/\/")
+		, homepagetext := homepagetext ? homepagetext : RegExReplace(this.homepagetext, "http(s)?:\/\/")
+		, homepagelink := homepagelink ? homepagelink : RegExReplace(this.homepagelink, "http(s)?:\/\/")
+		, donateLink := donateLink ? donateLink : RegExReplace(this.donateLink, "http(s)?:\/\/")
+		, email := email ? email : this.email
+		
+ 		if (donateLink)
+		{
+			donateSection =
+			(
+				<div class="donate">
+					<p>If you like this tool please consider <a href="https://%donateLink%">donating</a>.</p>
+				</div>
+				<hr>
+			)
+		}
+
+		html =
+		(
+			<!DOCTYPE html>
+			<html lang="en" dir="ltr">
+				<head>
+					<meta charset="utf-8">
+					<meta http-equiv="X-UA-Compatible" content="IE=edge">
+					<style media="screen">
+						.top {
+							text-align:center;
+						}
+						.top h2 {
+							color:#2274A5;
+							margin-bottom: 5px;
+						}
+						.donate {
+							color:#E83F6F;
+							text-align:center;
+							font-weight:bold;
+							font-size:small;
+							margin: 20px;
+						}
+						p {
+							margin: 0px;
+						}
+					</style>
+				</head>
+				<body>
+					<div class="top">
+						<h2>%scriptName%</h2>
+						<p>v%version%</p>
+						<hr>
+						<p>by %author%</p>
+		)
+		if ghlink and ghtext
+		{
+			sTmp=
+			(
+
+						<p><a href="https://%ghlink%" target="_blank">%ghtext%</a></p>
+			)
+			html.=sTmp
+		}
+		if doclink and doctext
+		{
+			sTmp=
+			(
+
+						<p><a href="https://%doclink%" target="_blank">%doctext%</a></p>
+			)
+			html.=sTmp
+		}
+		if (creditslink and credits) || IsObject(credits) || RegexMatch(credits,"(?<Author>(\w|)*)(\s*\-\s*)(?<Snippet>(\w|\|)*)\s*\-\s*(?<URL>.*)")
+		{
+			if RegexMatch(credits,"(?<Author>(\w|)*)(\s*\-\s*)(?<Snippet>(\w|\|)*)\s*\-\s*(?<URL>.*)")
+			{
+				CreditsLines:=strsplit(credits,"`n")
+				Credits:={}
+				for k,v in CreditsLines
+				{
+					val:=strsplit(strreplace(v,"`t"," ")," - ")
+					Credits[Trim(val.2)]:=Trim(val.1) "|" Trim((strlen(val.3)>5?val.3:""))
+				}
+			}
+			if IsObject(credits)
+			{
+				CreditsAssembly:="credits for used code:`n"
+				for k,v in credits
+				{
+					if (k="")
+						continue
+					if (strsplit(v,"|").2="")
+						CreditsAssembly.="<p>" k " - " strsplit(v,"|").1 "`n"
+					else
+						CreditsAssembly.="<p><a href=" """" strsplit(v,"|").2 """" ">" k " - " strsplit(v,"|").1 "</a></p>`n"
+				}
+				html.=CreditsAssembly
+			}
+			else
+			{
+				sTmp=
+				(
+							<p>credits: <a href="https://%creditslink%" target="_blank">%credits%</a></p>
+							<hr>
+				)
+			}
+			html.=sTmp
+		}
+		if forumlink and forumtext
+		{
+			sTmp=
+			(
+
+						<p><a href="https://%forumlink%" target="_blank">%forumtext%</a></p>
+			)
+			html.=sTmp
+		}
+		if homepagelink and homepagetext
+		{
+			sTmp=
+			(
+
+						<p><a href="https://%homepagelink%" target="_blank">%homepagetext%</a></p>
+
+			)
+			html.=sTmp
+		}
+		sTmp=
+		(
+
+								</div>
+					%donateSection%
+				</body>
+			</html>
+		)
+		html.=sTmp
+ 		btnxPos := 300/2 - 75/2
+		, axHight:=12
+		, donateHeight := donateLink ? 6 : 0
+		, forumHeight := forumlink ? 1 : 0
+		, ghHeight := ghlink ? 1 : 0
+		, creditsHeight := creditslink ? 1 : 0
+		, creditsHeight+=credits.Count()*1.5 ; + d:=(credits.Count()>0?2.5:0)
+		, homepageHeight := homepagelink ? 1 : 0
+		, docHeight := doclink ? 1 : 0
+		, axHight+=donateHeight
+		, axHight+=forumHeight
+		, axHight+=ghHeight
+		, axHight+=creditsHeight
+		, axHight+=homepageHeight
+		, axHight+=docHeight
+		if (axHight="")
+			axHight:=12
+		gui aboutScript:new, +alwaysontop +toolwindow, % "About " this.name
+		gui margin, 2
+		gui color, white
+		gui add, activex, w300 r%axHight% vdoc, htmlFile
+		gui add, button, w75 x%btnxPos% gaboutClose, % "&Close"
+		doc.write(html)
+		gui show, AutoSize
+		return
+
+		aboutClose:
+			gui aboutScript:destroy
+		return
+	}
+
+	
+	GetLicense()
+	{
+		/*
+		Function: GetLicense
+		Parameters:
+		Notes:
+		*CreditsRaw		global
+
+		this.systemID := this.GetSystemID()
+		cleanName := RegexReplace(A_ScriptName, "\..*$")
+		for i,value in ["Type", "License"]
+			RegRead, %value%, % "HKCU\SOFTWARE\" cleanName, % value
+
+		if (!License)
+		{
+			MsgBox, % 0x4 + 0x20
+			      , % "No license"
+			      , % "Seems like there is no license activated on this computer.`n"
+			        . "Do you have a license that you want to activate now?"
+
+			IfMsgBox, Yes
+			{
+				Gui, license:new
+				Gui, add, Text, w160, % "Paste the License Code here"
+				Gui, add, Edit, w160 vLicenseNumber
+				Gui, add, Button, w75 vTest, % "Save"
+				Gui, add, Button, w75 x+10, % "Cancel"
+				Gui, show
+
+				saveFunction := Func("licenseButtonSave").bind(this)
+				GuiControl, +g, test, % saveFunction
+				Exit
+			}
+
+			MsgBox, % 0x30
+			      , % "Unable to Run"
+			      , % "This program cannot run without a license."
+
+			ExitApp, 1
+		}
+
+		return {"type"    : Type
+		       ,"number"  : License}
+	}
+
+	
+	SaveLicense(licenseType, licenseNumber)
+	{
+		/*
+		Function: SaveLicense
+		Parameters:
+		Notes:
+		*/
+		cleanName := RegexReplace(A_ScriptName, "\..*$")
+
+		Try
+		{
+			RegWrite, % "REG_SZ"
+			        , % "HKCU\SOFTWARE\" cleanName
+			        , % "Type", % licenseType
+
+			RegWrite, % "REG_SZ"
+			        , % "HKCU\SOFTWARE\" cleanName
+			        , % "License", % licenseNumber
+
+			return true
+		}
+		catch
+			return false
+	}
+
+	
+	IsLicenceValid(licenseType, licenseNumber, URL)
+	{
+		/*
+		Function: IsLicenceValid
+		Parameters:
+		Notes:
+		*/
+		res := this.EDDRequest(URL, "check_license", licenseType ,licenseNumber)
+
+		if InStr(res, """license"":""inactive""")
+			res := this.EDDRequest(URL, "activate_license", licenseType ,licenseNumber)
+
+		if InStr(res, """license"":""valid""")
+			return true
+		else
+			return false
+	}
+
+	GetSystemID()
+	{
+		wmi := ComObjGet("winmgmts:{impersonationLevel=impersonate}!\\" A_ComputerName "\root\cimv2")
+		(wmi.ExecQuery("Select * from Win32_BaseBoard")._newEnum)[Computer]
+		return Computer.SerialNumber
+	}
+
+	
+	EDDRequest(URL, Action, licenseType, licenseNumber)
+	{
+		/*
+		Function: EDDRequest
+		Parameters:
+		Notes:
+		*/
+		strQuery := url "?edd_action=" Action
+		         .  "&item_id=" licenseType
+		         .  "&license=" licenseNumber
+		         .  (this.systemID ? "&url=" this.systemID : "")
+
+		try
+		{
+			http := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+			, http.Open("GET", strQuery)
+			, http.SetRequestHeader("Pragma", "no-cache")
+			, http.SetRequestHeader("Cache-Control", "no-cache, no-store")
+			, http.SetRequestHeader("User-Agent", "Mozilla/4.0 (compatible; Win32)")
+			, http.Send()
+			, http.WaitForResponse()
+
+			return http.responseText
+		}
+		catch err
+			return err.what ":`n" err.message
+	}
+
+/*
+
+
+	; Activate()
+	; 	{
+	; 	strQuery := this.strEddRootUrl . "?edd_action=activate_license&item_id=" . this.strRequestedProductId . "&license=" . this.strEddLicense . "&url=" . this.strUniqueSystemId
+	; 	strJSON := Url2Var(strQuery)
+	; 	Diag(A_ThisFunc . " strQuery", strQuery, "")
+	; 	Diag(A_ThisFunc . " strJSON", strJSON, "")
+	; 	return JSON.parse(strJSON)
+	; 	}
+	; Deactivate()
+	; 	{
+	; 	Loop, Parse, % "/|", |
+	; 	{
+	; 	strQuery := this.strEddRootUrl . "?edd_action=deactivate_license&item_id=" . this.strRequestedProductId . "&license=" . this.strEddLicense . "&url=" . this.strUniqueSystemId . A_LoopField
+	; 	strJSON := Url2Var(strQuery)
+	; 	Diag(A_ThisFunc . " strQuery", strQuery, "")
+	; 	Diag(A_ThisFunc . " strJSON", strJSON, "")
+	; 	this.oLicense := JSON.parse(strJSON)
+	; 	if (this.oLicense.success)
+	; 	break
+	; 	}
+	; 	}
+	; GetVersion()
+	; 	{
+	; 	strQuery := this.strEddRootUrl . "?edd_action=get_version&item_id=" . this.oLicense.item_id . "&license=" . this.strEddLicense . "&url=" . this.strUniqueSystemId
+	; 	strJSON := Url2Var(strQuery)
+	; 	Diag(A_ThisFunc . " strQuery", strQuery, "")
+	; 	Diag(A_ThisFunc . " strJSON", strJSON, "")
+	; 	return JSON.parse(strJSON)
+	; 	}
+	; RenewLink()
+	; 	{
+	; 	strUrl := this.strEddRootUrl . "checkout/?edd_license_key=" . this.strEddLicense . "&download_id=" . this.oLicense.item_id
+	; 	Diag(A_ThisFunc . " strUrl", strUrl, "")
+	; 	return strUrl
+	; 	}
+
+*/
+
+	Load(INI_File:="")
+	{
+		if (INI_File="")
+			INI_File:=this.configfile
+		Result := []
+		, OrigWorkDir:=A_WorkingDir
+		if (d_fWriteINI_st_count(INI_File,".ini")>0)
+		{
+			INI_File:=d_fWriteINI_st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
+			if (d_fWriteINI_st_count(INI_File,".ini")>0)
+				INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
+		}
+		if !FileExist(INI_File) ;; create new INI_File if not existing
+		{
+			SplitPath, INI_File, INI_File_File, INI_File_Dir, INI_File_Ext, INI_File_NNE, INI_File_Drive
+			if !Instr(d:=FileExist(INI_File_Dir),"D:")
+				FileCreateDir, % INI_File_Dir
+			if !FileExist(INI_File_File ".ini") ; check for ini-file file ending
+				FileAppend,, % INI_File ".ini"
+		}
+		SetWorkingDir, INI-Files
+		IniRead, SectionNames, % INI_File ".ini"
+		for each, Section in StrSplit(SectionNames, "`n") {
+			IniRead, OutputVar_Section, % INI_File ".ini", %Section%
+			for each, Haystack in StrSplit(OutputVar_Section, "`n")
+			{
+				If (Instr(Haystack,"="))
+				{
+					RegExMatch(Haystack, "(.*?)=(.*)", $)
+				, Result[Section, $1] := $2
+				}
+				else
+					Result[Section, Result[Section].MaxIndex()+1]:=Haystack
+			}
+		}
+		if A_WorkingDir!=OrigWorkDir
+			SetWorkingDir, %OrigWorkDir%
+		this.config:=Result
+	}
+	Save(INI_File:="")
+	{
+		if (INI_File="")
+			INI_File:=this.configfile
+		SplitPath, INI_File, INI_File_File, INI_File_Dir, INI_File_Ext, INI_File_NNE, INI_File_Drive
+
+		if (d_fWriteINI_st_count(INI_File,".ini")>0)
+		{
+			INI_File:=d_fWriteINI_st_removeDuplicates(INI_File,".ini") ;. ".ini" ; reduce number of ".ini"-patterns to 1
+			if (d_fWriteINI_st_count(INI_File,".ini")>0)
+				INI_File:=SubStr(INI_File,1,StrLen(INI_File)-4) ; and remove the last instance
+		}
+		if !Instr(d:=FileExist(INI_File_Dir),"D:")
+			FileCreateDir, % INI_File_Dir
+		if !FileExist(INI_File_File ".ini") ; check for ini-file file ending
+			FileAppend,, % INI_File ".ini"
+		for SectionName, Entry in this.config
+		{
+			Pairs := ""
+			for Key, Value in Entry
+			{
+				WriteInd++
+				if !Instr(Pairs,Key "=" Value "`n")
+					Pairs .= Key "=" Value "`n"
+			}
+			IniWrite, %Pairs%, % INI_File ".ini", %SectionName%
+		}
+ 	}
+
+
+
+
+}
+
+d_fWriteINI_st_removeDuplicates(string, delim="`n")
+{ ; remove all but the first instance of 'delim' in 'string'
+	; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
+	/*
+		RemoveDuplicates
+		Remove any and all consecutive lines. A "line" can be determined by
+		the delimiter parameter. Not necessarily just a `r or `n. But perhaps
+		you want a | as your "line".
+
+		string = The text or symbols you want to search for and remove.
+		delim  = The string which defines a "line".
+
+		example: st_removeDuplicates("aaa|bbb|||ccc||ddd", "|")
+		output:  aaa|bbb|ccc|ddd
+	*/
+	delim:=RegExReplace(delim, "([\\.*?+\[\{|\()^$])", "\$1")
+	Return RegExReplace(string, "(" delim ")+", "$1")
+}
+d_fWriteINI_st_count(string, searchFor="`n")
+{ ; count number of occurences of 'searchFor' in 'string'
+	; copy of the normal function to avoid conflicts.
+	; from StringThings-library by tidbit, Version 2.6 (Fri May 30, 2014)
+	/*
+		Count
+		Counts the number of times a tolken exists in the specified string.
+
+		string    = The string which contains the content you want to count.
+		searchFor = What you want to search for and count.
+
+		note: If you're counting lines, you may need to add 1 to the results.
+
+		example: st_count("aaa`nbbb`nccc`nddd", "`n")+1 ; add one to count the last line
+		output:  4
+	*/
+	StringReplace, string, string, %searchFor%, %searchFor%, UseErrorLevel
+	return ErrorLevel
+}
+
+	
+
+
+
+
+licenseButtonSave(this, CtrlHwnd, GuiEvent, EventInfo, ErrLevel:="")
+{
+	GuiControlGet, LicenseNumber
+	if this.IsLicenceValid(this.eddID, licenseNumber, "https://www.the-automator.com")
+	{
+		this.SaveLicense(this.eddID, LicenseNumber)
+		MsgBox, % 0x30
+		      , % "License Saved"
+		      , % "The license was applied correctly!`n"
+		        . "The program will start now."
+		
+		Reload
+	}
+	else
+	{
+		MsgBox, % 0x10
+		      , % "Invalid License"
+		      , % "The license you entered is invalid and cannot be activated."
+
+		ExitApp, 1
+	}
+}
+
+licenseButtonCancel(CtrlHwnd, GuiEvent, EventInfo, ErrLevel:="")
+{
+	MsgBox, % 0x30
+	      , % "Unable to Run"
+	      , % "This program cannot run without a license."
+
+	ExitApp, 1
+}
+
+
+CopyFilesAndFolders(SourcePattern, DestinationFolder, DoOverwrite = false)
+{
+	; Copies all files and folders matching SourcePattern into the folder named DestinationFolder and
+	; returns the number of files/folders that could not be copied.
+    ; First copy all the files (but not the folders):
+    ; FileCopy, %SourcePattern%, %DestinationFolder%, %DoOverwrite%
+    ; ErrorCount := ErrorLevel
+    ; Now copy all the folders:
+    Loop, %SourcePattern%, 2  ; 2 means "retrieve folders only".
+    {
+        FileCopyDir, % A_LoopFileFullPath, % DestinationFolder "\" A_LoopFileName , % DoOverwrite
+        ErrorCount += ErrorLevel
+        if ErrorLevel  ; Report each problem folder by name.
+            MsgBox,% "Could not copy " A_LoopFileFullPath " into " DestinationFolder "."
+    }
+    return ErrorCount
+}
+	;===============================================================================================================;
 	;}_____________________________________________________________________________________
 	; IniSettingsEditor v6 see below.
 	; retrieved from https://www.autohotkey.com/boards/viewtopic.php?p=237927#p237927, specifically gamax92_archive of the download.
